@@ -15,7 +15,13 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
+/**
+ * iRadar manager class. Starts background connectivity service as required 
+ * @author pzeltins
+ *
+ */
 public class IRadarManager {
 
 	  public static String TAG = "IRadarManager";
@@ -41,6 +47,7 @@ public class IRadarManager {
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.d(TAG, "ON Service Connected");
 			sendNotificationMessage("iRadar service started!");
             radarServiceBinder = service;
             radarServiceMessenger = new Messenger(radarServiceBinder);
@@ -98,6 +105,7 @@ public class IRadarManager {
 			  appContext.unbindService(radarConn);
 			  serviceBound.set(false);
 		  }
+		  stopConnectionMonitor();
 	  }
 	  
 	  public static synchronized void tryReconnect() {
@@ -120,7 +128,7 @@ public class IRadarManager {
 		  AlarmManager am = (AlarmManager) appContext.getSystemService(Context.ALARM_SERVICE);
 		  Intent reconnectIntent = new Intent(appContext, RadarMonitorService.class);
 		  reconnectIntent.putExtra(RadarMonitorService.INTENT_RECONNECT, true);
-		  reconnectionIntent = PendingIntent.getService(appContext, 0, reconnectIntent, PendingIntent.FLAG_ONE_SHOT);
+		  reconnectionIntent = PendingIntent.getService(appContext, 0, reconnectIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		  am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 1000L, ((long) seconds) * 1000L, 
 				  reconnectionIntent);
 	  }

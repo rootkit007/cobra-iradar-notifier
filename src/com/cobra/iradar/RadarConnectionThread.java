@@ -52,7 +52,10 @@ public class RadarConnectionThread extends Thread {
 			Message m = handler.obtainMessage(RadarConnectionService.MSG_IRADAR_FAILURE, e.getLocalizedMessage());
 			handler.handleMessage(m);
 		}
-		
+
+		Message mConnected = handler.obtainMessage(RadarConnectionService.MSG_NOTIFICATION, "Device Connected");
+		handler.handleMessage(mConnected);
+
 		byte[] packet;
 		while ( !isInterrupted() ) {
 			try {
@@ -71,11 +74,13 @@ public class RadarConnectionThread extends Thread {
 		}
 		
 		try {
+			rxStream.close();
+			txStream.close();
 			socket.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Message m = handler.obtainMessage(RadarConnectionService.MSG_IRADAR_FAILURE, e.getLocalizedMessage());
+			handler.handleMessage(m);
 		}
-		
 		
 	}
 	

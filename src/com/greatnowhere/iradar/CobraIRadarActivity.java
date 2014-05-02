@@ -112,7 +112,6 @@ public class CobraIRadarActivity extends Activity {
         btnQuit.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				IRadarManager.stop();
 				finish();
 			}
 		});
@@ -283,7 +282,12 @@ public class CobraIRadarActivity extends Activity {
 		b.setContentTitle("iRadar Notifier");
 		b.setSmallIcon(R.drawable.app_icon);
 		mNotificationManager.notify(null, 1, b.build());
+    }
 
+    @Override
+    public void finish() {
+    	IRadarManager.stop();
+    	super.finish();
     }
     
     @Override

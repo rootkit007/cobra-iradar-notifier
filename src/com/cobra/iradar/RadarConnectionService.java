@@ -8,9 +8,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -33,11 +31,15 @@ public class RadarConnectionService extends Service {
 	
 	public static final String BUNDLE_KEY_RADAR_MESSAGE = "radarMsgRecv";
 	
-	private HandlerThread thread = null;
-    	
 	private BluetoothDevice iRadarDevice;
 	private RadarConnectionThread radarThread;
 	private ServiceHandler radarThreadHandler;
+	
+	private enum ConnState {
+		NOT_INITIALIZED, BOUND, RADAR_FAILED, RADAR_STARTED, RADAR_STOPPED;
+	}
+	
+	private ConnState state = ConnState.NOT_INITIALIZED;
 	
 	/**
     * Target we publish for clients to send messages to ServiceHandler.
@@ -49,35 +51,29 @@ public class RadarConnectionService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		// super.startForeground(NOTIFICATION_ID, new Notification.Builder(getApplicationContext()).setContentText("Cobra iRadar").build());
-		if ( thread == null ) {
-			 thread = new HandlerThread("iRadar BT Handler");
-			 thread.start();
-		}
-		if ( mMessenger == null ) {
-			radarThreadHandler = new ServiceHandler(thread.getLooper());
-			mMessenger = new Messenger(radarThreadHandler);
-		}
+		radarThreadHandler = new ServiceHandler();
+		mMessenger = new Messenger(radarThreadHandler);
+		state = ConnState.BOUND;
 		return mMessenger.getBinder();
 	}
 	
 	private void runConnection() {
-    	if ( radarThread == null || !radarThread.isAlive() ) {
+    	if ( radarThread == null || radarThread.isInterrupted() ) {
 	    	radarThread = new RadarConnectionThread(iRadarDevice, radarThreadHandler);
 	    	radarThread.start();
+	    	state = ConnState.RADAR_STARTED;
     	}
 	}
 	
 	private void stopConnection() {
-    	if ( radarThread != null && !radarThread.isInterrupted() )
+    	if ( radarThread != null && !radarThread.isInterrupted() ) {
     		radarThread.interrupt();
+    		state = ConnState.RADAR_STOPPED;
+    	}
 	}
 	
     private final class ServiceHandler extends Handler {
 
-    	public ServiceHandler(Looper l) {
-        	super(l);
-        }
-        
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -92,6 +88,7 @@ public class RadarConnectionService extends Service {
    				runConnection();
             	break;
             case MSG_IRADAR_FAILURE:
+            	state = ConnState.RADAR_FAILED;
             	sendAllRecipients(MSG_IRADAR_FAILURE, ( msg.obj != null ? msg.obj.toString() : "" ));
             	break;
             case MSG_RADAR_MESSAGE_RECV:
