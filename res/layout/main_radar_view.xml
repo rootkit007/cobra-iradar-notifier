@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/radarState"
+        android:layout_width="match_parent"
+        android:layout_height="189dp"
+        android:textSize="100sp"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/connStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/logScroll"
+        android:layout_width="match_parent"
+        android:layout_height="206dp"
+        android:layout_gravity="bottom"
+        android:lines="15"
+        android:maxLines="300"
+        android:scrollHorizontally="true"
+        android:scrollbars="vertical"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@android:attr/buttonBarStyle"
+        >
+        
+            <Button
+        android:id="@+id/btnReconnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="Reconnect" />
+
+    	<Button
+        android:id="@+id/btnFakeAlert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="Fake Alert" />
+        
+    	<Button
+        android:id="@+id/btnQuit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="Quit" />
+    	
+    	
+    	</LinearLayout>
+
+</LinearLayout>
