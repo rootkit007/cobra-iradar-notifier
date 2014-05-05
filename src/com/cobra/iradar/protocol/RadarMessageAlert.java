@@ -1,4 +1,4 @@
-package com.cobra.iradar;
+package com.cobra.iradar.protocol;
 
 /**
  * Adds alert type, frequency, strength to base RadarMessage

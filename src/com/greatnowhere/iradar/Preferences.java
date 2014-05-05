@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 public class Preferences {
 
+	@SuppressWarnings("unused")
 	private static SharedPreferences prefs;
 	
 	public static void init(Context ctx) {

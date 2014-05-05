@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -31,8 +33,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.text.format.DateFormat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -40,18 +40,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cobra.iradar.IRadarManager;
-import com.cobra.iradar.RadarConnectionService;
-import com.cobra.iradar.RadarMessage;
-import com.cobra.iradar.RadarMessageAlert;
-import com.cobra.iradar.RadarMessageAlert.Alert;
-import com.cobra.iradar.RadarMessageStopAlert;
+import com.cobra.iradar.IRadarMessageHandler;
+import com.cobra.iradar.messaging.CobraMessageAllClear;
+import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
+import com.cobra.iradar.messaging.CobraMessageNotification;
+import com.cobra.iradar.messaging.CobraMessageThreat;
+import com.cobra.iradar.protocol.RadarMessageAlert.Alert;
 
 /**
  * This is the main Activity that displays the radar status.
@@ -105,7 +105,7 @@ public class CobraIRadarActivity extends Activity {
         btnFakeAlert.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				handleRadarMessage(new RadarMessageAlert(Alert.Ka, 1, 35.1f));
+				radarMessageHandler.onRadarMessage(new CobraMessageThreat(Alert.Ka, 2, 35.1f));
 			}
 		});
         btnQuit = (Button) findViewById(R.id.btnQuit);
@@ -180,59 +180,40 @@ public class CobraIRadarActivity extends Activity {
        startActivity(setIntent);
     }
     
-    private void ensureDiscoverable() {
-        if(D) Log.d(TAG, "ensure discoverable");
-        if (mBluetoothAdapter.getScanMode() !=
-            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
-    }
-
-    
     // The Handler that gets information back from the IRadar
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case RadarConnectionService.MSG_RADAR_MESSAGE_RECV:
-            	RadarMessage radarMsg = (RadarMessage) msg.getData().get(RadarConnectionService.BUNDLE_KEY_RADAR_MESSAGE);
-            	handleRadarMessage(radarMsg);
-            	break;
-            case RadarConnectionService.MSG_IRADAR_FAILURE:
-            	addLogMessage(( msg.obj != null ? msg.obj.toString() : "Communications failure" ));
-            	connState.setText("Disconnected, communications failure");
-            	// stop the service
-            	stopService();
-            	break;
-            case RadarConnectionService.MSG_NOTIFICATION:
-            	if ( msg.obj != null )
-            		addLogMessage(msg.obj.toString());
-            }
-        }
-    };
-    
-    private void handleRadarMessage(RadarMessage radarMsg) {
-    	switch ( radarMsg.type ) {
-		case RadarMessageAlert.TYPE_ALERT:
-    		RadarMessageAlert radarAlert = (RadarMessageAlert) radarMsg;
-        	addLogMessage("Got alert " + radarAlert.alertCode + " " + radarAlert.strength + " " + radarAlert.frequency);
-        	alert.setText(radarAlert.alert.getName() + " : " + radarAlert.strength + " : " + radarAlert.frequency + "\n" +
-        	 radarAlert.alert.getAdditionalName());
-        	Threat.newThreat(radarAlert);
-        	break;
-		case RadarMessageAlert.TYPE_STOP_ALERT:
-    		RadarMessageStopAlert radarStopAlert = (RadarMessageStopAlert) radarMsg;
-        	alert.setText("");
-        	connState.setText("Connected, battery " + radarStopAlert.batteryVoltage + "V");
-        	Threat.removeThreats();
-        	break;
-        default:
-        	addLogMessage("Radar message " + radarMsg.type);
-    	}
-    }
-    
+    private IRadarMessageHandler radarMessageHandler = new IRadarMessageHandler() {
+
+		@Override
+		public void onRadarMessage(CobraMessageConnectivityNotification msg) {
+			addLogMessage(msg.message);
+			connState.setText(msg.message);
+		}
+
+		@Override
+		public void onRadarMessage(CobraMessageThreat msg) {
+        	addLogMessage("Alert " + msg.alertType.getName() + msg.strength + " " + msg.frequency);
+        	alert.setText(msg.alertType.getName() + msg.strength + "\n" + msg.frequency + " " + msg.alertType.getAdditionalName());
+        	Timer t = new Timer(true);
+        	t.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					Threat.removeThreats();
+				}
+			}, 1000L);
+        	Threat.newThreat(msg);
+		}
+
+		@Override
+		public void onRadarMessage(CobraMessageAllClear msg) {
+			Threat.removeThreats();
+		}
+
+		@Override
+		public void onRadarMessage(CobraMessageNotification msg) {
+			addLogMessage(msg.message);
+		}
+	};
+
     public void addLogMessage(String msg) {
     	// generate timestamp
     	String tsMsg = DateFormat.format("HH:mm:ss", new Date()).toString() + " " + msg + "\n";
@@ -264,16 +245,15 @@ public class CobraIRadarActivity extends Activity {
             } else {
                 // User did not enable Bluetooth or an error occurred
                 Log.d(TAG, "BT not enabled");
-                Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
                 finish();
             }
         }
     }
     
     public void initialize() {
-		IRadarManager.initialize(getApplicationContext(), mHandler);
-		IRadarManager.startConnectionMonitor(60);
+		boolean success = IRadarManager.initialize(getApplicationContext(), true, CobraIRadarActivity.class, true, 60);
 		// start ongoing notification
+		/*
 		Builder b = new Notification.Builder(getApplicationContext());
 		b.setContentText("iRadar Notifier Running");
 		Intent resumeAppIntent = new Intent(getApplicationContext(), this.getClass());
@@ -282,6 +262,7 @@ public class CobraIRadarActivity extends Activity {
 		b.setContentTitle("iRadar Notifier");
 		b.setSmallIcon(R.drawable.app_icon);
 		mNotificationManager.notify(null, 1, b.build());
+		*/
     }
 
     @Override

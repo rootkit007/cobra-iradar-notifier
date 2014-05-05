@@ -16,7 +16,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.cobra.iradar.RadarMessageAlert;
+import com.cobra.iradar.messaging.CobraMessageThreat;
+import com.cobra.iradar.protocol.RadarMessageAlert;
 
 /**
  * Manages currently active threats and displays them
@@ -41,7 +42,7 @@ public class Threat {
 	 * View displaying current threat
 	 */
 	private View view;
-	private RadarMessageAlert alert;
+	private CobraMessageThreat alert;
 	
 	private static Context ctx;
 	
@@ -69,8 +70,8 @@ public class Threat {
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_X, alertSounds.load(ctx, R.raw.x1, 1));
 	}
 	
-	public static void newThreat(RadarMessageAlert alert) {
-		Threat t = findExistingThreat(alert.alertCode);
+	public static void newThreat(CobraMessageThreat alert) {
+		Threat t = findExistingThreat(alert.alertType.getCode());
 		if ( t == null ) {
 			View v = View.inflate(ctx, R.layout.threat, null);
 			t = new Threat();
@@ -98,7 +99,7 @@ public class Threat {
 	
 	private static Threat findExistingThreat(int alertType) {
 		for ( Threat t : activeThreats ) {
-			if ( t.alert.alertCode == alertType ) 
+			if ( t.alert.alertType.getType() == alertType ) 
 				return t;
 		}
 		return null;
@@ -119,7 +120,7 @@ public class Threat {
 	private void updateThreat() {
 		TextView band = (TextView) view.findViewById(R.id.textViewBand);
 		TextView freq = (TextView) view.findViewById(R.id.textViewFrequency);
-		band.setText(alert.alert.getName());
+		band.setText(alert.alertType.getName());
 		freq.setText(Float.toString(alert.frequency) + " Ghz");
 		band.setTextColor(ColorStateList.valueOf(getThreatColor(alert.strength)));
 		playAlert();
@@ -131,7 +132,7 @@ public class Threat {
 	
 	private void playAlert() {
 		am.setStreamVolume(AudioManager.STREAM_ALARM, am.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0);
-		alertSounds.play(alertSoundsLoaded.get(alert.alert.getSound()), 1, 1, 1, 0, 1);
+		alertSounds.play(alertSoundsLoaded.get(alert.alertType.getSound()), 1, 1, 1, 0, 1);
 	}
 	
 	private static int getThreatColor(int strength) {

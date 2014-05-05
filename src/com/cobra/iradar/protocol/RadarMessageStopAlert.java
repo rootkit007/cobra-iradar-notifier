@@ -1,4 +1,4 @@
-package com.cobra.iradar;
+package com.cobra.iradar.protocol;
 
 public class RadarMessageStopAlert extends RadarMessage {
 	

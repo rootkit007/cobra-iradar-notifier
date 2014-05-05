@@ -1,4 +1,4 @@
-package com.cobra.iradar;
+package com.cobra.iradar.protocol;
 
 import java.io.InputStream;
 
