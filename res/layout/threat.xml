@@ -3,27 +3,39 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" android:keepScreenOn="true" android:alpha="0.9"
-    android:background="@android:color/background_light">
+    android:background="@android:color/background_light" xmlns:app="http://schemas.android.com/apk/res/com.greatnowhere.iradar">
 
-    <TextView
+    <com.qwerjk.better_text.MagicTextView
         android:id="@+id/textViewBand"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:gravity="top"
+        android:gravity="top|center"
+        android:layout_gravity="top|center"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="45sp"
         android:textStyle="bold"
+        app:strokeWidth="2"
+        app:innerShadowRadius="0.1"
+        app:outerShadowRadius="0.1"
+        app:strokeJoinStyle="round"
         />
     
 
-    <TextView
+    <com.qwerjk.better_text.MagicTextView
         android:id="@+id/textViewFrequency"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
         android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:gravity="top|center"
+        android:layout_gravity="top|center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:strokeWidth="2"
+        app:innerShadowRadius="0.1"
+        app:outerShadowRadius="0.1"
+        app:strokeJoinStyle="round"
+	/>
 
 </LinearLayout>

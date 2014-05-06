@@ -15,7 +15,7 @@ import de.greenrobot.event.EventBus;
  * 
  * This handler is used for one-way communication from radar device to user app 
  * Handler class to receive messages from iRadar device
- * User app must extend this class and implement onRadarMessage() method
+ * User app must extend this class and implement onRadarMessage() methods
  * 
  * @author pzeltins
  *
@@ -56,10 +56,7 @@ public abstract class IRadarMessageHandler {
     }
     
     public final void onEventMainThread(RadarMessageAlert alertMsg) {
-    	CobraMessageThreat msgThreat = new CobraMessageThreat();
-    	msgThreat.alertType = alertMsg.alert;
-    	msgThreat.frequency = alertMsg.frequency;
-    	msgThreat.strength = alertMsg.strength;
+    	CobraMessageThreat msgThreat = new CobraMessageThreat(alertMsg.alert, alertMsg.strength, alertMsg.frequency);
     	isThreatActive = true;
     	onRadarMessage(msgThreat);
     }

@@ -1,13 +1,12 @@
 package com.cobra.iradar;
 
-import java.util.Random;
-
-import de.greenrobot.event.EventBus;
 import android.app.Notification;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
+import de.greenrobot.event.EventBus;
 
 /**
  * A service handling connection to iRadar
@@ -17,9 +16,12 @@ import android.os.IBinder;
  */
 public class RadarConnectionService extends Service {
 
+	private static final String TAG = RadarConnectionService.class.getCanonicalName();
+	
 	private BluetoothDevice iRadarDevice;
 	private RadarConnectionThread radarThread;
-    private int notificationId = new Random().nextInt();
+    @SuppressWarnings("unused")
+	private int notificationId = 1;
     private EventBus eventBus = EventBus.getDefault();
 	
 	@Override
@@ -29,7 +31,7 @@ public class RadarConnectionService extends Service {
     		iRadarDevice = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE);
     		Notification fgNotify = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_NOTIFICATION);
         	if ( IRadarManager.isShowNotification() && fgNotify != null ) {
-        		startForeground(notificationId, fgNotify );
+        		startForeground(1, fgNotify );
         	}
         	runConnection();
     	}
@@ -48,9 +50,12 @@ public class RadarConnectionService extends Service {
 	}
 	
 	public void runConnection() {
-    	if ( iRadarDevice != null && ( radarThread == null || !radarThread.isAlive()) ) {
+    	if ( iRadarDevice != null && ( radarThread == null || !radarThread.isRunning.get() ) ) {
+    		Log.i(TAG, "Starting new BT connection thread");
 	    	radarThread = new RadarConnectionThread(iRadarDevice);
 	    	radarThread.start();
+    	} else {
+    		Log.i(TAG, "Not starting new BT connection thread: already running");
     	}
 	}
 	
@@ -68,7 +73,8 @@ public class RadarConnectionService extends Service {
 		return null;
 	}
 	
-	public void onEventMainThread(EventReconnectioAttempt event) {
+	public void onEventMainThread(EventReconnectionAttemptCommand event) {
+		Log.i(TAG, "Received command to attempt reconnection");
 		runConnection();
 	}
 
@@ -77,7 +83,7 @@ public class RadarConnectionService extends Service {
 	 * @author pzeltins
 	 *
 	 */
-	public static class EventReconnectioAttempt {
+	public static class EventReconnectionAttemptCommand {
 	}
 	
 }

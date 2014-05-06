@@ -41,18 +41,12 @@ public class IRadarManager {
 	 * @param reconnectInterval interval in seconds
 	 * @return True if radar device found and connection attempt started, false otherwise. Call {@link getLastError} to retrieve any error messages
 	 */
-	public static synchronized boolean initialize(Context ctx, boolean showNotification, Class<?> notificationTarget,
+	public static synchronized boolean initialize(Context ctx, boolean showNotification, Notification notify, 
 			  boolean attemptReconnect, int reconnectInterval) {
 		  	appContext = ctx;
         	IRadarManager.showNotification = showNotification;
         	IRadarManager.setAttemptReconnect(attemptReconnect);
-        	IRadarManager.ongoingNotification = (new Notification.Builder(ctx)).
-        			setContentIntent(PendingIntent.getActivity(ctx, 0,
-        					new Intent(ctx, notificationTarget), Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP )).
-        			setContentText("iRadar Running").
-        			setContentTitle("iRadar").
-        			setOngoing(true).
-        			build();
+        	IRadarManager.ongoingNotification = notify;
 		  	
 	        // If the adapter is null, then Bluetooth is not supported
 	        if (mBluetoothAdapter == null) {
@@ -82,7 +76,7 @@ public class IRadarManager {
 	  }
 	  
 	  public static synchronized void tryReconnect() {
-		  eventBus.post(new RadarConnectionService.EventReconnectioAttempt());
+		  eventBus.post(new RadarConnectionService.EventReconnectionAttemptCommand());
 	  }
 	  
 	  /**

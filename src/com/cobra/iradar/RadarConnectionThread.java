@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -28,6 +29,8 @@ public class RadarConnectionThread extends Thread {
 	private InputStream rxStream;
 	private OutputStream txStream;
     private EventBus eventBus = EventBus.getDefault();
+    
+    public AtomicBoolean isRunning = new AtomicBoolean(false);
 	
 	public RadarConnectionThread(BluetoothDevice dev) {
 		iRadar = dev;
@@ -36,8 +39,11 @@ public class RadarConnectionThread extends Thread {
 	@Override
 	public synchronized void run() {
 		
+		isRunning.set(true);
+		
 		if ( iRadar == null ) {
 			this.interrupt();
+			isRunning.set(false);
 			return;
 		}
 		
@@ -60,6 +66,8 @@ public class RadarConnectionThread extends Thread {
 		} catch (Exception e) {
 			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connection failed",
 					ConnectivityStatus.DISCONNECTED.getCode()));
+			isRunning.set(false);
+			return;
 		}
 
 		eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
@@ -72,8 +80,8 @@ public class RadarConnectionThread extends Thread {
 				eventBus.post(RadarMessage.fromPacket(packet));
 			} catch (Exception e) {
 				Log.e(TAG, "IO Exception", e);
-				eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Error processing radar data",
-						ConnectivityStatus.DISCONNECTED.getCode()));
+				eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Error in data connection",
+						ConnectivityStatus.PROTOCOL_ERROR.getCode()));
 				this.interrupt(); 
 			}
 		}
@@ -87,6 +95,7 @@ public class RadarConnectionThread extends Thread {
 			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Disconnected",
 					ConnectivityStatus.DISCONNECTED.getCode()));
 		}
+		isRunning.set(false);
 		
 	}
 	
@@ -95,5 +104,5 @@ public class RadarConnectionThread extends Thread {
 			txStream.write(buf);
 		}
 	}
-
+	
 }

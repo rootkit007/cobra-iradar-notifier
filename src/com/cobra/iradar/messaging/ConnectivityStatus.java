@@ -4,7 +4,8 @@ public enum ConnectivityStatus {
 	UNKNOWN(0),
 	CONNECTING(1),
 	DISCONNECTED(2),
-	CONNECTED(3);
+	CONNECTED(3),
+	PROTOCOL_ERROR(4);
 	
 	private int code;
 	

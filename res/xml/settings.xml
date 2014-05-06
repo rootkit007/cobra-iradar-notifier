@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen android:key="preferences" 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:robobunny="http://robobunny.com">
+    <CheckBoxPreference android:title="Set Alerts Sound Level" android:key="@string/alert_level_set_flag" 
+        android:selectable="true" android:defaultValue="false" android:enabled="true" android:disableDependentsState="false"/>
+    <PreferenceCategory android:title="Alert Level" >
+        <com.robobunny.SeekBarPreference
+            android:key="@string/alert_level" android:dependency="@string/alert_level_set_flag"
+            android:title="Alert Level"
+            android:summary="Set volume level for radar alerts"
+            android:defaultValue="1"
+            android:max="10"
+            robobunny:min="1"
+            robobunny:unitsLeft=""
+            robobunny:unitsRight=""
+    />
+    </PreferenceCategory>
+
+</PreferenceScreen>

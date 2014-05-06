@@ -33,10 +33,13 @@ public class RadarMessageAlert extends RadarMessage {
 		this.frequency = frequency;
 	}
 
-	
 	public float calcFrequency() {
-		int l2 = 256 * (256 * packet[8]) + 256 * packet[9] + packet[10];
-        return (float)l2 / 1000.0F;
+		int l2 = 256 * (256 * byte2UnsignedInt(packet[8])) + 256 * byte2UnsignedInt(packet[9]) + byte2UnsignedInt(packet[10]);
+        return (float) l2 / 1000.0F;
+	}
+	
+	public int byte2UnsignedInt(byte b) {
+		return 0x000000FF & (int)b;
 	}
 	
 	public static final int ALERT_VOLUME_CHANGE = 118;

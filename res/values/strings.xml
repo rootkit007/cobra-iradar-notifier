@@ -16,5 +16,8 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Cobra iRadar Notifier</string>
+    <string name="settings">Settings</string>
+    <string name="alert_level_set_flag">alertLevelSetFlag</string>
+    <string name="alert_level">alertLevel</string>
 
 </resources>
