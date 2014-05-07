@@ -17,7 +17,28 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Cobra iRadar Notifier</string>
     <string name="settings">Settings</string>
-    <string name="alert_level_set_flag">alertLevelSetFlag</string>
-    <string name="alert_level">alertLevel</string>
-
+    <string name="prefKeyAlertLevelSetFlag">alertLevelSetFlag</string>
+    <string name="prefKeyAlertLevel">alertLevel</string>
+    <string name="prefKeyScanForDevice">prefScanDevice</string>
+    <string name="prefValScanForDevice">Scan for radar device</string>
+    <string name="prefSumScanForDevice">Attempt to reconnect to radar device</string>
+    <string name="prefKeyScanInterval"></string>
+    <string name="prefValScanInterval">Interval in seconds to scan</string>
+    <string name="prefDlgTitleScanInterval">Scan Interval</string>
+    <string name="prefDlgTxtScanInterval">Scan Interval in seconds</string>
+    <string name="prefKeySpeakEvents">perfKeySpeakEvents</string>
+    <string name="prefValSpeakEvents">Notify on radar connectivity</string>
+    <string name="prefKeyTextDeviceConnected">prefKeyTextDeviceConnected</string>
+    <string name="prefValTextDeviceConnected">Text to speak on connection</string>
+	<string name="prefValTextDeviceWorking">Text to speak while connected</string>
+	<string name="prefKeyTextDeviceWorking">prefKeyTextDeviceWorking</string>
+	<string name="prefValTextDeviceWorkingInterval">Interval to notify</string>
+	<string name="prefKeyTextDeviceWorkingInterval">prefKeyTextDeviceWorkingInterval</string>
+	<string name="prefDlgTextDeviceWorkingInterval">How often (in seconds) to notify that device is connected</string>
+	<string name="prefKeyTextDeviceDisconnect">prefKeyTextDeviceDisconnect</string>
+	<string name="prefValTextDeviceDisconnect">Text to speak on disconnection</string>
+	<string name="done">Done</string>
+	<string name="crashNotificationText">Cobra iRadar application has crashed. Developer would greatly appreciate if you agree to send a crash report which could help track down the cause of the crash. All you have to do is (optionally) enter your comments, and click OK button. The report is shared as email, so please choose your email application in the following popup and send. Thank you!</string>
+	<string name="crashNotificationTitle">Cobra iRadar Has Crashed!</string>
+	<string name="quit">Quit</string>
 </resources>

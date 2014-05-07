@@ -24,5 +24,14 @@ public class RadarMessageNotification {
 		this.message = message;
 		this.connectionStatus = connStatus;
 	}
+	
+	/**
+	 * Notification type message
+	 * @param message
+	 */
+	public RadarMessageNotification(String message) {
+		this(TYPE_NOTIFY, message, ConnectivityStatus.UNKNOWN.getCode());
+	}
+
 
 }

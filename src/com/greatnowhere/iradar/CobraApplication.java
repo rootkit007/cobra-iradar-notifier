@@ -6,7 +6,9 @@ import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
 
-@ReportsCrashes(formKey = "", mode=ReportingInteractionMode.TOAST, mailTo="rootkit007@gmail.com")
+@ReportsCrashes(formKey = "", mode=ReportingInteractionMode.NOTIFICATION, mailTo="rootkit007@gmail.com",
+		resNotifText=R.string.crashNotificationText, resNotifTitle=R.string.crashNotificationTitle,
+		resNotifTickerText=R.string.crashNotificationTitle, resDialogText=R.string.crashNotificationText)
 public class CobraApplication extends Application {
 
 	 @Override

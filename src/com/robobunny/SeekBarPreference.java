@@ -74,8 +74,11 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 	public void setRangeValues(int min, int max) {
 		mMaxValue = max;
 		mMinValue = min;
-		if ( mSeekBar != null )
+		setCurrentValue(mCurrentValue);
+		if ( mSeekBar != null ) {
+			mSeekBar.setProgress(mCurrentValue);
 			mSeekBar.setMax(mMaxValue - mMinValue);
+		}
 	}
 	
 	private String getAttributeStringValue(AttributeSet attrs, String namespace, String name, String defaultValue) {
@@ -176,9 +179,9 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 		}
 
 		// change accepted, store it
-		mCurrentValue = newValue;
-		mStatusText.setText(String.valueOf(newValue));
-		persistInt(newValue);
+		setCurrentValue(newValue);
+		mStatusText.setText(String.valueOf(mCurrentValue));
+		persistInt(mCurrentValue);
 
 	}
 
@@ -203,7 +206,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 	protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
 
 		if(restoreValue) {
-			mCurrentValue = getPersistedInt(mCurrentValue);
+			setCurrentValue(getPersistedInt(mCurrentValue));
 		}
 		else {
 			int temp = 0;
@@ -214,8 +217,8 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 				Log.e(TAG, "Invalid default value: " + defaultValue.toString());
 			}
 			
-			persistInt(temp);
-			mCurrentValue = temp;
+			setCurrentValue(temp);
+			persistInt(mCurrentValue);
 		}
 		
 	}
@@ -245,9 +248,15 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 	}
 	
 	public void setPersistedValue(int v) {
-		mCurrentValue = v;
+		setCurrentValue(v);
 		persistInt(v);
 		if ( mSeekBar != null ) 
 			mSeekBar.setProgress(mCurrentValue - mMinValue);
+	}
+	
+	protected void setCurrentValue(int v) {
+		if ( v > mMaxValue ) 
+			v = mMaxValue;
+		mCurrentValue = v;
 	}
 }

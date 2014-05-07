@@ -47,6 +47,8 @@ public class RadarConnectionThread extends Thread {
 			return;
 		}
 		
+		boolean isConnectionSuccess = false;
+		
 		// connection attempt
 		try {
 			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connecting to " + iRadar.getName(),
@@ -64,14 +66,14 @@ public class RadarConnectionThread extends Thread {
 			txStream = socket.getOutputStream();
 			
 		} catch (Exception e) {
-			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connection failed",
-					ConnectivityStatus.DISCONNECTED.getCode()));
+			eventBus.post(new RadarMessageNotification("Connection failed"));
 			isRunning.set(false);
 			return;
 		}
 
 		eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
 				ConnectivityStatus.CONNECTED.getCode()));
+		isConnectionSuccess = true;
 
 		byte[] packet;
 		while ( !isInterrupted() ) {
@@ -92,9 +94,14 @@ public class RadarConnectionThread extends Thread {
 			txStream.close();
 			socket.close();
 		} catch (IOException e) {
-			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Disconnected",
-					ConnectivityStatus.DISCONNECTED.getCode()));
+			Log.i(TAG, e.getLocalizedMessage());
 		}
+		
+		// if we were successfully connected, notify clients of conn status change
+		if ( isConnectionSuccess )
+			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Disconnected",
+				ConnectivityStatus.DISCONNECTED.getCode()));
+		
 		isRunning.set(false);
 		
 	}

@@ -17,7 +17,7 @@
       package="com.greatnowhere.iradar"
       android:versionCode="1"
       android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="11" android:maxSdkVersion="19" android:targetSdkVersion="19" />
+    <uses-sdk android:minSdkVersion="15" android:maxSdkVersion="19" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

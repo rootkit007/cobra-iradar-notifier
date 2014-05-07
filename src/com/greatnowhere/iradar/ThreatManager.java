@@ -10,12 +10,12 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.media.AudioManager;
 import android.media.SoundPool;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cobra.iradar.messaging.CobraMessageThreat;
@@ -31,14 +31,12 @@ public class ThreatManager {
 	/**
 	 * Threats currently displayed
 	 */
-	public static List<Threat> activeThreats = new ArrayList<Threat>();
+	private static List<Threat> activeThreats = new ArrayList<Threat>();
 	
 	private static WindowManager wm = null;
 	private static WindowManager.LayoutParams params;
-	private static AudioManager am = null;
 	private static SoundPool alertSounds = null;
 	private static Map<String, Integer> alertSoundsLoaded = new HashMap<String, Integer>();
-	private static int originalVolume = 0;
 	private static View mainThreatView;
 	private static LinearLayout mainThreatLayout; 
 	private static boolean isThreatActive = false;
@@ -61,10 +59,7 @@ public class ThreatManager {
         mainThreatLayout = (LinearLayout) mainThreatView.findViewById(R.id.layoutThreats);
         mainThreatLayout.setLayoutTransition(new LayoutTransition());
         
-        am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
-        originalVolume = am.getStreamVolume(AudioManager.STREAM_ALARM);
-
-        alertSounds = new SoundPool(3, AudioManager.STREAM_ALARM, 0);
+        alertSounds = new SoundPool(3, AlertAudioManager.OUTPUT_STREAM, 0);
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_KA, alertSounds.load(ctx, R.raw.ka1, 1));
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_HAZARD, alertSounds.load(ctx, R.raw.ev, 1));
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_K, alertSounds.load(ctx, R.raw.k1, 1));
@@ -99,10 +94,7 @@ public class ThreatManager {
 			t.removeThreat();
 		}
 		activeThreats = new ArrayList<Threat>();
-		if ( Preferences.isSetAlertLevel() ) {
-			// Restore alarms volume
-			am.setStreamVolume(AudioManager.STREAM_ALARM, originalVolume, 0);
-		}
+		AlertAudioManager.restoreOldAlertVolume();
 		isThreatActive = false;
 		wm.removeView(mainThreatView);
 
@@ -122,7 +114,7 @@ public class ThreatManager {
 	
 	private static int getThreatColor(int strength) {
 		// strength is assumed to be 0 - 5 (5=max)
-		return Color.argb(240, 150 + (strength * 20), 0, 0);
+		return Color.argb(255, 155 + (strength * 20), 10, 10);
 	}
 	
 	private static float getThreatSoundPitch(int strength) {
@@ -167,11 +159,9 @@ public class ThreatManager {
 		}
 		
 		private void playAlert() {
-			if ( Preferences.isSetAlertLevel() ) {
-				am.setStreamVolume(AudioManager.STREAM_ALARM, Preferences.getAlertLevel(), 0);
-			}
+			AlertAudioManager.setOurAlertVolume();
 			// start looping play
-			soundStreamId = alertSounds.play(alertSoundsLoaded.get(alert.alertType.getSound()), 1, 1, 1, 1, 
+			soundStreamId = alertSounds.play(alertSoundsLoaded.get(alert.alertType.getSound()), 1, 1, 1, -1, 
 					getThreatSoundPitch(alert.strength));
 		}
 		
@@ -186,6 +176,7 @@ public class ThreatManager {
 				return;
 			// only update if strength changes
 			if ( newStrength != alert.strength || !isShowing ) {
+				this.alert.strength = newStrength;
 				// stop any alert sound currently playing
 				if ( soundStreamId != 0 ) {
 					alertSounds.stop(soundStreamId);
@@ -197,9 +188,14 @@ public class ThreatManager {
 				}
 				TextView band = (TextView) view.findViewById(R.id.textViewBand);
 				TextView freq = (TextView) view.findViewById(R.id.textViewFrequency);
+				ProgressBar strength = (ProgressBar) view.findViewById(R.id.threatViewStrength);
 				band.setText(alert.alertType.getName());
 				freq.setText(Float.toString(alert.frequency) + " Ghz");
-				band.setTextColor(ColorStateList.valueOf(getThreatColor(alert.strength)));
+				ColorStateList threatColor = ColorStateList.valueOf(getThreatColor(alert.strength)); 
+				band.setTextColor(threatColor);
+				freq.setTextColor(threatColor);
+				strength.setProgress(this.alert.strength);
+				//strength.getProgressDrawable().setColorFilter(getThreatColor(alert.strength), Mode.SRC_IN);
 				playAlert();
 			}
 		}

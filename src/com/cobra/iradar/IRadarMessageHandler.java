@@ -1,5 +1,9 @@
 package com.cobra.iradar;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import android.os.CountDownTimer;
+
 import com.cobra.iradar.messaging.CobraMessageAllClear;
 import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
 import com.cobra.iradar.messaging.CobraMessageNotification;
@@ -25,6 +29,13 @@ public abstract class IRadarMessageHandler {
 	protected ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
 	protected Double batteryVoltage = 0D;
 	protected boolean isThreatActive = false;
+	
+	protected CountDownTimer alertTimer;
+	/**
+	 * True if threat is forcibly held active, regardless of "All Clear" messages
+	 * Used mostly for testing purposes
+	 */
+	protected AtomicBoolean isThreatForcedActive = new AtomicBoolean(false);
 	
 	protected static EventBus eventBus = EventBus.getDefault();
 	
@@ -58,6 +69,20 @@ public abstract class IRadarMessageHandler {
     public final void onEventMainThread(RadarMessageAlert alertMsg) {
     	CobraMessageThreat msgThreat = new CobraMessageThreat(alertMsg.alert, alertMsg.strength, alertMsg.frequency);
     	isThreatActive = true;
+    	if ( alertMsg.minAlerTime != null ) {
+    		isThreatForcedActive.set(true);
+    		alertTimer = new CountDownTimer(alertMsg.minAlerTime, alertMsg.minAlerTime) {
+				@Override
+				public void onTick(long millisUntilFinished) {
+				}
+				@Override
+				public void onFinish() {
+		    		isThreatForcedActive.set(false);
+		    		eventBus.post(new RadarMessageStopAlert(batteryVoltage));
+				}
+			};
+			alertTimer.start();
+    	}
     	onRadarMessage(msgThreat);
     }
     
@@ -65,7 +90,8 @@ public abstract class IRadarMessageHandler {
     public final void onEventMainThread(RadarMessageStopAlert stopAlertMsg) {
     	CobraMessageAllClear msgClear = new CobraMessageAllClear();
     	this.batteryVoltage = stopAlertMsg.batteryVoltage;
-    	if ( isThreatActive ) {
+    	// Send "All Clear" message only if threats are active, and not forcibly held active 
+    	if ( isThreatActive && !isThreatForcedActive.get() ) {
     		onRadarMessage(msgClear);
     		isThreatActive = false;
     	}

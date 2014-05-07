@@ -1,29 +1,42 @@
 package com.greatnowhere.iradar.config;
 
+import com.greatnowhere.iradar.R;
+
 import android.app.Activity;
-import android.content.Context;
-import android.media.AudioManager;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class SettingsActivity extends Activity {
 
-	private AudioManager am;
-	private static int maxAlarmVolume;
-	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        am = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        maxAlarmVolume = am.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-        
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
     }
     
-    public static int getMaxAlarmVolume() {
-    	return maxAlarmVolume;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.done_menu, menu);
+        return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	
+    	if ( item.getItemId() == R.id.itemDone ) {
+    		finish();
+    		return true;
+    	}
+    	
+        return false;
+    }
+    
+    
 }

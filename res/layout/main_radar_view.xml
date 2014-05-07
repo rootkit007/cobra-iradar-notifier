@@ -70,13 +70,16 @@
 	
     <TableRow >
 
-	    <LinearLayout android:layout_span="2"
+	    <LinearLayout 
+	        android:layout_span="2"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        style="@android:attr/buttonBarStyle"
+	        android:layout_gravity="center_horizontal"
+	        android:gravity="center_horizontal"
+	        style="?android:attr/buttonBarStyle"
 	        >
 	        
-	            <Button
+	        <Button
 	        android:id="@+id/btnReconnect"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
@@ -88,8 +91,15 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        style="?android:attr/buttonBarButtonStyle"
-	        android:text="Fake Alert" />
+	        android:text="Single Alert" />
 	        
+	    	<Button
+	        android:id="@+id/btnFakeAlertMulti"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        style="?android:attr/buttonBarButtonStyle"
+	        android:text="Multiple Alerts" />
+	    	
 	    	<Button
 	        android:id="@+id/btnQuit"
 	        android:layout_width="wrap_content"

@@ -53,6 +53,7 @@ import com.cobra.iradar.messaging.CobraMessageAllClear;
 import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
 import com.cobra.iradar.messaging.CobraMessageNotification;
 import com.cobra.iradar.messaging.CobraMessageThreat;
+import com.cobra.iradar.messaging.ConnectivityStatus;
 import com.cobra.iradar.protocol.RadarMessageAlert;
 import com.cobra.iradar.protocol.RadarMessageAlert.Alert;
 import com.greatnowhere.iradar.config.SettingsActivity;
@@ -81,6 +82,7 @@ public class CobraIRadarActivity extends Activity {
     private TextView voltage;
     private Button btnReconnect;
     private Button btnFakeAlert;
+    private Button btnFakeAlertMulti;
     private Button btnQuit;
     private Timer timerVoltage;
     
@@ -107,6 +109,13 @@ public class CobraIRadarActivity extends Activity {
         // initialize threats manager
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         ThreatManager.init(getApplicationContext());
+        
+        // Initialize TTS 
+        TTSManager.init(getApplicationContext());
+        
+        // Initialize alerts audio manager
+        AlertAudioManager.init(getApplicationContext());
+        
         eventBus.register(this);
         
         log = (TextView) findViewById(R.id.logScroll);
@@ -126,7 +135,16 @@ public class CobraIRadarActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Random r = new Random();
-				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f));
+				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
+			}
+		});
+        btnFakeAlertMulti = (Button) findViewById(R.id.btnFakeAlertMulti);
+        btnFakeAlertMulti.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Random r = new Random();
+				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
+				eventBus.post(new RadarMessageAlert(Alert.K, r.nextInt(4) + 1, 35.1f, 3000L));
 			}
 		});
         btnQuit = (Button) findViewById(R.id.btnQuit);
@@ -204,17 +222,21 @@ public class CobraIRadarActivity extends Activity {
 		public void onRadarMessage(CobraMessageConnectivityNotification msg) {
 			addLogMessage(msg.message);
 			connState.setText(msg.message);
+			if ( msg.status == ConnectivityStatus.DISCONNECTED ) {
+				voltage.setText("");
+			}
 		}
 
 		@Override
 		public void onRadarMessage(CobraMessageThreat msg) {
         	addLogMessage("Alert " + msg.alertType.getName() + msg.strength + " " + msg.frequency);
-        	alert.setText(msg.alertType.getName() + msg.strength + "\n" + msg.frequency + " " + msg.alertType.getAdditionalName());
+        	alert.setText(msg.alertType.getName() + " " + msg.frequency);
         	ThreatManager.newThreat(msg);
 		}
 
 		@Override
 		public void onRadarMessage(CobraMessageAllClear msg) {
+			alert.setText("");
 			ThreatManager.removeThreats();
 		}
 
@@ -273,10 +295,13 @@ public class CobraIRadarActivity extends Activity {
 		b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
 		b.setContentTitle("iRadar Notifier");
 		b.setSmallIcon(R.drawable.app_icon);
-		boolean success = IRadarManager.initialize(getApplicationContext(), true, b.build(), true, 60);
+		boolean success = IRadarManager.initialize(getApplicationContext(), true, b.build(), 
+				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval());
+		
 		if ( !success ) {
 			addLogMessage("Error initializing iRadar: " + IRadarManager.getLastError());
 		}
+		// set up voltage refresh every second
 		if ( timerVoltage == null ) {
 			timerVoltage = new Timer();
 			timerVoltage.scheduleAtFixedRate(new TimerTask() {
@@ -286,6 +311,13 @@ public class CobraIRadarActivity extends Activity {
 				}
 			}, 1000L, 1000L);
 		}
+    }
+    
+    public void onEvent(Preferences.PreferenceScanChangedEvent event) {
+    	IRadarManager.stopConnectionMonitor();
+    	if ( Preferences.isScanForDevice() ) {
+    		IRadarManager.startConnectionMonitor(Preferences.getDeviceScanInterval());
+    	}
     }
 
     @Override
@@ -307,14 +339,19 @@ public class CobraIRadarActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	
-    	if ( item.getItemId() == R.id.itemSettings ) {
+    	switch ( item.getItemId() ) {
+    	case R.id.itemSettings:
     		Intent settingsIntent = new Intent(getApplicationContext(),SettingsActivity.class);
     		settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     		getApplicationContext().startActivity(settingsIntent);
     		return true;
+    	case R.id.itemQuit:
+    		finish();
+    		return true;
+    	default:
+            return false;
     	}
     	
-        return false;
     }
     
     protected void onSaveInstanceState(Bundle outState) {

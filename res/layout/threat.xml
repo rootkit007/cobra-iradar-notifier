@@ -2,40 +2,72 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" android:keepScreenOn="true" android:alpha="0.9"
-    android:background="@android:color/background_light" xmlns:app="http://schemas.android.com/apk/res/com.greatnowhere.iradar">
+    android:layout_height="wrap_content" android:keepScreenOn="true">
 
-    <com.qwerjk.better_text.MagicTextView
+    <TextView
         android:id="@+id/textViewBand"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
+        android:alpha="1"
         android:gravity="top|center"
         android:layout_gravity="top|center"
         android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="45sp"
+        android:textAppearance="@android:attr/textAppearanceLargeInverse"
+        android:textSize="70sp"
         android:textStyle="bold"
+        android:shadowColor="#FFFFFF"
+	    android:shadowDx="0.0"
+	    android:shadowDy="0.0"
+	    android:shadowRadius="10.0" 
+	/>
+    
+    <ProgressBar android:max="5" android:id="@+id/threatViewStrength"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:shadowColor="#FFFFFF"
+	    android:shadowDx="0.0"
+	    android:shadowDy="0.0"
+	    android:shadowRadius="10.0" 
+		android:maxHeight="10dip"
+		android:minHeight="10dip"
+		style="?android:attr/progressBarStyleHorizontal"
+        android:gravity="top|center"
+        android:layout_gravity="top|center"
+        />
+        <!-- 
         app:strokeWidth="2"
+        app:strokeColor="#FF0000"
+        app:innerShadowColor="#FF0000"
         app:innerShadowRadius="0.1"
         app:outerShadowRadius="0.1"
         app:strokeJoinStyle="round"
-        />
+         -->
     
 
-    <com.qwerjk.better_text.MagicTextView
+    <TextView
         android:id="@+id/textViewFrequency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
+        android:alpha="1"
         android:textAlignment="center"
         android:gravity="top|center"
         android:layout_gravity="top|center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        app:strokeWidth="2"
+        android:textAppearance="@android:attr/textAppearanceMediumInverse"
+        android:textSize="40sp"
+        android:shadowColor="#FFFFFF"
+	    android:shadowDx="0.0"
+	    android:shadowDy="0.0"
+	    android:shadowRadius="10.0" 
+	/>
+    <!-- 
+            app:strokeWidth="2"
+        app:strokeColor="#FF0000"
         app:innerShadowRadius="0.1"
         app:outerShadowRadius="0.1"
         app:strokeJoinStyle="round"
-	/>
+        app:innerShadowColor="#FF0000"
+     -->
 
 </LinearLayout>

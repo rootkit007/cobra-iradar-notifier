@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:layout_gravity="top|center"
     android:gravity="top|center"
+    android:alpha="1"
     android:id="@+id/layoutThreats" >
 
 </LinearLayout>

@@ -14,6 +14,12 @@ public class RadarMessageAlert extends RadarMessage {
 	public float frequency;
 	public Alert alert;
 	
+	/**
+	 * min time this alert should be active
+	 * used only during testing
+	 */
+	public Long minAlerTime = null; 
+	
 	public RadarMessageAlert(byte[] packet) throws Exception {
 		super(packet);
 		if ( type != RadarMessage.TYPE_ALERT ) {
@@ -33,6 +39,11 @@ public class RadarMessageAlert extends RadarMessage {
 		this.frequency = frequency;
 	}
 
+	public RadarMessageAlert(Alert alert, int strength, float frequency, long minTime) {
+		this(alert,strength,frequency);
+		minAlerTime = minTime;
+	}
+	
 	public float calcFrequency() {
 		int l2 = 256 * (256 * byte2UnsignedInt(packet[8])) + 256 * byte2UnsignedInt(packet[9]) + byte2UnsignedInt(packet[10]);
         return (float) l2 / 1000.0F;
