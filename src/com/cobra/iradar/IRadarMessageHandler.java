@@ -1,8 +1,8 @@
 package com.cobra.iradar;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import android.os.CountDownTimer;
 
 import com.cobra.iradar.messaging.CobraMessageAllClear;
 import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
@@ -29,8 +29,7 @@ public abstract class IRadarMessageHandler {
 	protected ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
 	protected Double batteryVoltage = 0D;
 	protected boolean isThreatActive = false;
-	
-	protected CountDownTimer alertTimer;
+	protected Timer alertTimer;
 	/**
 	 * True if threat is forcibly held active, regardless of "All Clear" messages
 	 * Used mostly for testing purposes
@@ -47,7 +46,7 @@ public abstract class IRadarMessageHandler {
 	/**
 	 * Receives raw messages from {@link RadarConnectionService} and calls onRadarMessage as needed 
 	 */
-    public final void onEventMainThread(RadarMessageNotification msg) {
+    public final void onEventAsync(RadarMessageNotification msg) {
     	
     	switch (msg.type) {
     	case RadarMessageNotification.TYPE_CONN:
@@ -66,28 +65,27 @@ public abstract class IRadarMessageHandler {
     	}
     }
     
-    public final void onEventMainThread(RadarMessageAlert alertMsg) {
+    public final void onEventAsync(RadarMessageAlert alertMsg) {
     	CobraMessageThreat msgThreat = new CobraMessageThreat(alertMsg.alert, alertMsg.strength, alertMsg.frequency);
     	isThreatActive = true;
     	if ( alertMsg.minAlerTime != null ) {
     		isThreatForcedActive.set(true);
-    		alertTimer = new CountDownTimer(alertMsg.minAlerTime, alertMsg.minAlerTime) {
+    		if ( alertTimer != null )
+    			alertTimer.cancel();
+    		alertTimer = new Timer();
+    		alertTimer.schedule(new TimerTask() {
 				@Override
-				public void onTick(long millisUntilFinished) {
-				}
-				@Override
-				public void onFinish() {
+				public void run() {
 		    		isThreatForcedActive.set(false);
 		    		eventBus.post(new RadarMessageStopAlert(batteryVoltage));
 				}
-			};
-			alertTimer.start();
+			}, alertMsg.minAlerTime);
     	}
     	onRadarMessage(msgThreat);
     }
     
     
-    public final void onEventMainThread(RadarMessageStopAlert stopAlertMsg) {
+    public final void onEventAsync(RadarMessageStopAlert stopAlertMsg) {
     	CobraMessageAllClear msgClear = new CobraMessageAllClear();
     	this.batteryVoltage = stopAlertMsg.batteryVoltage;
     	// Send "All Clear" message only if threats are active, and not forcibly held active 

@@ -2,38 +2,54 @@
 <PreferenceScreen android:key="preferences" 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:robobunny="http://robobunny.com">
-    <CheckBoxPreference android:title="Set Alerts Sound Level" android:key="@string/prefKeyAlertLevelSetFlag" 
-        android:selectable="true" android:defaultValue="false" android:enabled="true" android:disableDependentsState="false"/>
-    <PreferenceCategory android:title="Alert Level" >
+
+    <PreferenceCategory android:title="@string/prefCatAudio">
+	    <CheckBoxPreference android:title="Set Alerts Sound Level" android:key="@string/prefKeyAlertLevelSetFlag" 
+	        android:selectable="true" android:defaultValue="false" android:enabled="true" android:disableDependentsState="false"/>
         <com.robobunny.SeekBarPreference
-            android:key="@string/prefKeyAlertLevel" android:dependency="@string/prefKeyAlertLevelSetFlag"
-            android:title="Alert Level"
-            android:summary="Set volume level for radar alerts"
-            android:defaultValue="1"
-            android:max="7"
-            robobunny:min="1"
-            robobunny:unitsLeft=""
-            robobunny:unitsRight=""
-    />
+	            android:key="@string/prefKeyAlertLevel" android:dependency="@string/prefKeyAlertLevelSetFlag"
+	            android:title="Alert Level"
+	            android:summary="Set volume level for radar alerts"
+	            android:defaultValue="1"
+	            android:max="7"
+	            robobunny:min="1"
+	            robobunny:unitsLeft=""
+	            robobunny:unitsRight=""
+	    />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/prefCatVisibleNotifications">
+        <CheckBoxPreference android:key="@string/prefKeyOngoingNotificationWhileConnected" android:title="@string/prefValOngoingNotificationWhileConnected" android:summary="@string/prefSumOngoingNotificationWhileConnected" android:defaultValue="true"/>
+        <CheckBoxPreference android:key="@string/prefKeyOngoingNotificationWhileScanning" android:title="@string/prefValOngoingNotificationWhileScanning" android:summary="@string/prefSumOngoingNotificationWhileScanning" android:defaultValue="true"/>
+        <CheckBoxPreference android:key="@string/prefKeyKeepScreenOnInForeground" android:title="@string/prefValKeepScreenOnInForeground" android:defaultValue="true"/>
+        <CheckBoxPreference android:key="@string/prefKeyTurnScreenOnForAlerts" android:title="@string/prefValTurnScreenOnForAlerts"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="Scanning" >
-    <CheckBoxPreference android:title="@string/prefValScanForDevice" android:summary="@string/prefSumScanForDevice" android:disableDependentsState="false" android:key="@string/prefKeyScanForDevice" android:defaultValue="true"/>
-    <EditTextPreference android:title="@string/prefValScanInterval" android:key="@string/prefKeyScanInterval" 
-        android:defaultValue="60" android:dialogMessage="@string/prefDlgTxtScanInterval" 
-        android:dialogTitle="@string/prefDlgTitleScanInterval" 
-        android:dependency="@string/prefKeyScanForDevice"
-        android:numeric="integer"  />
+	    <CheckBoxPreference android:title="@string/prefValScanForDevice" android:summary="@string/prefSumScanForDevice" android:disableDependentsState="false" android:key="@string/prefKeyScanForDevice" android:defaultValue="true"/>
+	    <EditTextPreference android:title="@string/prefValScanInterval" android:key="@string/prefKeyScanInterval" 
+	        android:defaultValue="60" android:dialogMessage="@string/prefDlgTxtScanInterval" 
+	        android:dialogTitle="@string/prefDlgTitleScanInterval" 
+	        android:dependency="@string/prefKeyScanForDevice"
+	        android:numeric="integer"  />
+	    <CheckBoxPreference android:key="@string/prefKeyStartScanOnBoot" android:title="@string/prefValStartScanOnBoot" android:summary="@string/prefSumStartScanOnBoot" android:defaultValue="true" android:dependency="@string/prefKeyScanForDevice"/>
+	    <CheckBoxPreference android:key="@string/prefKeyScanOnlyInCarMode" android:title="@string/prefValScanOnlyInCarMode" android:defaultValue="false" android:dependency="@string/prefKeyScanForDevice"/>
+	    <CheckBoxPreference android:key="@string/prefKeyScanOnlyInDrivingMode" android:title="@string/prefValScanOnlyInDrivingMode" android:summary="@string/prefSumScanOnlyInDrivingMode" android:defaultValue="false" android:dependency="@string/prefKeyScanForDevice" android:enabled="false"/>
    	</PreferenceCategory>
     <PreferenceCategory android:title="Connectivity Notification" >
-    <CheckBoxPreference android:title="@string/prefValSpeakEvents" android:disableDependentsState="false" android:key="@string/prefKeySpeakEvents" android:defaultValue="true"/>
-    <EditTextPreference android:title="@string/prefValTextDeviceConnected" android:key="@string/prefKeyTextDeviceConnected" android:dialogTitle="Text to speak when device connects" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Connected"/>
-    <EditTextPreference android:title="@string/prefValTextDeviceWorking" android:key="@string/prefKeyTextDeviceWorking" android:dialogTitle="Text to speak periodically while connected" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Active"/>
-    <EditTextPreference android:title="@string/prefValTextDeviceWorkingInterval" android:key="@string/prefKeyTextDeviceWorkingInterval" 
-        android:defaultValue="300" android:dialogMessage="@string/prefDlgTextDeviceWorkingInterval" 
-        android:dialogTitle="@string/prefDlgTextDeviceWorkingInterval" 
-        android:dependency="@string/prefKeySpeakEvents"
-        android:numeric="integer"  />
-    <EditTextPreference android:title="@string/prefValTextDeviceDisconnect" android:key="@string/prefKeyTextDeviceDisconnect" android:dialogTitle="Text to speak when device disconnects" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Disconnected"/>
+	    <CheckBoxPreference android:title="@string/prefValSpeakEvents" android:disableDependentsState="false" android:key="@string/prefKeySpeakEvents" android:defaultValue="true"/>
+	    <EditTextPreference android:title="@string/prefValTextDeviceConnected" android:key="@string/prefKeyTextDeviceConnected" android:dialogTitle="Text to speak when device connects" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Connected"/>
+	    <EditTextPreference android:title="@string/prefValTextDeviceWorking" android:key="@string/prefKeyTextDeviceWorking" android:dialogTitle="Text to speak periodically while connected" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Active"/>
+	    <EditTextPreference android:title="@string/prefValTextDeviceWorkingInterval" android:key="@string/prefKeyTextDeviceWorkingInterval" 
+	        android:defaultValue="300" android:dialogMessage="@string/prefDlgTextDeviceWorkingInterval" 
+	        android:dialogTitle="@string/prefDlgTextDeviceWorkingInterval" 
+	        android:dependency="@string/prefKeySpeakEvents"
+	        android:numeric="integer"  />
+	    <EditTextPreference android:title="@string/prefValTextDeviceDisconnect" android:key="@string/prefKeyTextDeviceDisconnect" android:dialogTitle="Text to speak when device disconnects" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Disconnected"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/prefCatThreats">
+        <CheckBoxPreference android:key="@string/prefKeyLogThreats" android:title="@string/prefValLogThreats" android:summary="@string/prefSumLogThreats" android:defaultValue="true" android:disableDependentsState="false"/>
+        <CheckBoxPreference android:key="@string/prefKeyLogLocation" android:title="@string/prefValLogLocation" android:summary="@string/prefSumLogLocation" android:dependency="@string/prefKeyLogThreats"/>
+        <CheckBoxPreference android:key="@string/prefKeyLogThreatsLimitNum" android:title="@string/prefValLogThreatsLimitNum" android:defaultValue="false" android:dependency="@string/prefKeyLogThreats" android:disableDependentsState="false"/>
+        <EditTextPreference android:key="@string/prefKeyLogThreatsLimitNumVal" android:dependency="@string/prefKeyLogThreatsLimitNum" android:title="@string/prefValLogThreatsLimitNumVal" android:defaultValue="500" android:numeric="integer"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

@@ -1,4 +1,4 @@
-package com.greatnowhere.iradar;
+package com.greatnowhere.iradar.threats;
 
 import java.util.HashMap;
 import java.util.Timer;
@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.cobra.iradar.messaging.ConnectivityStatus;
 import com.cobra.iradar.protocol.RadarMessageNotification;
+import com.greatnowhere.iradar.config.Preferences;
 
 import de.greenrobot.event.EventBus;
 

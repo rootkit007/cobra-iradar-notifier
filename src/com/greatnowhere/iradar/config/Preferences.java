@@ -1,4 +1,6 @@
-package com.greatnowhere.iradar;
+package com.greatnowhere.iradar.config;
+
+import com.greatnowhere.iradar.R;
 
 import de.greenrobot.event.EventBus;
 import android.content.Context;
@@ -19,6 +21,10 @@ public class Preferences {
 		prefs.registerOnSharedPreferenceChangeListener(new PreferenceChangeListener());
 	}
 	
+	public static boolean isInitialized() {
+		return ( prefs != null );
+	}
+	
 	public static boolean isSetAlertLevel() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyAlertLevelSetFlag),true); 
 	}
@@ -34,6 +40,30 @@ public class Preferences {
 	
 	public static int getDeviceScanInterval() {
 		return Integer.parseInt(prefs.getString(res.getString(R.string.prefKeyScanInterval), "60"));
+	}
+	
+	public static boolean isScanForDeviceInCarModeOnly() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyScanOnlyInCarMode), true);
+	}
+	
+	public static boolean isScanForDeviceAfterRestart() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyStartScanOnBoot), false);
+	}
+	
+	/**
+	 * Ongoing notification while scanning?
+	 * @return
+	 */
+	public static boolean isNotifyOngoingScan() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyOngoingNotificationWhileScanning), true);
+	}
+	
+	/**
+	 * Ongoing notification while connected?
+	 * @return
+	 */
+	public static boolean isNotifyOngoingConnected() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyOngoingNotificationWhileConnected), true);
 	}
 	
 	public static boolean isNotifyConnectivity() {
@@ -56,6 +86,30 @@ public class Preferences {
 		return Integer.parseInt(prefs.getString(res.getString(R.string.prefKeyTextDeviceWorkingInterval), "300"));
 	}
 	
+	public static boolean isKeepScreenOnForeground() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyKeepScreenOnInForeground), true);
+	}
+	
+	public static boolean isTurnScreenOnForAlerts() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyTurnScreenOnForAlerts), true);
+	}
+	
+	public static boolean isLogThreats() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLogThreats), true);
+	}
+	
+	public static boolean isLogThreatLocation() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLogLocation), true);
+	}
+	
+	public static boolean isLogThreatLimitNumeric() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLogThreatsLimitNum), true);
+	}
+	
+	public static int getLogThreatLimitNumeric() {
+		return prefs.getInt(res.getString(R.string.prefKeyLogThreatsLimitNumVal), 300);
+	}
+	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
 		@Override
 		public void onSharedPreferenceChanged(
@@ -63,7 +117,8 @@ public class Preferences {
 			
 			// If periodic scanning has been changed, must notify the service
 			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyScanForDevice)) ||
-			     key.equalsIgnoreCase(res.getString(R.string.prefKeyScanForDevice)) ) {
+			     key.equalsIgnoreCase(res.getString(R.string.prefKeyScanInterval)) ||
+			     key.equalsIgnoreCase(res.getString(R.string.prefKeyScanOnlyInCarMode))) {
 				
 				eventBus.post(new PreferenceScanChangedEvent());
 				

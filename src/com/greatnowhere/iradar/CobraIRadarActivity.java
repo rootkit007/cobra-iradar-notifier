@@ -47,8 +47,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.cobra.iradar.IRadarManager;
+import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.IRadarMessageHandler;
+import com.cobra.iradar.RadarScanManager;
 import com.cobra.iradar.messaging.CobraMessageAllClear;
 import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
 import com.cobra.iradar.messaging.CobraMessageNotification;
@@ -56,7 +57,11 @@ import com.cobra.iradar.messaging.CobraMessageThreat;
 import com.cobra.iradar.messaging.ConnectivityStatus;
 import com.cobra.iradar.protocol.RadarMessageAlert;
 import com.cobra.iradar.protocol.RadarMessageAlert.Alert;
+import com.greatnowhere.iradar.config.Preferences;
 import com.greatnowhere.iradar.config.SettingsActivity;
+import com.greatnowhere.iradar.threats.AlertAudioManager;
+import com.greatnowhere.iradar.threats.TTSManager;
+import com.greatnowhere.iradar.threats.ThreatManager;
 
 import de.greenrobot.event.EventBus;
 
@@ -70,11 +75,15 @@ public class CobraIRadarActivity extends Activity {
 
     // Intent request codes
     private static final int REQUEST_ENABLE_BT = 3;
+    
+    public static final String INTENT_BACKGROUND = "runInBackground";
 
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     
     private NotificationManager mNotificationManager;
+    
+    private View rootView;
     
     private TextView alert;
     private TextView connState;
@@ -99,8 +108,7 @@ public class CobraIRadarActivity extends Activity {
         // Set up the window layout
         setContentView(R.layout.main_radar_view);
         
-        // keep screen on
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        rootView = findViewById(R.id.mainViewLayout);
         
         // set defaults for preferences
         PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.settings, false);
@@ -152,6 +160,7 @@ public class CobraIRadarActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				finish();
+				System.exit(0);
 			}
 		});
 
@@ -163,38 +172,23 @@ public class CobraIRadarActivity extends Activity {
         // Otherwise, setup the chat session
         } else {
            	initialize();
+           	if ( getIntent().getBooleanExtra(INTENT_BACKGROUND, false)) {
+           		goHome();
+           	}
         }
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if(D) Log.e(TAG, "++ ON START ++");
-
-    }
-
-    @Override
-    public synchronized void onResume() {
-        super.onResume();
-        if(D) Log.e(TAG, "+ ON RESUME +");
-
-    }
-
-
-    @Override
-    public synchronized void onPause() {
-        super.onPause();
-        if(D) Log.e(TAG, "- ON PAUSE -");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if(D) Log.e(TAG, "-- ON STOP --");
-    }
     
+    public void onResume() {
+        // keep screen on
+        if ( Preferences.isKeepScreenOnForeground() )
+        	getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        else 
+        	getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        super.onResume();
+    }
+
     public void stopService() {
-        IRadarManager.stop();
+        RadarManager.stop();
         mNotificationManager.cancelAll();
     }
 
@@ -209,45 +203,75 @@ public class CobraIRadarActivity extends Activity {
     @Override
     public void onBackPressed() {
        Log.d(TAG, "onBackPressed Called");
-       Intent setIntent = new Intent(Intent.ACTION_MAIN);
-       setIntent.addCategory(Intent.CATEGORY_HOME);
-       setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-       startActivity(setIntent);
+       goHome();
+    }
+    
+    public void goHome() {
+        Intent setIntent = new Intent(Intent.ACTION_MAIN);
+        setIntent.addCategory(Intent.CATEGORY_HOME);
+        setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(setIntent);
     }
     
     // The Handler that gets information back from the IRadar
+    // All event handlers are called in async thread, so care must be taken when updating UI
 	private IRadarMessageHandler radarMessageHandler = new IRadarMessageHandler() {
 
 		@Override
-		public void onRadarMessage(CobraMessageConnectivityNotification msg) {
-			addLogMessage(msg.message);
-			connState.setText(msg.message);
-			if ( msg.status == ConnectivityStatus.DISCONNECTED ) {
-				voltage.setText("");
-			}
+		public void onRadarMessage(final CobraMessageConnectivityNotification msg) {
+			rootView.post(new Runnable() {
+				@Override
+				public void run() {
+					addLogMessage(msg.message);
+					connState.setText(msg.message);
+					if ( msg.status == ConnectivityStatus.DISCONNECTED ) {
+						voltage.setText("");
+					}
+				}
+			});
 		}
 
 		@Override
-		public void onRadarMessage(CobraMessageThreat msg) {
-        	addLogMessage("Alert " + msg.alertType.getName() + msg.strength + " " + msg.frequency);
-        	alert.setText(msg.alertType.getName() + " " + msg.frequency);
-        	ThreatManager.newThreat(msg);
+		public void onRadarMessage(final CobraMessageThreat msg) {
+			rootView.post(new Runnable() {
+				@Override
+				public void run() {
+		        	addLogMessage("Alert " + msg.alertType.getName() + msg.strength + " " + msg.frequency);
+		        	alert.setText(msg.alertType.getName() + " " + msg.frequency);
+		        	ThreatManager.newThreat(msg);
+				}
+			});
 		}
 
 		@Override
-		public void onRadarMessage(CobraMessageAllClear msg) {
-			alert.setText("");
-			ThreatManager.removeThreats();
+		public void onRadarMessage(final CobraMessageAllClear msg) {
+			rootView.post(new Runnable() {
+				@Override
+				public void run() {
+					alert.setText("");
+					ThreatManager.removeThreats();
+				}
+			});
 		}
 
 		@Override
-		public void onRadarMessage(CobraMessageNotification msg) {
-			addLogMessage(msg.message);
+		public void onRadarMessage(final CobraMessageNotification msg) {
+			rootView.post(new Runnable() {
+				@Override
+				public void run() {
+					addLogMessage(msg.message);
+				}
+			});
 		}
 	};
 	
-	public void onEventMainThread(CommandRefreshVoltage event) {
-		voltage.setText(Double.toString(radarMessageHandler.getBatteryVoltage()) + "V");
+	public void onEventAsync(final CommandRefreshVoltage event) {
+		rootView.post(new Runnable() {
+			@Override
+			public void run() {
+				voltage.setText(Double.toString(radarMessageHandler.getBatteryVoltage()) + "V");
+			}
+		});
 	}
 
     public void addLogMessage(String msg) {
@@ -287,46 +311,66 @@ public class CobraIRadarActivity extends Activity {
     }
     
     public void initialize() {
-		// start ongoing notification
-		Builder b = new Notification.Builder(getApplicationContext());
-		b.setContentText("iRadar Notifier Running");
-		Intent resumeAppIntent = new Intent(getApplicationContext(), this.getClass());
-		resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
-		b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
-		b.setContentTitle("iRadar Notifier");
-		b.setSmallIcon(R.drawable.app_icon);
-		boolean success = IRadarManager.initialize(getApplicationContext(), true, b.build(), 
-				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval());
+		// ongoing notification?
+    	Builder b;
+    	Notification scanNotification = null;
+    	Notification connectedNotification = null;
+    	Intent resumeAppIntent;
+    	if ( Preferences.isNotifyOngoingScan() ) {
+    		b = new Notification.Builder(getApplicationContext());
+    		b.setContentText("iRadar Scanning For Devices");
+    		resumeAppIntent = new Intent(getApplicationContext(), this.getClass());
+    		resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
+    		b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
+    		b.setContentTitle("iRadar Notifier");
+    		b.setSmallIcon(R.drawable.app_icon);
+    		scanNotification = b.build();
+    	}
+    	if ( Preferences.isNotifyOngoingConnected() ) {
+			b = new Notification.Builder(getApplicationContext());
+			b.setContentText("iRadar Notifier Connected");
+			resumeAppIntent = new Intent(getApplicationContext(), this.getClass());
+			resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
+			b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
+			b.setContentTitle("iRadar Notifier");
+			b.setSmallIcon(R.drawable.app_icon);
+			connectedNotification = b.build();
+    	}
+		boolean success = RadarManager.initialize(getApplicationContext(), Preferences.isNotifyOngoingConnected(),
+				connectedNotification, scanNotification, 
+				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly());
 		
 		if ( !success ) {
-			addLogMessage("Error initializing iRadar: " + IRadarManager.getLastError());
-		}
-		// set up voltage refresh every second
-		if ( timerVoltage == null ) {
-			timerVoltage = new Timer();
-			timerVoltage.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					eventBus.post(new CommandRefreshVoltage());
-				}
-			}, 1000L, 1000L);
+			addLogMessage("Error initializing iRadar: " + RadarManager.getLastError());
+		} else {
+			// set up voltage refresh every second
+			if ( timerVoltage == null ) {
+				timerVoltage = new Timer();
+				timerVoltage.scheduleAtFixedRate(new TimerTask() {
+					@Override
+					public void run() {
+						eventBus.post(new CommandRefreshVoltage());
+					}
+				}, 1000L, 1000L);
+			}
 		}
     }
     
     public void onEvent(Preferences.PreferenceScanChangedEvent event) {
-    	IRadarManager.stopConnectionMonitor();
-    	if ( Preferences.isScanForDevice() ) {
-    		IRadarManager.startConnectionMonitor(Preferences.getDeviceScanInterval());
-    	}
+    	RadarScanManager.scan(Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly());
     }
 
     @Override
     public void finish() {
-    	IRadarManager.stopConnectionMonitor();
-    	IRadarManager.stop();
+    	stop();
+    	super.finish();
+    }
+    
+    public void stop() {
+    	RadarManager.stop();
+    	ThreatManager.removeThreats();
     	if ( timerVoltage != null )
     		timerVoltage.cancel();
-    	super.finish();
     }
     
     @Override

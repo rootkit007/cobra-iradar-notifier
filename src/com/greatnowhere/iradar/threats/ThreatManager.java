@@ -1,15 +1,18 @@
-package com.greatnowhere.iradar;
+package com.greatnowhere.iradar.threats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.location.Location;
 import android.media.SoundPool;
 import android.view.Gravity;
 import android.view.View;
@@ -20,6 +23,9 @@ import android.widget.TextView;
 
 import com.cobra.iradar.messaging.CobraMessageThreat;
 import com.cobra.iradar.protocol.RadarMessageAlert;
+import com.greatnowhere.iradar.R;
+import com.greatnowhere.iradar.config.Preferences;
+import com.greatnowhere.iradar.location.LocationManager;
 
 /**
  * Manages currently active threats and displays them
@@ -49,8 +55,12 @@ public class ThreatManager {
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                ( Preferences.isTurnScreenOnForAlerts() ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | 
+                		WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                		WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD : 0),
                 PixelFormat.TRANSLUCENT);
+	    
         params.gravity = Gravity.CENTER | Gravity.TOP;
         wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
         
@@ -68,6 +78,10 @@ public class ThreatManager {
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_POP, alertSounds.load(ctx, R.raw.ka1, 1));
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_RDD, alertSounds.load(ctx, R.raw.vg2, 1));
         alertSoundsLoaded.put(RadarMessageAlert.ALERT_SOUND_X, alertSounds.load(ctx, R.raw.x1, 1));
+        
+        // Initialize location manager
+        LocationManager.init(ctx);
+        ThreatLogger.init(ctx);
 	}
 	
 	public static void newThreat(CobraMessageThreat alert) {
@@ -118,7 +132,7 @@ public class ThreatManager {
 	}
 	
 	private static float getThreatSoundPitch(int strength) {
-		return (((float) strength - 1) / 8f) + 1f;
+		return (((float) strength - 1) / 16f) + 1f;
 	}
 
 	/**
@@ -126,13 +140,19 @@ public class ThreatManager {
 	 * @author pzeltins
 	 *
 	 */
-	private static class Threat {
+	protected static class Threat {
 		/**
 		 * View displaying current threat
 		 */
 		private View view;
-		private CobraMessageThreat alert;
+		protected CobraMessageThreat alert;
 		private int soundStreamId;
+		private TextView band;
+		private TextView freq;
+		private ProgressBar strength;
+		protected Set<Location> locations;
+		protected Long startTimeMillis = System.currentTimeMillis();
+		
 		/**
 		 * True if this threat has been added to the view
 		 */
@@ -141,6 +161,9 @@ public class ThreatManager {
 		private Threat(View v, CobraMessageThreat a) {
 			view = v;
 			alert = a;
+			band = (TextView) view.findViewById(R.id.textViewBand);
+			freq = (TextView) view.findViewById(R.id.textViewFrequency);
+			strength = (ProgressBar) view.findViewById(R.id.threatViewStrength);
 		}
 
 		private void showThreat() {
@@ -155,6 +178,9 @@ public class ThreatManager {
 			if ( soundStreamId != 0 ) {
 				alertSounds.stop(soundStreamId);
 				soundStreamId = 0;
+			}
+			if ( Preferences.isLogThreats() ) {
+				ThreatLogger.logThreat(this);
 			}
 		}
 		
@@ -174,8 +200,10 @@ public class ThreatManager {
 		private void updateThreat(int newStrength) {
 			if ( view == null || alert == null )
 				return;
+			recordLocation();
 			// only update if strength changes
 			if ( newStrength != alert.strength || !isShowing ) {
+				
 				this.alert.strength = newStrength;
 				// stop any alert sound currently playing
 				if ( soundStreamId != 0 ) {
@@ -186,9 +214,6 @@ public class ThreatManager {
 					mainThreatLayout.addView(view);
 					isShowing = true;
 				}
-				TextView band = (TextView) view.findViewById(R.id.textViewBand);
-				TextView freq = (TextView) view.findViewById(R.id.textViewFrequency);
-				ProgressBar strength = (ProgressBar) view.findViewById(R.id.threatViewStrength);
 				band.setText(alert.alertType.getName());
 				freq.setText(Float.toString(alert.frequency) + " Ghz");
 				ColorStateList threatColor = ColorStateList.valueOf(getThreatColor(alert.strength)); 
@@ -197,6 +222,14 @@ public class ThreatManager {
 				strength.setProgress(this.alert.strength);
 				//strength.getProgressDrawable().setColorFilter(getThreatColor(alert.strength), Mode.SRC_IN);
 				playAlert();
+			}
+		}
+		
+		private void recordLocation() {
+			if ( Preferences.isLogThreatLocation() && LocationManager.isReady() ) {
+				if ( locations == null )
+					locations = new LinkedHashSet<Location>();
+				locations.add(LocationManager.getCurrentLoc());
 			}
 		}
 		

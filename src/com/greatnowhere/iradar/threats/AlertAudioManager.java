@@ -1,6 +1,8 @@
-package com.greatnowhere.iradar;
+package com.greatnowhere.iradar.threats;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.greatnowhere.iradar.config.Preferences;
 
 import android.content.Context;
 import android.media.AudioManager;

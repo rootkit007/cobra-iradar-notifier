@@ -14,6 +14,7 @@ import android.util.Log;
 import com.cobra.iradar.messaging.ConnectivityStatus;
 import com.cobra.iradar.protocol.RadarMessage;
 import com.cobra.iradar.protocol.RadarMessageNotification;
+import com.cobra.iradar.protocol.RadarMessageStopAlert;
 import com.cobra.iradar.protocol.RadarPacketProcessor;
 
 import de.greenrobot.event.EventBus;
@@ -30,7 +31,7 @@ public class RadarConnectionThread extends Thread {
 	private OutputStream txStream;
     private EventBus eventBus = EventBus.getDefault();
     
-    public AtomicBoolean isRunning = new AtomicBoolean(false);
+    public static AtomicBoolean isRunning = new AtomicBoolean(false);
 	
 	public RadarConnectionThread(BluetoothDevice dev) {
 		iRadar = dev;
@@ -82,6 +83,7 @@ public class RadarConnectionThread extends Thread {
 				eventBus.post(RadarMessage.fromPacket(packet));
 			} catch (Exception e) {
 				Log.e(TAG, "IO Exception", e);
+				eventBus.post(new RadarMessageStopAlert(0));
 				eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Error in data connection",
 						ConnectivityStatus.PROTOCOL_ERROR.getCode()));
 				this.interrupt(); 
@@ -98,9 +100,11 @@ public class RadarConnectionThread extends Thread {
 		}
 		
 		// if we were successfully connected, notify clients of conn status change
-		if ( isConnectionSuccess )
+		if ( isConnectionSuccess ) {
+			eventBus.post(new RadarMessageStopAlert(0));
 			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Disconnected",
 				ConnectivityStatus.DISCONNECTED.getCode()));
+		}
 		
 		isRunning.set(false);
 		

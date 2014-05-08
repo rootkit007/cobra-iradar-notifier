@@ -14,7 +14,7 @@ public class RadarMonitorService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		if ( intent.getBooleanExtra(INTENT_RECONNECT, false) ) {
-			IRadarManager.tryReconnect();
+			RadarManager.tryReconnect();
 		}
 	}
 	

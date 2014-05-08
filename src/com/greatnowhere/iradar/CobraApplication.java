@@ -6,9 +6,10 @@ import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
 
-@ReportsCrashes(formKey = "", mode=ReportingInteractionMode.NOTIFICATION, mailTo="rootkit007@gmail.com",
+@ReportsCrashes(formKey = "", mode=ReportingInteractionMode.DIALOG, mailTo="rootkit007@gmail.com",
 		resNotifText=R.string.crashNotificationText, resNotifTitle=R.string.crashNotificationTitle,
-		resNotifTickerText=R.string.crashNotificationTitle, resDialogText=R.string.crashNotificationText)
+		resNotifTickerText=R.string.crashNotificationTitle, resDialogText=R.string.crashNotificationText,
+		resDialogCommentPrompt=R.string.crashNotificationText, resDialogTitle=R.string.crashNotificationTitle)
 public class CobraApplication extends Application {
 
 	 @Override
@@ -16,6 +17,6 @@ public class CobraApplication extends Application {
          super.onCreate();
 
          // The following line triggers the initialization of ACRA
-         ACRA.init(this);
+         //ACRA.init(this);
      }
 }
