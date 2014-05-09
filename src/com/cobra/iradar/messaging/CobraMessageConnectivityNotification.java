@@ -7,6 +7,10 @@ package com.cobra.iradar.messaging;
  */
 public class CobraMessageConnectivityNotification extends CobraMessageNotification {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public ConnectivityStatus status;
 	
 }

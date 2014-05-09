@@ -25,6 +25,7 @@ public class RadarManager {
 	
 	private static Notification ongoingNotification;
 	
+	@SuppressWarnings("unused")
 	private static EventBus eventBus = EventBus.getDefault();
 	  
 	/**
@@ -38,45 +39,45 @@ public class RadarManager {
 	 */
 	public static synchronized boolean initialize(Context ctx, boolean showNotification, Notification notify, Notification scanNotification,
 			  boolean runScan, int scanInterval, boolean scanInCarModeOnly) {
-		  	appContext = ctx;
-        	RadarManager.showNotification = showNotification;
-        	RadarManager.ongoingNotification = notify;
-		  	
-	        // If the adapter is null, then Bluetooth is not supported
-	        if (mBluetoothAdapter == null) {
-	            lastError = "Bluetooth is not available";
-	            return false;
-	        }
-	        
-	        for ( BluetoothDevice dev : mBluetoothAdapter.getBondedDevices() ) {
-	        	if ( Constants.BT_DEVICE_NAMES.contains(dev.getName()) ) {
-	        		RadarScanManager.init(ctx, scanNotification, runScan, scanInterval, scanInCarModeOnly);
-	        		connectRadarDevice(dev);
-	        		return true;
-	        	}
-	        }
-	        lastError = "iRadar device not paired!";
-	        return false;
-	  }
+		appContext = ctx;
+		RadarManager.showNotification = showNotification;
+		RadarManager.ongoingNotification = notify;
+		
+		// If the adapter is null, then Bluetooth is not supported
+		if (mBluetoothAdapter == null) {
+		    lastError = "Bluetooth is not available";
+		    return false;
+		}
+		
+		for ( BluetoothDevice dev : mBluetoothAdapter.getBondedDevices() ) {
+			if ( Constants.BT_DEVICE_NAMES.contains(dev.getName()) ) {
+				RadarScanManager.init(ctx, scanNotification, runScan, scanInterval, scanInCarModeOnly);
+				connectRadarDevice(dev);
+				return true;
+			}
+		}
+		lastError = "iRadar device not paired!";
+		return false;
+	}
 	  
-	  public static String getLastError() {
-		  return lastError;
-	  }
+	public static String getLastError() {
+		return lastError;
+	}
 	  
-	  public static synchronized void stop() {
-		  appContext.stopService(new Intent(appContext, RadarConnectionService.class));
-		  RadarScanManager.stop();
-	  }
+	public static synchronized void stop() {
+		appContext.stopService(new Intent(appContext, RadarConnectionService.class));
+		RadarScanManager.stop();
+	}
 	  
-	  public static synchronized void tryReconnect() {
-		  eventBus.post(new RadarConnectionService.EventReconnectionAttemptCommand());
-	  }
+	public static synchronized void startConnectionService() {
+		appContext.startService(new RadarConnectionServiceIntent(RadarManager.appContext, 
+					  RadarManager.mBTDevice, RadarManager.ongoingNotification ));
+	}
 	  
 	  
 	private static synchronized void connectRadarDevice( BluetoothDevice dev ) {
 		mBTDevice = dev;
-		appContext.startService(new RadarConnectionServiceIntent(RadarManager.appContext, 
-			  RadarManager.mBTDevice, RadarManager.ongoingNotification ));
+		startConnectionService();
 	}
 	  
 	public static boolean isShowNotification() {

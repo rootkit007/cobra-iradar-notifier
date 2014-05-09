@@ -35,12 +35,28 @@ public class AlertAudioManager {
 				originalVolume = am.getStreamVolume(OUTPUT_STREAM);
 				// preferences alert level is always 0-7
 				// must translate that to selected stream's level
-				int translatedVolume = getTranslatedVolume(Preferences.getAlertLevel()); 
+				int translatedVolume = getTranslatedVolume(getOurAlertLevel()); 
 				am.setStreamVolume(OUTPUT_STREAM, translatedVolume, 0);
 				isOurAlertVolumeSet.set(true);
 			}
 		}
 		
+	}
+	
+	/**
+	 * Returns alert level for current audio output route
+	 * @return
+	 */
+	@SuppressWarnings("deprecation")
+	private static int getOurAlertLevel() {
+		if ( am.isBluetoothA2dpOn() || am.isBluetoothScoOn() ) {
+			// BT
+			return Preferences.getAlertLevelBT();
+		}
+		if ( am.isWiredHeadsetOn()) {
+			return Preferences.getAlertLevelHeadSet();
+		}
+		return Preferences.getAlertLevelSpeaker();
 	}
 	
 	public static void restoreOldAlertVolume() {

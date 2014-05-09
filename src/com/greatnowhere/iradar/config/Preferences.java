@@ -29,8 +29,18 @@ public class Preferences {
 		return prefs.getBoolean(res.getString(R.string.prefKeyAlertLevelSetFlag),true); 
 	}
 	
-	public static int getAlertLevel() {
+	public static int getAlertLevelSpeaker() {
 		int i = prefs.getInt(res.getString(R.string.prefKeyAlertLevel), 1);
+		return i;
+	}
+	
+	public static int getAlertLevelBT() {
+		int i = prefs.getInt(res.getString(R.string.prefKeyAlertLevelBT), 1);
+		return i;
+	}
+	
+	public static int getAlertLevelHeadSet() {
+		int i = prefs.getInt(res.getString(R.string.prefKeyAlertLevelHeadSet), 1);
 		return i;
 	}
 	
@@ -68,6 +78,14 @@ public class Preferences {
 	
 	public static boolean isNotifyConnectivity() {
 		return prefs.getBoolean(res.getString(R.string.prefKeySpeakEvents), true);
+	}
+
+	/**
+	 * If true, dont speak connectivity events during calls 
+	 * @return
+	 */
+	public static boolean isNotifyConnectivityNotDuringCalls() {
+		return prefs.getBoolean(res.getString(R.string.prefKeySpeakNotDuringCalls), true);
 	}
 	
 	public static String getNotifyOnConnectText() {
@@ -111,7 +129,6 @@ public class Preferences {
 	}
 	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
-		@Override
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			

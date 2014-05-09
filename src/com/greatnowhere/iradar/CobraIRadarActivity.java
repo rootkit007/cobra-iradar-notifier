@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -59,6 +60,7 @@ import com.cobra.iradar.protocol.RadarMessageAlert;
 import com.cobra.iradar.protocol.RadarMessageAlert.Alert;
 import com.greatnowhere.iradar.config.Preferences;
 import com.greatnowhere.iradar.config.SettingsActivity;
+import com.greatnowhere.iradar.location.LocationManager;
 import com.greatnowhere.iradar.threats.AlertAudioManager;
 import com.greatnowhere.iradar.threats.TTSManager;
 import com.greatnowhere.iradar.threats.ThreatManager;
@@ -89,6 +91,7 @@ public class CobraIRadarActivity extends Activity {
     private TextView connState;
     private TextView log;
     private TextView voltage;
+    private TextView location;
     private Button btnReconnect;
     private Button btnFakeAlert;
     private Button btnFakeAlertMulti;
@@ -110,9 +113,14 @@ public class CobraIRadarActivity extends Activity {
         
         rootView = findViewById(R.id.mainViewLayout);
         
+        eventBus.register(this);
+        
         // set defaults for preferences
         PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.settings, false);
         Preferences.init(getApplicationContext());
+        
+        // Initialize alerts audio manager
+        AlertAudioManager.init(getApplicationContext());
         
         // initialize threats manager
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -121,26 +129,20 @@ public class CobraIRadarActivity extends Activity {
         // Initialize TTS 
         TTSManager.init(getApplicationContext());
         
-        // Initialize alerts audio manager
-        AlertAudioManager.init(getApplicationContext());
-        
-        eventBus.register(this);
-        
         log = (TextView) findViewById(R.id.logScroll);
         log.setMovementMethod(new ScrollingMovementMethod());
         alert = (TextView) findViewById(R.id.radarState);
         connState = (TextView) findViewById(R.id.connStatus);
         voltage = (TextView) findViewById(R.id.voltageText);
         btnReconnect = (Button) findViewById(R.id.btnReconnect);
+        location = (TextView) findViewById(R.id.mainViewLocation);
         btnReconnect.setOnClickListener( new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				initialize();
 			}
 		});
         btnFakeAlert = (Button) findViewById(R.id.btnFakeAlert);
         btnFakeAlert.setOnClickListener( new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				Random r = new Random();
 				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
@@ -148,7 +150,6 @@ public class CobraIRadarActivity extends Activity {
 		});
         btnFakeAlertMulti = (Button) findViewById(R.id.btnFakeAlertMulti);
         btnFakeAlertMulti.setOnClickListener( new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				Random r = new Random();
 				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
@@ -157,7 +158,6 @@ public class CobraIRadarActivity extends Activity {
 		});
         btnQuit = (Button) findViewById(R.id.btnQuit);
         btnQuit.setOnClickListener( new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				finish();
 				System.exit(0);
@@ -220,7 +220,6 @@ public class CobraIRadarActivity extends Activity {
 		@Override
 		public void onRadarMessage(final CobraMessageConnectivityNotification msg) {
 			rootView.post(new Runnable() {
-				@Override
 				public void run() {
 					addLogMessage(msg.message);
 					connState.setText(msg.message);
@@ -234,7 +233,6 @@ public class CobraIRadarActivity extends Activity {
 		@Override
 		public void onRadarMessage(final CobraMessageThreat msg) {
 			rootView.post(new Runnable() {
-				@Override
 				public void run() {
 		        	addLogMessage("Alert " + msg.alertType.getName() + msg.strength + " " + msg.frequency);
 		        	alert.setText(msg.alertType.getName() + " " + msg.frequency);
@@ -246,7 +244,6 @@ public class CobraIRadarActivity extends Activity {
 		@Override
 		public void onRadarMessage(final CobraMessageAllClear msg) {
 			rootView.post(new Runnable() {
-				@Override
 				public void run() {
 					alert.setText("");
 					ThreatManager.removeThreats();
@@ -257,7 +254,6 @@ public class CobraIRadarActivity extends Activity {
 		@Override
 		public void onRadarMessage(final CobraMessageNotification msg) {
 			rootView.post(new Runnable() {
-				@Override
 				public void run() {
 					addLogMessage(msg.message);
 				}
@@ -265,11 +261,17 @@ public class CobraIRadarActivity extends Activity {
 		}
 	};
 	
-	public void onEventAsync(final CommandRefreshVoltage event) {
+	public void onEventAsync(final UIRefreshEvent event) {
 		rootView.post(new Runnable() {
-			@Override
 			public void run() {
 				voltage.setText(Double.toString(radarMessageHandler.getBatteryVoltage()) + "V");
+				String locInfo = "";
+				if ( LocationManager.getCurrentLoc() != null ) {
+					Location lastKnownLoc = LocationManager.getCurrentLoc();
+					locInfo += ((System.currentTimeMillis() - lastKnownLoc.getTime())/1000L) + "s ";
+					locInfo += (lastKnownLoc.getSpeed() * 3.6f) + "kph";
+				}
+				location.setText(( LocationManager.isReady() ? "Ready " + locInfo : "Not Ready" ) );
 			}
 		});
 	}
@@ -323,6 +325,7 @@ public class CobraIRadarActivity extends Activity {
     		resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
     		b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
     		b.setContentTitle("iRadar Notifier");
+    		b.setOngoing(true);
     		b.setSmallIcon(R.drawable.app_icon);
     		scanNotification = b.build();
     	}
@@ -333,6 +336,7 @@ public class CobraIRadarActivity extends Activity {
 			resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
 			b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
 			b.setContentTitle("iRadar Notifier");
+    		b.setOngoing(true);
 			b.setSmallIcon(R.drawable.app_icon);
 			connectedNotification = b.build();
     	}
@@ -349,7 +353,7 @@ public class CobraIRadarActivity extends Activity {
 				timerVoltage.scheduleAtFixedRate(new TimerTask() {
 					@Override
 					public void run() {
-						eventBus.post(new CommandRefreshVoltage());
+						eventBus.post(new UIRefreshEvent());
 					}
 				}, 1000L, 1000L);
 			}
@@ -368,7 +372,8 @@ public class CobraIRadarActivity extends Activity {
     
     public void stop() {
     	RadarManager.stop();
-    	ThreatManager.removeThreats();
+    	ThreatManager.stop();
+    	TTSManager.stop();
     	if ( timerVoltage != null )
     		timerVoltage.cancel();
     }
@@ -410,7 +415,7 @@ public class CobraIRadarActivity extends Activity {
 		log.setText(savedState.getCharSequence("log"));
     }
     
-    public static class CommandRefreshVoltage {
+    public static class UIRefreshEvent {
     	
     }
 

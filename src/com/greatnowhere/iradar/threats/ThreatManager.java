@@ -2,24 +2,18 @@ package com.greatnowhere.iradar.threats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.location.Location;
 import android.media.SoundPool;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.cobra.iradar.messaging.CobraMessageThreat;
 import com.cobra.iradar.protocol.RadarMessageAlert;
@@ -41,10 +35,10 @@ public class ThreatManager {
 	
 	private static WindowManager wm = null;
 	private static WindowManager.LayoutParams params;
-	private static SoundPool alertSounds = null;
-	private static Map<String, Integer> alertSoundsLoaded = new HashMap<String, Integer>();
+	static SoundPool alertSounds = null;
+	static Map<String, Integer> alertSoundsLoaded = new HashMap<String, Integer>();
 	private static View mainThreatView;
-	private static LinearLayout mainThreatLayout; 
+	static LinearLayout mainThreatLayout; 
 	private static boolean isThreatActive = false;
 	
 	private static Context ctx;
@@ -84,7 +78,16 @@ public class ThreatManager {
         ThreatLogger.init(ctx);
 	}
 	
+	public static void stop() {
+		removeThreats();
+		LocationManager.stop();
+	}
+	
 	public static void newThreat(CobraMessageThreat alert) {
+		// ignore frequency 0, must be a fluke
+		if ( alert.frequency == 0f )
+			return;
+		
 		Threat t = findExistingThreat( alert );
 		if ( t == null ) {
 			View v = View.inflate(ctx, R.layout.threat, null);
@@ -126,113 +129,13 @@ public class ThreatManager {
 		super();
 	}
 	
-	private static int getThreatColor(int strength) {
+	static int getThreatColor(int strength) {
 		// strength is assumed to be 0 - 5 (5=max)
 		return Color.argb(255, 155 + (strength * 20), 10, 10);
 	}
 	
-	private static float getThreatSoundPitch(int strength) {
+	static float getThreatSoundPitch(int strength) {
 		return (((float) strength - 1) / 16f) + 1f;
-	}
-
-	/**
-	 * Active threat class
-	 * @author pzeltins
-	 *
-	 */
-	protected static class Threat {
-		/**
-		 * View displaying current threat
-		 */
-		private View view;
-		protected CobraMessageThreat alert;
-		private int soundStreamId;
-		private TextView band;
-		private TextView freq;
-		private ProgressBar strength;
-		protected Set<Location> locations;
-		protected Long startTimeMillis = System.currentTimeMillis();
-		
-		/**
-		 * True if this threat has been added to the view
-		 */
-		private boolean isShowing = false;
-		
-		private Threat(View v, CobraMessageThreat a) {
-			view = v;
-			alert = a;
-			band = (TextView) view.findViewById(R.id.textViewBand);
-			freq = (TextView) view.findViewById(R.id.textViewFrequency);
-			strength = (ProgressBar) view.findViewById(R.id.threatViewStrength);
-		}
-
-		private void showThreat() {
-			if ( view == null || alert == null )
-				return;
-			updateThreat(alert.strength);
-		}
-		
-		private void removeThreat() {
-			mainThreatLayout.removeView(view);
-			isShowing = false;
-			if ( soundStreamId != 0 ) {
-				alertSounds.stop(soundStreamId);
-				soundStreamId = 0;
-			}
-			if ( Preferences.isLogThreats() ) {
-				ThreatLogger.logThreat(this);
-			}
-		}
-		
-		private void playAlert() {
-			AlertAudioManager.setOurAlertVolume();
-			// start looping play
-			soundStreamId = alertSounds.play(alertSoundsLoaded.get(alert.alertType.getSound()), 1, 1, 1, -1, 
-					getThreatSoundPitch(alert.strength));
-		}
-		
-		private void updateThreat(CobraMessageThreat t) {
-			this.alert.frequency = t.frequency;
-			this.alert.alertType = t.alertType;
-			updateThreat(t.strength);
-		}
-		
-		private void updateThreat(int newStrength) {
-			if ( view == null || alert == null )
-				return;
-			recordLocation();
-			// only update if strength changes
-			if ( newStrength != alert.strength || !isShowing ) {
-				
-				this.alert.strength = newStrength;
-				// stop any alert sound currently playing
-				if ( soundStreamId != 0 ) {
-					alertSounds.stop(soundStreamId);
-					soundStreamId = 0;
-				}
-				if ( !isShowing ) {
-					mainThreatLayout.addView(view);
-					isShowing = true;
-				}
-				band.setText(alert.alertType.getName());
-				freq.setText(Float.toString(alert.frequency) + " Ghz");
-				ColorStateList threatColor = ColorStateList.valueOf(getThreatColor(alert.strength)); 
-				band.setTextColor(threatColor);
-				freq.setTextColor(threatColor);
-				strength.setProgress(this.alert.strength);
-				//strength.getProgressDrawable().setColorFilter(getThreatColor(alert.strength), Mode.SRC_IN);
-				playAlert();
-			}
-		}
-		
-		private void recordLocation() {
-			if ( Preferences.isLogThreatLocation() && LocationManager.isReady() ) {
-				if ( locations == null )
-					locations = new LinkedHashSet<Location>();
-				locations.add(LocationManager.getCurrentLoc());
-			}
-		}
-		
 	}
 
 

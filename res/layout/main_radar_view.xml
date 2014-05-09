@@ -54,6 +54,22 @@
     </TableRow>
     
     <TableRow>
+        
+        <TextView
+            android:text="Location" 
+            />
+        
+	    <TextView
+	        android:id="@+id/mainViewLocation"
+	        android:layout_span="3"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:textStyle="bold"
+	        android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+    </TableRow>
+    
+    <TableRow>
 
         <TextView
             android:text="Log" 

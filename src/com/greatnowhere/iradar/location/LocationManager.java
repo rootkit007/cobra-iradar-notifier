@@ -9,7 +9,6 @@ import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Looper;
 
 public class LocationManager {
 
@@ -42,8 +41,10 @@ public class LocationManager {
 		c.setAccuracy(Criteria.ACCURACY_FINE);
 		c.setSpeedRequired(true);
 		c.setSpeedAccuracy(Criteria.ACCURACY_HIGH);
+		c.setBearingRequired(true);
+		c.setBearingAccuracy(Criteria.ACCURACY_HIGH);
 		locListener = new LocationListener();
-		lm.requestLocationUpdates(100L, 10L, c, locListener, null);
+		lm.requestLocationUpdates(100L, 5L, c, locListener, null);
 	}
 	
 	public static void stop() {
@@ -90,21 +91,13 @@ public class LocationManager {
 	}
 
 	private static class LocationListener implements android.location.LocationListener {
-
-		@Override
 		public void onLocationChanged(Location location) {
 			setCurrentLoc(location);
 		}
-
-		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
-
-		@Override
 		public void onProviderEnabled(String provider) {
 		}
-
-		@Override
 		public void onProviderDisabled(String provider) {
 		}
 

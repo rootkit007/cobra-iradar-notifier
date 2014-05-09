@@ -26,7 +26,10 @@
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-			
+	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+	<!-- Moto X specific -->
+    <uses-permission android:name="com.motorola.context.permission.CONTEXT" />
+				
     <application android:label="@string/app_name" android:allowBackup="true"
                  android:icon="@drawable/app_icon" android:name=".CobraApplication">
                  
@@ -38,6 +41,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+		<activity
+            android:name="org.acra.CrashReportDialog"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Dialog">
         </activity>
         <service android:label="iRadar Connectivity Service" android:permission="android.permission.BLUETOOTH" android:name="com.cobra.iradar.RadarConnectionService" android:enabled="true"></service>
         <service android:label="iRadar Monitoring Service" android:name="com.cobra.iradar.RadarMonitorService" android:enabled="true"></service>

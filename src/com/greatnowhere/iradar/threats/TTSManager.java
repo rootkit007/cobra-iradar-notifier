@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.cobra.iradar.messaging.ConnectivityStatus;
@@ -27,12 +28,23 @@ public class TTSManager {
 	private static AtomicInteger connStatus = new AtomicInteger(ConnectivityStatus.UNKNOWN.getCode());
 	private static Timer timer;
 	private static HashMap<String, String> ttsParams = new HashMap<String, String>();
+	private static TelephonyManager tm;
 	
 	public static void init(Context ctx) {
+		stop();
+		isReady.set(false);
+		tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
 		tts = new TextToSpeech(ctx, new TTSInitListener());
 		ttsParams.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AlertAudioManager.OUTPUT_STREAM));
 		tts.setOnUtteranceProgressListener(new TTSUtteranceProgressListener());
 		eventBus.register(new EventListener());
+	}
+	
+	public static void stop() {
+		if ( tts != null ) 
+			tts.shutdown();
+		if ( timer != null )
+			timer.cancel();
 	}
 	
 	public static class EventListener {
@@ -72,6 +84,8 @@ public class TTSManager {
 	}
 	
 	private static void speak(String text) {
+		if ( Preferences.isNotifyConnectivityNotDuringCalls() && tm.getCallState() != TelephonyManager.CALL_STATE_OFFHOOK )
+			return;
 		if ( isReady.get() && Preferences.isNotifyConnectivity() && text != null && !text.isEmpty() ) {
 			AlertAudioManager.setOurAlertVolume();
 			int i = tts.speak(text, TextToSpeech.QUEUE_ADD, ttsParams);
@@ -87,7 +101,6 @@ public class TTSManager {
 	}
 	
 	private static class TTSInitListener implements TextToSpeech.OnInitListener {
-		@Override
 		public void onInit(int status) {
 			if ( status == TextToSpeech.SUCCESS )
 				isReady.set(true);

@@ -72,4 +72,9 @@
 	<string name="prefKeyLogLocation">prefKeyLogLocation</string>
 	<string name="prefValLogLocation">Log threat location</string>
 	<string name="prefSumLogLocation">Records GPS location. Will consume more battery!</string>
+	<string name="prefKeySpeakNotDuringCalls">prefKeySpeakNotDuringCalls</string>
+	<string name="prefValSpeakNotDuringCalls">Dont speak during calls</string>
+	<string name="prefSumSpeakNotDuringCalls">Dont speak notifications when call is active</string>
+	<string name="prefKeyAlertLevelBT">prefKeyAlertLevelBT</string>
+	<string name="prefKeyAlertLevelHeadSet">prefKeyAlertLevelHeadSet</string>
 </resources>

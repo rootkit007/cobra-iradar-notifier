@@ -35,6 +35,7 @@ public class RadarConnectionThread extends Thread {
 	
 	public RadarConnectionThread(BluetoothDevice dev) {
 		iRadar = dev;
+		setName("BT Connection");
 	}
 	
 	@Override

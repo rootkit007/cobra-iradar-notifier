@@ -7,4 +7,9 @@ package com.cobra.iradar.messaging;
  */
 public class CobraMessageAllClear extends CobraMessage {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 }

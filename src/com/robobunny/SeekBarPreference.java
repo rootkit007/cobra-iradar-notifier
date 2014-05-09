@@ -161,7 +161,6 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 		
 	}
 	
-	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		int newValue = progress + mMinValue;
 		
@@ -185,10 +184,8 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 
 	}
 
-	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {}
 
-	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		notifyChanged();
 	}

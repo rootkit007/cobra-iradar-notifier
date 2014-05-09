@@ -31,14 +31,14 @@ public class RadarConnectionService extends Service {
 	
 	@Override
 	public int onStartCommand (Intent intent, int flags, int startId) {
+    	if ( !eventBus.isRegistered(this) )
+    		eventBus.register(this);
     	int retVal = super.onStartCommand(intent,flags,startId);
     	if ( intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE) != null ) {
     		iRadarDevice = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE);
     		connectedNotification = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_NOTIFICATION);
         	runConnection();
     	}
-    	if ( !eventBus.isRegistered(this) )
-    		eventBus.register(this);
     	return retVal;
     }
 	
@@ -51,8 +51,12 @@ public class RadarConnectionService extends Service {
     	stopConnection();
 	}
 	
-	public void runConnection() {
-    	if ( iRadarDevice != null && ( radarThread == null || !RadarConnectionThread.isRunning.get() ) ) {
+	public synchronized void runConnection() {
+		// cant run thread unless device is defined
+		if ( iRadarDevice == null )
+			return;
+		
+    	if ( radarThread == null || !RadarConnectionThread.isRunning.get() ) {
     		Log.i(TAG, "Starting new BT connection thread");
 	    	radarThread = new RadarConnectionThread(iRadarDevice);
 	    	radarThread.start();
@@ -61,7 +65,7 @@ public class RadarConnectionService extends Service {
     	}
 	}
 	
-	private void stopConnection() {
+	private synchronized void stopConnection() {
     	if ( radarThread != null && radarThread.isAlive() ) {
     		radarThread.interrupt();
     	}
@@ -75,19 +79,15 @@ public class RadarConnectionService extends Service {
 		return null;
 	}
 	
-	public void onEvent(EventReconnectionAttemptCommand event) {
-		Log.i(TAG, "Received command to attempt reconnection");
-		runConnection();
-	}
-	
 	public void onEventAsync(RadarMessageNotification msg) {
 		if ( msg.type == RadarMessageNotification.TYPE_CONN ) {
 			switch (ConnectivityStatus.fromCode(msg.connectionStatus)) {
 			case DISCONNECTED:
 				stopForeground(true);
+				stopSelf();
 				break;
 			case CONNECTED:
-	        	if ( RadarManager.isShowNotification() && connectedNotification != null ) {
+	        	if ( connectedNotification != null ) {
 	        		startForeground(NOTIFICATION_CONNECTED, connectedNotification );
 	        	}
 				break;
@@ -96,12 +96,4 @@ public class RadarConnectionService extends Service {
 		}
 	}
 
-	/**
-	 * Empty class, used by event bus to signal reconnection attempt
-	 * @author pzeltins
-	 *
-	 */
-	public static class EventReconnectionAttemptCommand {
-	}
-	
 }

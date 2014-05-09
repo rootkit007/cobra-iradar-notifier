@@ -4,6 +4,11 @@ import com.cobra.iradar.protocol.RadarMessageAlert.Alert;
 
 public class CobraMessageThreat extends CobraMessage {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public Alert alertType;
 	
 	/**

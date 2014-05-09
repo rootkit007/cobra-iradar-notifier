@@ -10,6 +10,10 @@ package com.cobra.iradar.messaging;
  */
 public class CobraMessageStatus extends CobraMessage {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public Double batteryVoltage;
 	
 }

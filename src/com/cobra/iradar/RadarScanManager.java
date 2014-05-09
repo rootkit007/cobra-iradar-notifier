@@ -15,6 +15,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentFilter.MalformedMimeTypeException;
 import android.content.res.Configuration;
 
 public class RadarScanManager {
@@ -39,6 +40,8 @@ public class RadarScanManager {
 	
 	private static EventBus eventBus = EventBus.getDefault();
 	
+	private static UIModeReceiver uiModeReceiver = new UIModeReceiver(); 
+	
 	/**
 	 * 
 	 * @param ctx Context
@@ -59,7 +62,16 @@ public class RadarScanManager {
 		IntentFilter intFilter = new IntentFilter();
 		intFilter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
 		intFilter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE);
-		ctx.registerReceiver(new UIModeReceiver(), intFilter);
+		intFilter.addAction(UIModeReceiver.MOTO_X_CONTEXT_ACTION_DRIVE);
+		intFilter.addAction(UIModeReceiver.MOTO_X_MODE_CHANGED_BROADCAST);
+		ctx.registerReceiver(uiModeReceiver, intFilter);
+		intFilter = new IntentFilter();
+		intFilter.addAction(UIModeReceiver.MOTO_X_CONTEXT_CHANGE_BROADCAST);
+		try {
+			intFilter.addDataType(UIModeReceiver.MOTO_X_CONTEXT_BROADCAST_MIME_TYPE);
+		} catch (MalformedMimeTypeException e) {
+		}
+		ctx.registerReceiver(uiModeReceiver, intFilter);
 		
 		scan(runScan,scanInterval,runInCarModeOnly);
 	}
@@ -96,6 +108,8 @@ public class RadarScanManager {
 	private static void startConnectionMonitor() {
 		if ( notify != null )
 			notifManager.notify(NOTIFICATION_SCAN, notify);
+		if ( reconnectionIntent != null ) 
+			alarmManager.cancel(reconnectionIntent);
 		Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 		reconnectIntent.putExtra(RadarMonitorService.INTENT_RECONNECT, true);
 		reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -107,8 +121,10 @@ public class RadarScanManager {
 		if ( reconnectionIntent != null ) {
 			alarmManager.cancel(reconnectionIntent);
 			reconnectionIntent = null;
-			if ( notify != null )
+			if ( notify != null ) {
 				notifManager.cancel(NOTIFICATION_SCAN);
+			}
+			ctx.unregisterReceiver(uiModeReceiver);
 		}
 	}
 	
@@ -135,16 +151,38 @@ public class RadarScanManager {
 	}
 	
 	private static class UIModeReceiver extends BroadcastReceiver {
+		
+		private static String MOTO_X_CONTEXT_CHANGE_BROADCAST = "com.motorola.context.CONTEXT_CHANGE";
+		private static String MOTO_X_CONTEXT_BROADCAST_MIME_TYPE = "context/com.motorola.context.publisher.InVehicle";
+		private static String MOTO_X_CONTEXT_ACTION_DRIVE = "com.motorola.contextaware.intent.action.DRIVE_CURRENT_STATE";
+		private static String MOTO_X_MODE_CHANGED_BROADCAST = "com.motorola.assist.intent.action.MODE_CHANGED";
+		private static String MOTO_X_MODE_CHANGED_BROADCAST_STATE = "com.motorola.context.engine.intent.extra.MODE_CHANGED_STATUS";
+		private static String MOTO_X_MODE_CHANGED_BROADCAST_STATE_PREV = "com.motorola.context.engine.intent.extra.MODE_CHANGED_PREV_STATUS";
+		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if ( intent.getAction().equals(UiModeManager.ACTION_ENTER_CAR_MODE)  ) {
 				isCarMode.set(true);
+				eventBus.post(new RadarMessageNotification("Car mode activated"));
 				scan();
 			} 
 			if ( intent.getAction().equals(UiModeManager.ACTION_EXIT_CAR_MODE)  ) {
 				isCarMode.set(false);
+				eventBus.post(new RadarMessageNotification("Car mode deactivated"));
 				scan();
-			} 
+			}
+			if ( intent.getAction().equals(UIModeReceiver.MOTO_X_CONTEXT_CHANGE_BROADCAST) &&
+					intent.getType().equals(UIModeReceiver.MOTO_X_CONTEXT_BROADCAST_MIME_TYPE)) {
+				eventBus.post(new RadarMessageNotification("Got Moto X context change event"));
+			}
+			if ( intent.getAction().equals(UIModeReceiver.MOTO_X_CONTEXT_ACTION_DRIVE)  ) {
+				eventBus.post(new RadarMessageNotification("Got Moto X drive status event"));
+			}
+			if ( intent.getAction().equals(UIModeReceiver.MOTO_X_MODE_CHANGED_BROADCAST)  ) {
+				int state = intent.getIntExtra(MOTO_X_MODE_CHANGED_BROADCAST_STATE, 0);
+				int prevState = intent.getIntExtra(MOTO_X_MODE_CHANGED_BROADCAST_STATE_PREV, 0);
+				eventBus.post(new RadarMessageNotification("Got Moto X status changed event: " + state + " prev " + prevState ));
+			}
 		}
 	}
 	
