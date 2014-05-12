@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
@@ -15,11 +16,14 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.cobra.iradar.messaging.CobraMessageNotification;
 import com.cobra.iradar.messaging.CobraMessageThreat;
 import com.cobra.iradar.protocol.RadarMessageAlert;
 import com.greatnowhere.iradar.R;
 import com.greatnowhere.iradar.config.Preferences;
 import com.greatnowhere.iradar.location.LocationManager;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Manages currently active threats and displays them
@@ -37,13 +41,21 @@ public class ThreatManager {
 	private static WindowManager.LayoutParams params;
 	static SoundPool alertSounds = null;
 	static Map<String, Integer> alertSoundsLoaded = new HashMap<String, Integer>();
-	private static View mainThreatView;
-	static LinearLayout mainThreatLayout; 
-	private static boolean isThreatActive = false;
+	protected static View mainThreatView;
+	protected static LinearLayout mainThreatLayout; 
+	private static AtomicBoolean isThreatActive = new AtomicBoolean(false);
+	private static EventBus eventBus = EventBus.getDefault();
+	private static final ThreatManager instance = new ThreatManager();
 	
 	private static Context ctx;
 	
 	public static void init(Context appContext) {
+		if ( ctx != null )
+			return;
+		
+		if ( !eventBus.isRegistered(instance))
+			eventBus.register(instance);
+		
 		ctx = appContext;
 	    params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -88,6 +100,22 @@ public class ThreatManager {
 		if ( alert.frequency == 0f )
 			return;
 		
+		// check if fake
+		if ( Preferences.isFakeAlertDetection() && Preferences.isLogThreatLocation() && LocationManager.isReady() ) {
+			if ( ThreatLogger.countSimilarThreatOccurences(alert, LocationManager.getCurrentLoc(), Preferences.getFakeAlertDetectionRadius()) > 5 ) {
+				eventBus.post(new CobraMessageNotification("Fake alert detected " + alert.alertType.getName() + " " + alert.frequency));
+				return;
+			}
+		}
+		
+		if ( !isThreatActive.get() ) {
+			isThreatActive.set(true);
+			eventBus.post(new UIRunnableEvent(new Runnable() {
+				public void run() {
+					wm.addView(mainThreatView, params);
+				}
+			}));
+		}
 		Threat t = findExistingThreat( alert );
 		if ( t == null ) {
 			View v = View.inflate(ctx, R.layout.threat, null);
@@ -97,13 +125,9 @@ public class ThreatManager {
 		} else {
 			t.updateThreat(alert);
 		}
-		if ( !isThreatActive ) {
-			wm.addView(mainThreatView, params);
-		}
-		isThreatActive = true;
 	}
 	
-	public static void removeThreats() {
+	public synchronized static void removeThreats() {
 		if ( activeThreats.size() == 0 ) 
 			return;
 		
@@ -112,8 +136,12 @@ public class ThreatManager {
 		}
 		activeThreats = new ArrayList<Threat>();
 		AlertAudioManager.restoreOldAlertVolume();
-		isThreatActive = false;
-		wm.removeView(mainThreatView);
+		isThreatActive.set(false);
+		eventBus.post(new UIRunnableEvent(new Runnable() {
+			public void run() {
+				wm.removeView(mainThreatView);
+			}
+		}));
 
 	}
 	
@@ -138,5 +166,24 @@ public class ThreatManager {
 		return (((float) strength - 1) / 16f) + 1f;
 	}
 
+	/**
+	 * Hacky helper class and event handlers for UI interaction
+	 * @param event
+	 */
+	public void onEventMainThread(UIRunnableEvent event) {
+		mainThreatView.post(event.r);
+	}
+	
+	protected static void post(Runnable r) {
+		eventBus.post(new UIRunnableEvent(r));
+	}
+	
+	public static class UIRunnableEvent {
+		protected Runnable r;
+		
+		protected UIRunnableEvent(Runnable r) {
+			this.r = r;
+		}
+	}
 
 }

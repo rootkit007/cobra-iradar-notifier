@@ -31,11 +31,12 @@
 	    android:shadowDx="0.0"
 	    android:shadowDy="0.0"
 	    android:shadowRadius="30.0" 
-		android:maxHeight="40dip"
-		android:minHeight="40dip"
+		android:maxHeight="20dip"
+		android:minHeight="20dip"
 		style="?android:attr/progressBarStyleHorizontal"
         android:gravity="top|center"
         android:layout_gravity="top|center"
+        android:progressDrawable="@drawable/threat_strength"
         />
         <!-- 
         app:strokeWidth="2"

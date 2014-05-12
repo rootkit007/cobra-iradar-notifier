@@ -84,7 +84,7 @@ public class TTSManager {
 	}
 	
 	private static void speak(String text) {
-		if ( Preferences.isNotifyConnectivityNotDuringCalls() && tm.getCallState() != TelephonyManager.CALL_STATE_OFFHOOK )
+		if ( Preferences.isNotifyConnectivityNotDuringCalls() && tm.getCallState() != TelephonyManager.CALL_STATE_IDLE )
 			return;
 		if ( isReady.get() && Preferences.isNotifyConnectivity() && text != null && !text.isEmpty() ) {
 			AlertAudioManager.setOurAlertVolume();

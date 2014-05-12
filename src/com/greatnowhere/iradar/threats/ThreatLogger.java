@@ -2,6 +2,7 @@ package com.greatnowhere.iradar.threats;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -9,6 +10,7 @@ import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -16,12 +18,12 @@ import android.location.Location;
 import android.os.Parcelable;
 
 import com.cobra.iradar.messaging.CobraMessageThreat;
-import com.greatnowhere.iradar.CobraApplication;
+import com.greatnowhere.iradar.MainRadarApplication;
 import com.greatnowhere.iradar.config.Preferences;
 
 public class ThreatLogger extends SQLiteOpenHelper {
 
-	private static final String DB_NAME = CobraApplication.class.getCanonicalName();
+	private static final String DB_NAME = MainRadarApplication.class.getCanonicalName();
 	private static final int DB_VERSION = 3;
 	
 	private static final String LATITUDE = "lat";
@@ -62,6 +64,14 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		ctx.startService(i);
 	}
 	
+	public static int countSimilarThreatOccurences(CobraMessageThreat threat, Location loc, float radius) {
+		Threat t = new Threat();
+		t.locations = new LinkedHashSet<Location>();
+		t.locations.add(loc);
+		t.alert = threat;
+		return countSimilarThreatOccurences(t, radius);
+	}
+	
 	/**
 	 * Counts threats in database with the same alert type, frequency and within "radius" of the location
 	 * @param threat
@@ -70,16 +80,21 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	 */
 	public static int countSimilarThreatOccurences(Threat threat, float radius) {
 		SQLiteDatabase db = instance.getReadableDatabase();
+		int count = 0;
 		if ( threat.locations != null ) {
 			for ( Location l : threat.locations ) {
-				String sql = "select distinct id from threats where type=? and freq=? and exists (select * from threats_locations "
+				String sql = "select count(id) from threats where type=? and freq=? and exists (select * from threats_locations "
 						+ "where " + buildDistanceQuery(l.getLatitude(),l.getLongitude()) + " > ?)";
-				db.rawQuery(sql, new String[] { Integer.toString(threat.alert.alertType.getCode()),
+				Cursor c = db.rawQuery(sql, new String[] { Integer.toString(threat.alert.alertType.getCode()),
 						Float.toString(threat.alert.frequency), Double.toString(convertKmToPartialDistance(radius))
 						} );
+				if ( c.getCount() > 0 ) {
+					c.moveToNext();
+					count = c.getInt(0);
+				}
 			}
 		}
-		return 0;
+		return count;
 	}
 	
 	/**
@@ -120,11 +135,11 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	}
 	
 	public static double convertPartialDistanceToKm(double result) {
-	    return Math.acos(result) * 6371;
+	    return Math.acos(result) * 6371d;
 	}
 	
 	public static double convertKmToPartialDistance(double km) {
-	    return Math.cos(km/6371f);
+	    return Math.cos(km/6371d);
 	}
 	
 	/**

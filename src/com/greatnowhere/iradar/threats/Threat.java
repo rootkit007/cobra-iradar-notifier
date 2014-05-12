@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import android.content.res.ColorStateList;
+import android.graphics.PorterDuff.Mode;
 import android.location.Location;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -57,7 +58,12 @@ public class Threat {
 	}
 	
 	void removeThreat() {
-		ThreatManager.mainThreatLayout.removeView(view);
+		if ( isShowing )
+			ThreatManager.post(new Runnable() {
+				public void run() {
+					ThreatManager.mainThreatLayout.removeView(view);
+				}
+			});
 		isShowing = false;
 		if ( soundStreamId != 0 ) {
 			ThreatManager.alertSounds.stop(soundStreamId);
@@ -94,16 +100,22 @@ public class Threat {
 				ThreatManager.alertSounds.stop(soundStreamId);
 				soundStreamId = 0;
 			}
-			if ( !isShowing ) {
-				ThreatManager.mainThreatLayout.addView(view);
-				isShowing = true;
-			}
-			band.setText(alert.alertType.getName());
-			freq.setText(Float.toString(alert.frequency) + " Ghz");
-			ColorStateList threatColor = ColorStateList.valueOf(ThreatManager.getThreatColor(alert.strength)); 
-			band.setTextColor(threatColor);
-			freq.setTextColor(threatColor);
-			strength.setProgress(this.alert.strength);
+			ThreatManager.post(new Runnable() {
+				public void run() {
+					if ( !isShowing ) {
+						ThreatManager.mainThreatLayout.addView(view);
+						isShowing = true;
+					}
+					band.setText(alert.alertType.getName());
+					freq.setText(Float.toString(alert.frequency) + " Ghz");
+					int color = ThreatManager.getThreatColor(alert.strength);
+					ColorStateList threatColor = ColorStateList.valueOf(color); 
+					band.setTextColor(threatColor);
+					freq.setTextColor(threatColor);
+					strength.setProgress(alert.strength);
+					strength.getProgressDrawable().getCurrent().setColorFilter(color, Mode.MULTIPLY);
+				}
+			});
 			//strength.getProgressDrawable().setColorFilter(getThreatColor(alert.strength), Mode.SRC_IN);
 			playAlert();
 		}

@@ -128,6 +128,35 @@ public class Preferences {
 		return prefs.getInt(res.getString(R.string.prefKeyLogThreatsLimitNumVal), 300);
 	}
 	
+	public static boolean isFakeAlertDetection() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyFakeAlertDetection), true);
+	}
+	
+	public static float getFakeAlertDetectionRadius() {
+		return prefs.getFloat(res.getString(R.string.prefKeyFakeAlertDetectionRadius), 0.1f);
+	}
+	
+	public static String getLogFileName() {
+		return prefs.getString(res.getString(R.string.prefKeyLogFileName), "iradar.log");
+	}
+	
+	/**
+	 * How many lines to display in log
+	 * @return
+	 */
+	public static int getScreenLogScrollBackLimit() {
+		return prefs.getInt(res.getString(R.string.prefKeyScreenLogScrollBackLimit), 300);
+	}
+	
+	/**
+	 * Screen Refresh Frequency (Hz) in main activity 
+	 * @return
+	 */
+	public static int getScreenRefreshFrequency() {
+		return prefs.getInt(res.getString(R.string.prefKeyScreenRefreshFrequency), 2);
+	}
+	
+	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {

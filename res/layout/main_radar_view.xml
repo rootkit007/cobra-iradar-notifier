@@ -9,6 +9,7 @@
         
         <TextView
             android:text="Threats" 
+	        android:textStyle="bold"
             />
         
 	    <TextView
@@ -26,6 +27,7 @@
 
         <TextView
             android:text="Status" 
+	        android:textStyle="bold"
             />
         
 	    <TextView
@@ -33,6 +35,7 @@
 	        android:layout_span="3"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
+	        android:textStyle="bold"
 	        android:textAppearance="?android:attr/textAppearanceMedium" />
     
     </TableRow>

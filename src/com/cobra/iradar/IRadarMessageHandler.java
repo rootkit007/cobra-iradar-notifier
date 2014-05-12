@@ -43,6 +43,10 @@ public abstract class IRadarMessageHandler {
 		eventBus.register(this);
 	}
 	
+	public void stop() {
+		eventBus.unregister(this);
+	}
+	
 	/**
 	 * Receives raw messages from {@link RadarConnectionService} and calls onRadarMessage as needed 
 	 */

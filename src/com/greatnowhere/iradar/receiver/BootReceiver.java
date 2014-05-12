@@ -1,6 +1,6 @@
 package com.greatnowhere.iradar.receiver;
 
-import com.greatnowhere.iradar.CobraIRadarActivity;
+import com.greatnowhere.iradar.MainRadarActivity;
 import com.greatnowhere.iradar.config.Preferences;
 
 import android.content.BroadcastReceiver;
@@ -22,8 +22,9 @@ public class BootReceiver extends BroadcastReceiver {
 			}
 			
 			if ( Preferences.isScanForDeviceAfterRestart() ) {
-				Intent i = new Intent(context, CobraIRadarActivity.class);
-				i.putExtra(CobraIRadarActivity.INTENT_BACKGROUND, true);
+				Intent i = new Intent(context, MainRadarActivity.class);
+				i.putExtra(MainRadarActivity.INTENT_BACKGROUND, true);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(i);
 			}
 		}

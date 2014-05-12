@@ -10,7 +10,7 @@ import android.app.Application;
 		resNotifText=R.string.crashNotificationText, resNotifTitle=R.string.crashNotificationTitle,
 		resNotifTickerText=R.string.crashNotificationTitle, resDialogText=R.string.crashNotificationText,
 		resDialogTitle=R.string.crashNotificationTitle)
-public class CobraApplication extends Application {
+public class MainRadarApplication extends Application {
 
 	 @Override
      public void onCreate() {
