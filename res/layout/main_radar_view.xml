@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" 
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+   
+<TableLayout 
     android:id="@+id/mainViewLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     >
 
     <TableRow>
@@ -14,7 +17,6 @@
         
 	    <TextView
 	        android:id="@+id/radarState"
-	        android:layout_span="3"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:textSize="50sp"
@@ -32,7 +34,6 @@
         
 	    <TextView
 	        android:id="@+id/connStatus"
-	        android:layout_span="3"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:textStyle="bold"
@@ -48,7 +49,6 @@
         
 	    <TextView
 	        android:id="@+id/voltageText"
-	        android:layout_span="3"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:textStyle="bold"
@@ -59,12 +59,26 @@
     <TableRow>
         
         <TextView
-            android:text="Location" 
+            android:text="Mode" 
+            />
+        
+	    <TextView
+	        android:id="@+id/mainViewTextuiMode"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:textStyle="bold"
+	        android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+    </TableRow>
+    
+    <TableRow>
+        
+        <TextView
+            android:text="Speed" 
             />
         
 	    <TextView
 	        android:id="@+id/mainViewLocation"
-	        android:layout_span="3"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:textStyle="bold"
@@ -75,24 +89,24 @@
     <TableRow>
 
         <TextView
-            android:text="Log" 
+            android:text="@string/log" 
             />
         
 	    <TextView
 	        android:id="@+id/logScroll"
-	        android:layout_span="3"
-	        android:layout_width="match_parent"
+	        android:layout_width="fill_parent"
 	        android:layout_height="206dp"
 	        android:layout_gravity="bottom"
 	        android:lines="15"
 	        android:maxLines="300"
-	        android:scrollHorizontally="true"
+	        android:scrollHorizontally="false"
+	        android:scrollbarStyle="outsideOverlay"
 	        android:scrollbars="vertical"
 	        android:textAppearance="?android:attr/textAppearanceSmall" />
 	</TableRow>
 	
-    <TableRow >
-
+</TableLayout>
+<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
 	        <Button
 	        android:id="@+id/btnReconnect"
 	        android:layout_width="wrap_content"
@@ -100,23 +114,9 @@
 	        android:text="Reconnect" />
 	
 	    	<Button
-	        android:id="@+id/btnFakeAlert"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="Single\nAlert" />
-	        
-	    	<Button
-	        android:id="@+id/btnFakeAlertMulti"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="Multiple\nAlerts" />
-	    	
-	    	<Button
 	        android:id="@+id/btnQuit"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="Quit" />
-	    	
-	
-    </TableRow>
-</TableLayout>
+</LinearLayout>
+</LinearLayout>

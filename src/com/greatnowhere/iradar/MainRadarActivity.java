@@ -19,9 +19,10 @@ package com.greatnowhere.iradar;
 import java.util.Random;
 
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.location.Location;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.method.ScrollingMovementMethod;
@@ -66,14 +67,15 @@ public class MainRadarActivity extends Activity {
     private TextView connState;
     private TextView log;
     private TextView voltage;
+    private TextView uiMode;
     private TextView location;
     private Button btnReconnect;
-    private Button btnFakeAlert;
-    private Button btnFakeAlertMulti;
     private Button btnQuit;
     private Runnable uiRefreshRunnable;
     
-    private EventBus eventBus = EventBus.getDefault();
+    private UiModeManager uiModeManager;
+    
+    private EventBus eventBus;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,7 +87,10 @@ public class MainRadarActivity extends Activity {
         
         rootView = findViewById(R.id.mainViewLayout);
         
+        eventBus = EventBus.getDefault();
         eventBus.register(this);
+        
+        uiModeManager = (UiModeManager) getApplicationContext().getSystemService(UI_MODE_SERVICE);
 
         // set defaults for preferences
         PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.settings, false);
@@ -97,25 +102,11 @@ public class MainRadarActivity extends Activity {
         connState = (TextView) findViewById(R.id.connStatus);
         voltage = (TextView) findViewById(R.id.voltageText);
         btnReconnect = (Button) findViewById(R.id.btnReconnect);
+        uiMode = (TextView) findViewById(R.id.mainViewTextuiMode);
         location = (TextView) findViewById(R.id.mainViewLocation);
         btnReconnect.setOnClickListener( new OnClickListener() {
 			public void onClick(View v) {
 				initialize();
-			}
-		});
-        btnFakeAlert = (Button) findViewById(R.id.btnFakeAlert);
-        btnFakeAlert.setOnClickListener( new OnClickListener() {
-			public void onClick(View v) {
-				Random r = new Random();
-				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
-			}
-		});
-        btnFakeAlertMulti = (Button) findViewById(R.id.btnFakeAlertMulti);
-        btnFakeAlertMulti.setOnClickListener( new OnClickListener() {
-			public void onClick(View v) {
-				Random r = new Random();
-				eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
-				eventBus.post(new RadarMessageAlert(Alert.K, r.nextInt(4) + 1, 35.1f, 3000L));
 			}
 		});
         btnQuit = (Button) findViewById(R.id.btnQuit);
@@ -211,6 +202,13 @@ public class MainRadarActivity extends Activity {
     		settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     		getApplicationContext().startActivity(settingsIntent);
     		return true;
+    	case R.id.itemTestAlert:
+			Random r = new Random();
+			eventBus.post(new RadarMessageAlert(Alert.Ka, r.nextInt(4) + 1, 35.1f, 3000L));
+			return true;
+    	case R.id.itemAbout:
+    		startActivity(new Intent(getApplicationContext(), AboutActivity.class));
+    		return true;
     	case R.id.itemQuit:
     		finish();
     		return true;
@@ -220,25 +218,56 @@ public class MainRadarActivity extends Activity {
     	
     }
     
+    private String getCurrentUIModeString(int mode) {
+    	switch (mode) {
+    	case Configuration.UI_MODE_TYPE_APPLIANCE:
+    		return "Appliance";
+    	case Configuration.UI_MODE_TYPE_CAR:
+    		return "Car";
+    	case Configuration.UI_MODE_TYPE_DESK:
+    		return "Desk";
+    	case Configuration.UI_MODE_TYPE_TELEVISION:
+    		return "TV";
+    	case Configuration.UI_MODE_TYPE_NORMAL:
+    		return "Normal";
+    	}
+    	return "Unknown";
+    }
+    
     /**
      * Refresh UI thingamajjigs
      * @param event
      */
     public void onEventMainThread(UIRefreshEvent event) {
-    	log.setText(CollectorService.getLog());
     	voltage.setText(CollectorService.getBatteryVoltage());
     	alert.setText(CollectorService.getLastAlert());
     	connState.setText(CollectorService.getConnStatus());
-		String locInfo = "";
-		if ( LocationManager.getCurrentLoc() != null ) {
-			Location lastKnownLoc = LocationManager.getCurrentLoc();
-			locInfo += ((System.currentTimeMillis() - lastKnownLoc.getTime())/1000L) + "s ";
-			locInfo += (lastKnownLoc.getSpeed() * 3.6f) + "kph";
+    	uiMode.setText(getCurrentUIModeString(uiModeManager.getCurrentModeType()));
+		if ( LocationManager.isReady() ) {
+			String locInfo = "";
+			locInfo += (Preferences.getUnits() == Preferences.PREF_UNITS_METRIC ?  
+					String.format("%.1f",LocationManager.getCurrentSpeedKph()) + "kph" :
+					String.format("%.1f",LocationManager.getCurrentSpeedMph()) + "mph");	
+			location.setText(locInfo);
+		} else {
+			location.setText("Unknown");
 		}
-		location.setText(( LocationManager.isReady() ? "Ready " + locInfo : "Not Ready" ) );
+    }
+    
+    /**
+     * Separate handler to refresh logview
+     * Frequent refreshes make UI unresponsive, so we'll update log only when a message arrives
+     * @param event
+     */
+    public void onEventMainThread(UIRefreshLogEvent event) {
+    	log.setText(CollectorService.getLog());
     }
     
     public static class UIRefreshEvent {
+    }
+    
+    public static class UIRefreshLogEvent {
+    	
     }
     
 }

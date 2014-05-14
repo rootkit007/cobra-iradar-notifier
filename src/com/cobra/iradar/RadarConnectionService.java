@@ -26,20 +26,22 @@ public class RadarConnectionService extends Service {
 	private RadarConnectionThread radarThread;
     @SuppressWarnings("unused")
 	private int notificationId = 1;
-    private EventBus eventBus = EventBus.getDefault();
+    private EventBus eventBus;
     private Notification connectedNotification;
 	
 	@Override
 	public int onStartCommand (Intent intent, int flags, int startId) {
-    	if ( !eventBus.isRegistered(this) )
+    	super.onStartCommand(intent,flags,startId);
+		eventBus = EventBus.getDefault();
+		if ( !eventBus.isRegistered(this) )
     		eventBus.register(this);
-    	int retVal = super.onStartCommand(intent,flags,startId);
-    	if ( intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE) != null ) {
+    	if ( intent != null && intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE) != null ) {
     		iRadarDevice = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE);
     		connectedNotification = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_NOTIFICATION);
-        	runConnection();
     	}
-    	return retVal;
+    	if ( iRadarDevice != null )
+    		runConnection();
+    	return START_STICKY;
     }
 	
 	@Override
@@ -49,6 +51,8 @@ public class RadarConnectionService extends Service {
     		stopForeground(true);
     	}
     	stopConnection();
+		if ( eventBus.isRegistered(this) )
+    		eventBus.unregister(this);
 	}
 	
 	public synchronized void runConnection() {

@@ -14,6 +14,7 @@ import com.cobra.iradar.messaging.CobraMessageThreat;
 import com.greatnowhere.iradar.R;
 import com.greatnowhere.iradar.config.Preferences;
 import com.greatnowhere.iradar.location.LocationManager;
+import com.greatnowhere.iradar.threats.ThreatManager.ThreatCredibility;
 
 /**
  * Active threat class
@@ -21,6 +22,9 @@ import com.greatnowhere.iradar.location.LocationManager;
  *
  */
 public class Threat {
+	
+	public static final boolean SHOW_FALSE_THREATS = false;
+	public static final boolean AUDIBLE_FALSE_THREATS = false;
 	
 	/**
 	 * View displaying current threat
@@ -31,8 +35,14 @@ public class Threat {
 	private TextView band;
 	private TextView freq;
 	private ProgressBar strength;
+	/**
+	 * Max strength of this threat
+	 */
+	protected int maxStrength = 0;
 	protected Set<Location> locations;
 	protected Long startTimeMillis = System.currentTimeMillis();
+	protected Long endTimeMillis;
+	protected ThreatManager.ThreatCredibility credibility = ThreatCredibility.LEGIT;
 	
 	/**
 	 * True if this threat has been added to the view
@@ -43,9 +53,10 @@ public class Threat {
 		
 	}
 	
-	public Threat(View v, CobraMessageThreat a) {
+	public Threat(View v, CobraMessageThreat a, ThreatManager.ThreatCredibility cred) {
 		view = v;
 		alert = a;
+		credibility = cred;
 		band = (TextView) view.findViewById(R.id.textViewBand);
 		freq = (TextView) view.findViewById(R.id.textViewFrequency);
 		strength = (ProgressBar) view.findViewById(R.id.threatViewStrength);
@@ -58,10 +69,11 @@ public class Threat {
 	}
 	
 	void removeThreat() {
+		endTimeMillis = System.currentTimeMillis();
 		if ( isShowing )
 			ThreatManager.post(new Runnable() {
 				public void run() {
-					ThreatManager.mainThreatLayout.removeView(view);
+					ThreatManager.instance.mainThreatLayout.removeView(view);
 				}
 			});
 		isShowing = false;
@@ -91,6 +103,7 @@ public class Threat {
 		if ( view == null || alert == null )
 			return;
 		recordLocation();
+		maxStrength = Math.max(maxStrength, newStrength);
 		// only update if strength changes
 		if ( newStrength != alert.strength || !isShowing ) {
 			
@@ -100,24 +113,26 @@ public class Threat {
 				ThreatManager.alertSounds.stop(soundStreamId);
 				soundStreamId = 0;
 			}
-			ThreatManager.post(new Runnable() {
-				public void run() {
-					if ( !isShowing ) {
-						ThreatManager.mainThreatLayout.addView(view);
-						isShowing = true;
+			if ( isShowVisibleThreat() ) {
+				ThreatManager.post(new Runnable() {
+					public void run() {
+						if ( !isShowing ) {
+							ThreatManager.instance.mainThreatLayout.addView(view);
+							isShowing = true;
+						}
+						band.setText(alert.alertType.getName());
+						freq.setText(Float.toString(alert.frequency) + " Ghz");
+						int color = ThreatManager.getThreatColor(alert.strength);
+						ColorStateList threatColor = ColorStateList.valueOf(color);
+						band.setTextColor(threatColor);
+						freq.setTextColor(threatColor);
+						strength.setProgress(alert.strength);
+						strength.getProgressDrawable().getCurrent().setColorFilter(color, Mode.MULTIPLY);
 					}
-					band.setText(alert.alertType.getName());
-					freq.setText(Float.toString(alert.frequency) + " Ghz");
-					int color = ThreatManager.getThreatColor(alert.strength);
-					ColorStateList threatColor = ColorStateList.valueOf(color); 
-					band.setTextColor(threatColor);
-					freq.setTextColor(threatColor);
-					strength.setProgress(alert.strength);
-					strength.getProgressDrawable().getCurrent().setColorFilter(color, Mode.MULTIPLY);
-				}
-			});
-			//strength.getProgressDrawable().setColorFilter(getThreatColor(alert.strength), Mode.SRC_IN);
-			playAlert();
+				});
+			}
+			if ( isPlayAudibleThreat() )
+				playAlert();
 		}
 	}
 	
@@ -129,4 +144,26 @@ public class Threat {
 		}
 	}
 	
+	/**
+	 * Returns true if this threat should be made audible 
+	 * @return
+	 */
+	public boolean isPlayAudibleThreat() {
+		return ( credibility != ThreatCredibility.FAKE && credibility != ThreatCredibility.HIDDEN) ||
+				( AUDIBLE_FALSE_THREATS );
+	}
+
+	/**
+	 * Returns true if this threat should be made visible
+	 * @return
+	 */
+	public boolean isShowVisibleThreat() {
+		return isShowVisibleThreat(this.credibility);
+	}
+	
+	public static boolean isShowVisibleThreat(ThreatCredibility c) {
+		return ( c != ThreatCredibility.FAKE && c != ThreatCredibility.HIDDEN) ||
+				( SHOW_FALSE_THREATS );
+	}
+
 }

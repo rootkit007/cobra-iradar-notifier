@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:id="@+id/layoutIdAbout"
+     >
+    
+    <TextView
+        android:id="@+id/aboutIdTextAbout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autoLink="all"
+	    android:layout_gravity="center_vertical|center_horizontal"
+        android:text="@string/aboutTxtAbout" />
+
+    <TextView
+        android:id="@+id/aboutIdCopyrightLinks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+	    android:layout_gravity="center_vertical|center_horizontal"
+	    android:text="@string/aboutTxtCopyright"
+        android:autoLink="all" />
+    
+    <Button android:id="@+id/aboutIdButtonOK"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:text="@string/ok"
+        />
+
+</LinearLayout>

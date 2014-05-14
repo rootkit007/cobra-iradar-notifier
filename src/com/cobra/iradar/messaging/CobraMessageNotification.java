@@ -17,9 +17,4 @@ public class CobraMessageNotification extends CobraMessage {
 		
 	}
 	
-	public CobraMessageNotification(String msg) {
-		this();
-		message = msg;
-	}
-	
 }

@@ -27,7 +27,7 @@ public class RadarScanManager {
 	private static UiModeManager uiManager;
 	private static AlarmManager alarmManager;
 	private static NotificationManager notifManager;
-	private static PendingIntent reconnectionIntent;
+	private PendingIntent reconnectionIntent;
 	
 	
 	private static boolean runScan;
@@ -35,7 +35,9 @@ public class RadarScanManager {
 	private static boolean runInCarModeOnly;
 	private static Notification notify;
 	
-	static EventBus eventBus = EventBus.getDefault();
+	private EventBus eventBus;
+	private RadarEventsListener radarEventsListener;
+	static RadarScanManager instance;
 	
 	/**
 	 * 
@@ -47,13 +49,16 @@ public class RadarScanManager {
 	 */
 	public static void init(Context ctx, Notification notify, boolean runScan, int scanInterval, boolean runInCarModeOnly) {
 		RadarScanManager.ctx = ctx;
+		instance = new RadarScanManager();
+		instance.eventBus = EventBus.getDefault();
+		instance.radarEventsListener = new RadarEventsListener();
 		RadarScanManager.notify = notify;
 		uiManager = (UiModeManager) RadarScanManager.ctx.getSystemService(Context.UI_MODE_SERVICE);
 		alarmManager = (AlarmManager) RadarScanManager.ctx.getSystemService(Context.ALARM_SERVICE);
 		notifManager = (NotificationManager) RadarScanManager.ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		isCarMode.set( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR );
 		
-		eventBus.register(new RadarEventsListener());
+		instance.eventBus.register(instance.radarEventsListener);
 		scan(runScan,scanInterval,runInCarModeOnly);
 	}
 	
@@ -89,27 +94,36 @@ public class RadarScanManager {
 	private static void startConnectionMonitor() {
 		if ( notify != null )
 			notifManager.notify(NOTIFICATION_SCAN, notify);
-		if ( reconnectionIntent != null ) 
-			alarmManager.cancel(reconnectionIntent);
+		if ( instance.reconnectionIntent != null ) 
+			alarmManager.cancel(instance.reconnectionIntent);
+		if ( !instance.eventBus.isRegistered(instance.radarEventsListener))
+			instance.eventBus.register(instance.radarEventsListener);
+		
 		Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 		reconnectIntent.putExtra(RadarMonitorService.INTENT_RECONNECT, true);
-		reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 		alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 1000L, ((long) scanInterval) * 1000L, 
-		  reconnectionIntent);
+				instance.reconnectionIntent);
 	}
 	  
 	public static void stop() {
-		if ( reconnectionIntent != null ) {
-			alarmManager.cancel(reconnectionIntent);
-			reconnectionIntent = null;
+		if ( instance.reconnectionIntent == null ) {
+			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
+			reconnectIntent.putExtra(RadarMonitorService.INTENT_RECONNECT, true);
+			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 		}
+		alarmManager.cancel(instance.reconnectionIntent);
+		instance.reconnectionIntent = null;
+
 		if ( notify != null ) {
 			notifManager.cancel(NOTIFICATION_SCAN);
 		}
+		if ( instance.eventBus.isRegistered(instance.radarEventsListener)) 
+			instance.eventBus.unregister(instance.radarEventsListener);
 	}
 	
 	public static boolean isScanActive() {
-		return ( reconnectionIntent != null );
+		return ( instance.reconnectionIntent != null );
 	}
 	
 	// Run scan only when not connected ya know

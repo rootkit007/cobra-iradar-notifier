@@ -24,22 +24,23 @@ import de.greenrobot.event.EventBus;
  * @author pzeltins
  *
  */
-public abstract class IRadarMessageHandler {
+public abstract class RadarMessageHandler {
 
-	protected ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
-	protected Double batteryVoltage = 0D;
-	protected boolean isThreatActive = false;
-	protected Timer alertTimer;
+	private ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
+	private Double batteryVoltage = 0D;
+	private boolean isThreatActive = false;
+	private Timer alertTimer;
 	/**
 	 * True if threat is forcibly held active, regardless of "All Clear" messages
 	 * Used mostly for testing purposes
 	 */
 	protected AtomicBoolean isThreatForcedActive = new AtomicBoolean(false);
 	
-	protected static EventBus eventBus = EventBus.getDefault();
+	protected static EventBus eventBus;
 	
-	public IRadarMessageHandler() {
+	public RadarMessageHandler() {
 		super();
+		eventBus = EventBus.getDefault();
 		eventBus.register(this);
 	}
 	
@@ -102,7 +103,11 @@ public abstract class IRadarMessageHandler {
     public final Double getBatteryVoltage() {
     	return batteryVoltage;
     }
-    	
+    
+    public final ConnectivityStatus getConnStatus() {
+    	return connStatus;
+    }
+    
     public abstract void onRadarMessage(CobraMessageConnectivityNotification msg);
     public abstract void onRadarMessage(CobraMessageThreat msg);
     public abstract void onRadarMessage(CobraMessageAllClear msg);

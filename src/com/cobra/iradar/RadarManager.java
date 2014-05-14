@@ -26,7 +26,7 @@ public class RadarManager {
 	private static Notification ongoingNotification;
 	
 	@SuppressWarnings("unused")
-	private static EventBus eventBus = EventBus.getDefault();
+	private static EventBus eventBus;
 	  
 	/**
 	 * 
@@ -40,6 +40,7 @@ public class RadarManager {
 	public static synchronized boolean initialize(Context ctx, boolean showNotification, Notification notify, Notification scanNotification,
 			  boolean runScan, int scanInterval, boolean scanInCarModeOnly) {
 		appContext = ctx;
+		eventBus = EventBus.getDefault();
 		RadarManager.showNotification = showNotification;
 		RadarManager.ongoingNotification = notify;
 		
@@ -70,6 +71,8 @@ public class RadarManager {
 	}
 	  
 	public static synchronized void startConnectionService() {
+		if ( RadarManager.appContext == null )
+			return;
 		appContext.startService(new RadarConnectionServiceIntent(RadarManager.appContext, 
 					  RadarManager.mBTDevice, RadarManager.ongoingNotification ));
 	}

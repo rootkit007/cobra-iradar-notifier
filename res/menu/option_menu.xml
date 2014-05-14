@@ -18,5 +18,7 @@
         android:enabled="true" android:visible="true" android:titleCondensed="@string/settings" 
         android:menuCategory="system" android:showAsAction="ifRoom" android:title="@string/settings"
         ></item>
+    <item android:id="@+id/itemTestAlert" android:title="@string/menuItemTestAlertTitle"></item>
+    <item android:id="@+id/itemAbout" android:title="@string/itemTextAbout"></item>
     <item android:id="@+id/itemQuit" android:titleCondensed="@string/quit" android:title="@string/quit"></item>
 </menu>

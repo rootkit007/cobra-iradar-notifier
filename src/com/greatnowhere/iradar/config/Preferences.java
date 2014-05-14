@@ -11,6 +11,9 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
 
+	public static final int PREF_UNITS_METRIC = 1;
+	public static final int PREF_UNITS_IMPERIAL = 2;
+	
 	private static SharedPreferences prefs;
 	private static Resources res;
 	private static EventBus eventBus = EventBus.getDefault();
@@ -133,8 +136,20 @@ public class Preferences {
 	}
 	
 	public static float getFakeAlertDetectionRadius() {
-		return prefs.getFloat(res.getString(R.string.prefKeyFakeAlertDetectionRadius), 0.1f);
+		String v = prefs.getString(res.getString(R.string.prefKeyFakeAlertDetectionRadius), Float.toString(0.1f));
+		return Float.parseFloat(v);
 	}
+	
+	public static int getFakeAlertOccurenceThreshold() {
+		String v = prefs.getString(res.getString(R.string.prefKeyFakeAlertDetectionOccurenceThreshold), Integer.toString(5));
+		return Integer.parseInt(v);
+	}
+	
+	public static int getThreatShowMinSpeed() {
+		String v = prefs.getString(res.getString(R.string.prefKeyThreatShowMinSpeed), Integer.toString(0));
+		return Integer.parseInt(v);
+	}
+	
 	
 	public static String getLogFileName() {
 		return prefs.getString(res.getString(R.string.prefKeyLogFileName), "iradar.log");
@@ -156,6 +171,10 @@ public class Preferences {
 		return prefs.getInt(res.getString(R.string.prefKeyScreenRefreshFrequency), 2);
 	}
 	
+	public static int getUnits() {
+		String v = prefs.getString(res.getString(R.string.prefKeyUnits), Integer.toString(PREF_UNITS_METRIC));
+		return Integer.parseInt(v); 
+	}
 	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
 		public void onSharedPreferenceChanged(

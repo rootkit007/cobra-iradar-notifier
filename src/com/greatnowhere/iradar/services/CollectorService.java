@@ -17,7 +17,7 @@ import android.os.IBinder;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.cobra.iradar.IRadarMessageHandler;
+import com.cobra.iradar.RadarMessageHandler;
 import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.RadarScanManager;
 import com.cobra.iradar.messaging.CobraMessageAllClear;
@@ -44,23 +44,31 @@ public class CollectorService extends Service {
 
 	private static final String TAG = CollectorService.class.getCanonicalName();
 	
-    private EventBus eventBus = EventBus.getDefault();
+    private EventBus eventBus;
     private boolean isRadarInitialized = false;
     
-    private static Queue<String> screenLog = new ConcurrentLinkedQueue<String>();
-    private static ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
-    private static String lastAlert = "";
+    private Queue<String> screenLog = new ConcurrentLinkedQueue<String>();
+    private String screenLogString = "";
+    private ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
+    private String lastAlert = "";
+    
+    private static CollectorService instance;
     
     public int onStartCommand(Intent intent, int flags, int startId) {
-    	int retVal = super.onStartCommand(intent, flags, startId);
+    	super.onStartCommand(intent, flags, startId);
+    	
+    	if ( eventBus == null )
+    		eventBus = EventBus.getDefault();
     	
     	if ( !eventBus.isRegistered(this)) {
     		eventBus.register(this);
     	}
     	
+    	instance = this;
+    	
     	init();
     	
-	    return retVal;
+	    return START_STICKY;
     }
     
     private void init() {
@@ -119,6 +127,7 @@ public class CollectorService extends Service {
         LocationManager.stop();
         radarMessageHandler.stop();
         eventBus.unregister(this);
+        eventBus = null;
     }
     
 	public IBinder onBind(Intent intent) {
@@ -131,15 +140,12 @@ public class CollectorService extends Service {
 
     // The Handler that gets information back from the IRadar
     // All event handlers are called in async thread, so care must be taken when updating UI
-	private static IRadarMessageHandler radarMessageHandler = new IRadarMessageHandler() {
+	private RadarMessageHandler radarMessageHandler = new RadarMessageHandler() {
 
 		@Override
 		public void onRadarMessage(final CobraMessageConnectivityNotification msg) {
 				addLogMessage(msg.message);
-				CollectorService.connStatus = msg.status;
-				if ( CollectorService.connStatus != ConnectivityStatus.CONNECTED ) {
-					
-				}
+				instance.connStatus = getConnStatus();
 		}
 
 		@Override
@@ -162,20 +168,32 @@ public class CollectorService extends Service {
 	};
 	
     public synchronized static String getConnStatus() {
-		return connStatus.getStatusName();
+    	if ( instance == null )
+    		return null;
+		return instance.connStatus.getStatusName();
 	}
 
 	public synchronized static String getBatteryVoltage() {
-		return (connStatus == ConnectivityStatus.CONNECTED ? Double.toString(radarMessageHandler.getBatteryVoltage()) : "" );
+    	if ( instance == null )
+    		return null;
+		return (instance.connStatus == ConnectivityStatus.CONNECTED ? Double.toString(instance.radarMessageHandler.getBatteryVoltage()) : "" );
 	}
 
 	public synchronized static String getLastAlert() {
-		return lastAlert;
+    	if ( instance == null )
+    		return null;
+		return instance.lastAlert;
 	}
 
 	public synchronized static String getLog() {
+		return instance.screenLogString;
+	}
+	
+	private synchronized static String getLogAsString() {
+    	if ( instance == null )
+    		return null;
 		String log = "";
-		for ( String s : screenLog ) {
+		for ( String s : instance.screenLog ) {
 			log = s + "\n" + log;
 		}
 		return log;
@@ -184,11 +202,13 @@ public class CollectorService extends Service {
 	public static void addLogMessage(String msg) {
     	// generate timestamp
     	String tsMsg = DateFormat.format("M/d HH:mm:ss", new Date()).toString() + " " + msg;
-    	screenLog.add(tsMsg);
-    	if ( screenLog.size() > Preferences.getScreenLogScrollBackLimit() )
-    		screenLog.remove();
+    	instance.screenLog.add(tsMsg);
+    	if ( instance.screenLog.size() > Preferences.getScreenLogScrollBackLimit() )
+    		instance.screenLog.remove();
+    	instance.screenLogString = getLogAsString();
     	//log.setText(tsMsg + log.getText());
     	addFileLogMessage(tsMsg);
+    	instance.eventBus.post(new MainRadarActivity.UIRefreshLogEvent());
     }
     
     public static void addFileLogMessage(String msg) {
@@ -199,7 +219,7 @@ public class CollectorService extends Service {
     				  Environment.getExternalStorageDirectory(), 
     				  Preferences.getLogFileName());
     		  OutputStream os = new FileOutputStream(logFile, true);
-    		  os.write(msg.getBytes());
+    		  os.write((msg + "\n").getBytes());
     		  os.close();
     	} catch (Exception e) {
     		  e.printStackTrace();

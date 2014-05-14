@@ -52,10 +52,10 @@
 	<string name="prefCatAudio">Audible Alerts</string>
 	<string name="prefCatVisibleNotifications">Notifications</string>
 	<string name="prefKeyOngoingNotificationWhileConnected">prefKeyOngoingNotificationWhileConnected</string>
-	<string name="prefValOngoingNotificationWhileConnected">Show ongoing notification while connected</string>
+	<string name="prefValOngoingNotificationWhileConnected">Notification while connected</string>
 	<string name="prefSumOngoingNotificationWhileConnected">Shows ongoing notification when radar device is connected</string>
 	<string name="prefKeyOngoingNotificationWhileScanning">prefKeyOngoingNotificationWhileScanning</string>
-	<string name="prefValOngoingNotificationWhileScanning">Show ongoing notification when scanning for devices</string>
+	<string name="prefValOngoingNotificationWhileScanning">Notification while scanning</string>
 	<string name="prefSumOngoingNotificationWhileScanning">Shows ongoing notification if scheduled scan for radar devices is active</string>
 	<string name="prefKeyScanOnlyInCarMode">prefKeyScanOnlyInCarMode</string>
 	<string name="prefValScanOnlyInCarMode">Only scan if in car mode</string>
@@ -86,4 +86,20 @@
 	<string name="prefSumFakeAlertDetection">Learn locations/frequencies of frequent alerts, and dont display them anymore</string>
 	<string name="prefValFakeAlertDetectionRadius">Proximity threshold for fake alerts</string>
 	<string name="prefSumFakeAlertDetectionRadius">Proximity (km) to previous alerts</string>
+	<string name="menuItemTestAlertTitle">Test Alert</string>
+	<string name="prefSumAlertLevelSetFlag">Set alerts volume. Will restore original volume after alert(s) clear</string>
+	<string name="prefKeyUnits">prefKeyUnits</string>
+	<string name="prefValUnits">Units to display</string>
+	<string name="prefKeyFakeAlertDetectionOccurenceThreshold">prefKeyFakeAlertDetectionOccurenceThreshold</string>
+	<string name="prefValFakeAlertDetectionOccurenceThreshold">Number of occurences threshold</string>
+	<string name="prefSumFakeAlertDetectionOccurenceThreshold">How many occurences of a threat with same frequency and location before its classified as false</string>
+	<string name="prefKeyThreatShowMinSpeed">prefKeyThreatShowMinSpeed</string>
+	<string name="prefValThreatShowMinSpeed">"Show Threats only when speed above "</string>
+	<string name="prefSumThreatShowMinSpeed">Only alert when speed is above threshold</string>
+	<string name="prefDlgTextThreatShowMinSpeed">"Will not show any alerts unless speed is above entered value (km/h) "</string>
+	<string name="log">Log</string>
+	<string name="aboutTxtAbout">Radar Notifier Application\nVisit https://github.com/rootkit007/cobra-iradar-notifier to submit bug report or get source code\nQuestions? Email rootkit007@gmail.com</string>
+	<string name="aboutTxtCopyright">Icon by http://www.visualpharm.com/</string>
+	<string name="itemTextAbout">About</string>
+	<string name="ok">OK</string>
 </resources>

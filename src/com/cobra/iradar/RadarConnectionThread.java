@@ -29,12 +29,13 @@ public class RadarConnectionThread extends Thread {
 	private BluetoothSocket socket;
 	private InputStream rxStream;
 	private OutputStream txStream;
-    private EventBus eventBus = EventBus.getDefault();
+    private EventBus eventBus;
     
     public static AtomicBoolean isRunning = new AtomicBoolean(false);
 	
 	public RadarConnectionThread(BluetoothDevice dev) {
 		iRadar = dev;
+		eventBus = EventBus.getDefault();
 		setName("BT Connection");
 	}
 	

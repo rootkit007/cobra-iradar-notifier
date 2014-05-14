@@ -17,10 +17,11 @@ public class LocationManager {
 	private static Location currentLoc;
 	private static LocationListener locListener;
 	private static boolean isReady = false;
-	private static EventBus eventBus = EventBus.getDefault();
+	private static EventBus eventBus;
 	
 	public static void init(Context ctx) {
 		LocationManager.ctx = ctx;
+		eventBus = EventBus.getDefault();
 		eventBus.register(new ConnectivityEventsListener());
 		lm = (android.location.LocationManager) LocationManager.ctx.getSystemService(Context.LOCATION_SERVICE);
 	}
@@ -62,6 +63,20 @@ public class LocationManager {
 	public static void setCurrentLoc(Location currentLoc) {
 		LocationManager.currentLoc = currentLoc;
 		isReady = true;
+	}
+	
+	public static float getCurrentSpeedKph() {
+		if ( getCurrentLoc() != null ) {
+			return getCurrentLoc().getSpeed()*3.6f;
+		}
+		return 0f;
+	}
+	
+	public static float getCurrentSpeedMph() {
+		if ( getCurrentLoc() != null ) {
+			return getCurrentLoc().getSpeed()*2.23694f;
+		}
+		return 0f;
 	}
 
 	public static boolean isReady() {

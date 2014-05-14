@@ -24,20 +24,22 @@ public class TTSManager {
 
 	private static TextToSpeech tts;
 	private static AtomicBoolean isReady = new AtomicBoolean(false);
-	private static EventBus eventBus = EventBus.getDefault();
+	private static EventBus eventBus;
 	private static AtomicInteger connStatus = new AtomicInteger(ConnectivityStatus.UNKNOWN.getCode());
 	private static Timer timer;
 	private static HashMap<String, String> ttsParams = new HashMap<String, String>();
 	private static TelephonyManager tm;
+	private static EventListener listener = new EventListener();
 	
 	public static void init(Context ctx) {
 		stop();
+		eventBus = EventBus.getDefault();
 		isReady.set(false);
 		tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
 		tts = new TextToSpeech(ctx, new TTSInitListener());
 		ttsParams.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AlertAudioManager.OUTPUT_STREAM));
 		tts.setOnUtteranceProgressListener(new TTSUtteranceProgressListener());
-		eventBus.register(new EventListener());
+		eventBus.register(listener);
 	}
 	
 	public static void stop() {
@@ -45,6 +47,8 @@ public class TTSManager {
 			tts.shutdown();
 		if ( timer != null )
 			timer.cancel();
+		if ( eventBus != null && eventBus.isRegistered(listener))
+			eventBus.unregister(listener);
 	}
 	
 	public static class EventListener {

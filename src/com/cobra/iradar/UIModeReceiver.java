@@ -11,7 +11,7 @@ import de.greenrobot.event.EventBus;
 
 public class UIModeReceiver extends BroadcastReceiver {
 	
-	private static EventBus eventBus = EventBus.getDefault();
+	private static EventBus eventBus;
 	
 	public static String MOTO_X_CONTEXT_CHANGE_BROADCAST = "com.motorola.context.CONTEXT_CHANGE";
 	public static String MOTO_X_CONTEXT_BROADCAST_MIME_TYPE = "context/com.motorola.context.publisher.InVehicle";
@@ -22,6 +22,7 @@ public class UIModeReceiver extends BroadcastReceiver {
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		eventBus = EventBus.getDefault();
 		if ( intent.getAction().equals(Intent.ACTION_DOCK_EVENT) ) {
 			if ( intent.getIntExtra(Intent.EXTRA_DOCK_STATE, -1) == Intent.EXTRA_DOCK_STATE_CAR ) {
 				RadarScanManager.isCarMode.set(true);
