@@ -3,6 +3,7 @@ package com.greatnowhere.iradar.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -17,7 +18,6 @@ import android.os.IBinder;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.cobra.iradar.RadarMessageHandler;
 import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.RadarScanManager;
 import com.cobra.iradar.messaging.CobraMessageAllClear;
@@ -45,11 +45,10 @@ public class CollectorService extends Service {
 	private static final String TAG = CollectorService.class.getCanonicalName();
 	
     private EventBus eventBus;
-    private boolean isRadarInitialized = false;
+	private boolean isRadarInitialized = false;
     
     private Queue<String> screenLog = new ConcurrentLinkedQueue<String>();
     private String screenLogString = "";
-    private ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
     private String lastAlert = "";
     
     private static CollectorService instance;
@@ -60,13 +59,15 @@ public class CollectorService extends Service {
     	if ( eventBus == null )
     		eventBus = EventBus.getDefault();
     	
-    	if ( !eventBus.isRegistered(this)) {
-    		eventBus.register(this);
-    	}
-    	
     	instance = this;
     	
-    	init();
+    	if ( intent != null && intent.hasExtra(RadarManager.INTENT_ACTIVITY_EXTRA_KEY_MSG) && isRadarInitialized ) {
+    		Serializable s = intent.getSerializableExtra(RadarManager.INTENT_ACTIVITY_EXTRA_KEY_MSG);
+    		Log.i(TAG, "Posting Cobra message " + s.toString());
+    		eventBus.post(s);
+    	} else {
+    		init();
+    	}
     	
 	    return START_STICKY;
     }
@@ -110,10 +111,8 @@ public class CollectorService extends Service {
     	}
     	isRadarInitialized = RadarManager.initialize(getApplicationContext(), Preferences.isNotifyOngoingConnected(),
 				connectedNotification, scanNotification, 
-				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly());
-    	if ( !isRadarInitialized ) {
-    		connStatus = ConnectivityStatus.PROTOCOL_ERROR;
-    	}
+				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly(),
+				CollectorService.class);
     	
     }
     
@@ -126,7 +125,6 @@ public class CollectorService extends Service {
         ThreatManager.stop();
         LocationManager.stop();
         radarMessageHandler.stop();
-        eventBus.unregister(this);
         eventBus = null;
     }
     
@@ -140,43 +138,33 @@ public class CollectorService extends Service {
 
     // The Handler that gets information back from the IRadar
     // All event handlers are called in async thread, so care must be taken when updating UI
-	private RadarMessageHandler radarMessageHandler = new RadarMessageHandler() {
-
+	private CobraMessageHandler radarMessageHandler = new CobraMessageHandler() {
 		@Override
-		public void onRadarMessage(final CobraMessageConnectivityNotification msg) {
-				addLogMessage(msg.message);
-				instance.connStatus = getConnStatus();
+		public void onEventBackgroundThread(final CobraMessageConnectivityNotification msg) {
 		}
-
 		@Override
-		public void onRadarMessage(final CobraMessageThreat msg) {
+		public void onEventBackgroundThread(final CobraMessageThreat msg) {
 	        	addLogMessage("Alert " + msg.alertType.getName() + msg.strength + " " + msg.frequency);
 	        	lastAlert = msg.alertType.getName() + " " + msg.frequency;
 	        	ThreatManager.newThreat(msg);
 		}
-
 		@Override
-		public void onRadarMessage(final CobraMessageAllClear msg) {
+		public void onEventBackgroundThread(final CobraMessageAllClear msg) {
 				lastAlert = "";
 				ThreatManager.removeThreats();
 		}
-
 		@Override
-		public void onRadarMessage(final CobraMessageNotification msg) {
+		public void onEventBackgroundThread(final CobraMessageNotification msg) {
 				addLogMessage(msg.message);
 		}
 	};
 	
     public synchronized static String getConnStatus() {
-    	if ( instance == null )
-    		return null;
-		return instance.connStatus.getStatusName();
+		return RadarManager.getConnectivityStatus().getStatusName();
 	}
 
 	public synchronized static String getBatteryVoltage() {
-    	if ( instance == null )
-    		return null;
-		return (instance.connStatus == ConnectivityStatus.CONNECTED ? Double.toString(instance.radarMessageHandler.getBatteryVoltage()) : "" );
+		return (RadarManager.getConnectivityStatus() == ConnectivityStatus.CONNECTED ? Double.toString(RadarManager.getBatteryVoltage()) : "" );
 	}
 
 	public synchronized static String getLastAlert() {

@@ -55,10 +55,10 @@
         </activity>
         <activity android:name="AboutActivity" android:noHistory="true" android:excludeFromRecents="true"></activity>
         <activity android:name=".config.SettingsActivity" android:label="Settings" android:noHistory="true" android:excludeFromRecents="true"></activity>
-        		<service android:label="iRadar Connectivity Service" android:permission="android.permission.BLUETOOTH" android:name="com.cobra.iradar.RadarConnectionService" android:enabled="true"></service>
-        <service android:label="iRadar Monitoring Service" android:name="com.cobra.iradar.RadarMonitorService" android:enabled="true"></service>
-        <service android:label="Data Collector Service" android:name=".services.CollectorService" android:enabled="true"></service>
-        <service android:label="Threat Logger Service" android:name="com.greatnowhere.iradar.threats.ThreatLogger$ThreatLoggerService" android:enabled="true"></service>
+        <service android:label="iRadar Connectivity Service" android:permission="android.permission.BLUETOOTH" android:name="com.cobra.iradar.RadarConnectionService" android:enabled="true" android:singleUser="true"></service>
+        <service android:label="iRadar Monitoring Service" android:name="com.cobra.iradar.RadarMonitorService" android:enabled="true" android:singleUser="true"></service>
+        <service android:label="Data Collector Service" android:name=".services.CollectorService" android:enabled="true" android:singleUser="true"></service>
+        <service android:label="Threat Logger Service" android:name="com.greatnowhere.iradar.threats.ThreatLogger$ThreatLoggerService" android:enabled="true" android:singleUser="true"></service>
         <service android:label="DB Pruner Service" android:name="com.greatnowhere.iradar.threats.ThreatLogger$DBPruneService" android:enabled="true"></service>
         <receiver android:name=".receiver.BootReceiver" android:enabled="true">
             <intent-filter>

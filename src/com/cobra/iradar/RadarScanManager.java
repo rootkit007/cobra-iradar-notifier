@@ -2,10 +2,6 @@ package com.cobra.iradar;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.cobra.iradar.messaging.ConnectivityStatus;
-import com.cobra.iradar.protocol.RadarMessageNotification;
-
-import de.greenrobot.event.EventBus;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -20,7 +16,7 @@ public class RadarScanManager {
 	/**
 	 * "Scanning" notification ID
 	 */
-	public static final int NOTIFICATION_SCAN = 1;
+	public static final int NOTIFICATION_SCAN = 2;
 
 	private static Context ctx;
 	static AtomicBoolean isCarMode = new AtomicBoolean();
@@ -35,8 +31,6 @@ public class RadarScanManager {
 	private static boolean runInCarModeOnly;
 	private static Notification notify;
 	
-	private EventBus eventBus;
-	private RadarEventsListener radarEventsListener;
 	static RadarScanManager instance;
 	
 	/**
@@ -50,15 +44,11 @@ public class RadarScanManager {
 	public static void init(Context ctx, Notification notify, boolean runScan, int scanInterval, boolean runInCarModeOnly) {
 		RadarScanManager.ctx = ctx;
 		instance = new RadarScanManager();
-		instance.eventBus = EventBus.getDefault();
-		instance.radarEventsListener = new RadarEventsListener();
 		RadarScanManager.notify = notify;
 		uiManager = (UiModeManager) RadarScanManager.ctx.getSystemService(Context.UI_MODE_SERVICE);
 		alarmManager = (AlarmManager) RadarScanManager.ctx.getSystemService(Context.ALARM_SERVICE);
 		notifManager = (NotificationManager) RadarScanManager.ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		isCarMode.set( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR );
-		
-		instance.eventBus.register(instance.radarEventsListener);
 		scan(runScan,scanInterval,runInCarModeOnly);
 	}
 	
@@ -75,9 +65,9 @@ public class RadarScanManager {
 	
 	public static void scan() {
 		// determine if scan should be active
+		// only if not connected
 		if ( runScan && scanInterval > 0 &&
 				  ( !runInCarModeOnly || ( runInCarModeOnly && isCarMode.get() ) ) ) {
-			
 			// yes, active. set up system alarm to wake monitor service
 			stop();
 			startConnectionMonitor();
@@ -96,11 +86,9 @@ public class RadarScanManager {
 			notifManager.notify(NOTIFICATION_SCAN, notify);
 		if ( instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
-		if ( !instance.eventBus.isRegistered(instance.radarEventsListener))
-			instance.eventBus.register(instance.radarEventsListener);
 		
 		Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
-		reconnectIntent.putExtra(RadarMonitorService.INTENT_RECONNECT, true);
+		reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
 		instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 		alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 1000L, ((long) scanInterval) * 1000L, 
 				instance.reconnectionIntent);
@@ -109,7 +97,7 @@ public class RadarScanManager {
 	public static void stop() {
 		if ( instance.reconnectionIntent == null ) {
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
-			reconnectIntent.putExtra(RadarMonitorService.INTENT_RECONNECT, true);
+			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
 			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 		}
 		alarmManager.cancel(instance.reconnectionIntent);
@@ -118,30 +106,22 @@ public class RadarScanManager {
 		if ( notify != null ) {
 			notifManager.cancel(NOTIFICATION_SCAN);
 		}
-		if ( instance.eventBus.isRegistered(instance.radarEventsListener)) 
-			instance.eventBus.unregister(instance.radarEventsListener);
 	}
 	
 	public static boolean isScanActive() {
 		return ( instance.reconnectionIntent != null );
 	}
 	
-	// Run scan only when not connected ya know
-	private static class RadarEventsListener {
-		@SuppressWarnings("unused")
-		public void onEventAsync(RadarMessageNotification msg) {
-			if ( msg.type == RadarMessageNotification.TYPE_CONN ) {
-				switch (ConnectivityStatus.fromCode(msg.connectionStatus)) {
-				case CONNECTED:
-					stop();
-					break;
-				case DISCONNECTED:
-					scan();
-					break;
-				default:
-				}
-			}
-		}
+	public static Notification getNotification() {
+		return notify;
+	}
+	
+	public static void eventDisconnect() {
+		scan();
+	}
+
+	public static void eventConnect() {
+		stop();
 	}
 	
 }

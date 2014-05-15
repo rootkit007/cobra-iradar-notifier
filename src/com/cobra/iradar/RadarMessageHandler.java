@@ -4,6 +4,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.util.Log;
+
+import com.cobra.iradar.messaging.CobraMessage;
 import com.cobra.iradar.messaging.CobraMessageAllClear;
 import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
 import com.cobra.iradar.messaging.CobraMessageNotification;
@@ -26,6 +29,8 @@ import de.greenrobot.event.EventBus;
  */
 public abstract class RadarMessageHandler {
 
+	private static final String TAG = RadarMessageHandler.class.getCanonicalName();
+	
 	private ConnectivityStatus connStatus = ConnectivityStatus.UNKNOWN;
 	private Double batteryVoltage = 0D;
 	private boolean isThreatActive = false;
@@ -38,20 +43,17 @@ public abstract class RadarMessageHandler {
 	
 	protected static EventBus eventBus;
 	
-	public RadarMessageHandler() {
-		super();
-		eventBus = EventBus.getDefault();
-		eventBus.register(this);
-	}
-	
 	public void stop() {
-		eventBus.unregister(this);
+		if ( eventBus != null && eventBus.isRegistered(this) )
+			eventBus.unregister(this);
 	}
 	
 	/**
 	 * Receives raw messages from {@link RadarConnectionService} and calls onRadarMessage as needed 
 	 */
     public final void onEventAsync(RadarMessageNotification msg) {
+    	
+    	Log.i(TAG,"Got " + msg.toString());
     	
     	switch (msg.type) {
     	case RadarMessageNotification.TYPE_CONN:
@@ -108,9 +110,6 @@ public abstract class RadarMessageHandler {
     	return connStatus;
     }
     
-    public abstract void onRadarMessage(CobraMessageConnectivityNotification msg);
-    public abstract void onRadarMessage(CobraMessageThreat msg);
-    public abstract void onRadarMessage(CobraMessageAllClear msg);
-    public abstract void onRadarMessage(CobraMessageNotification msg);
+    public abstract void onRadarMessage(CobraMessage msg);
 	
 }

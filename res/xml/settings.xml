@@ -40,8 +40,8 @@
     <PreferenceScreen android:title="@string/prefCatVisibleNotifications" android:persistent="false">
         <CheckBoxPreference android:key="@string/prefKeyOngoingNotificationWhileConnected" android:title="@string/prefValOngoingNotificationWhileConnected" android:summary="@string/prefSumOngoingNotificationWhileConnected" android:defaultValue="true"/>
         <CheckBoxPreference android:key="@string/prefKeyOngoingNotificationWhileScanning" android:title="@string/prefValOngoingNotificationWhileScanning" android:summary="@string/prefSumOngoingNotificationWhileScanning" android:defaultValue="true"/>
-        <CheckBoxPreference android:key="@string/prefKeyKeepScreenOnInForeground" android:title="@string/prefValKeepScreenOnInForeground" android:defaultValue="true"/>
-        <CheckBoxPreference android:key="@string/prefKeyTurnScreenOnForAlerts" android:title="@string/prefValTurnScreenOnForAlerts"/>
+        <CheckBoxPreference android:key="@string/prefKeyKeepScreenOnInForeground" android:title="@string/prefValKeepScreenOnInForeground" android:defaultValue="true" android:summary="@string/prefSumKeepScreenOnInForeground"/>
+        <CheckBoxPreference android:key="@string/prefKeyTurnScreenOnForAlerts" android:title="@string/prefValTurnScreenOnForAlerts" android:summary="@string/prefSumTurnScreenOnForAlerts"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="Scanning" android:persistent="false">
 	    <CheckBoxPreference android:title="@string/prefValScanForDevice" android:summary="@string/prefSumScanForDevice" android:disableDependentsState="false" android:key="@string/prefKeyScanForDevice" android:defaultValue="true"/>

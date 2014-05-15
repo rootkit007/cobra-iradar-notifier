@@ -20,7 +20,7 @@ import de.greenrobot.event.EventBus;
 public class RadarConnectionService extends Service {
 
 	private static final String TAG = RadarConnectionService.class.getCanonicalName();
-	public static final int NOTIFICATION_CONNECTED = 2;
+	public static final int NOTIFICATION_CONNECTED = 1;
 	
 	private BluetoothDevice iRadarDevice;
 	private RadarConnectionThread radarThread;
@@ -32,6 +32,9 @@ public class RadarConnectionService extends Service {
 	@Override
 	public int onStartCommand (Intent intent, int flags, int startId) {
     	super.onStartCommand(intent,flags,startId);
+    	
+    	Log.i(TAG, "Service Start");
+    	
 		eventBus = EventBus.getDefault();
 		if ( !eventBus.isRegistered(this) )
     		eventBus.register(this);

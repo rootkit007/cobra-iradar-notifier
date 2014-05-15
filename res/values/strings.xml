@@ -71,9 +71,9 @@
 	<string name="prefKeyLogThreatsLimitNumVal">prefKeyLogThreatsLimitNumVal</string>
 	<string name="prefValLogThreatsLimitNumVal">Max Number of threats to keep</string>
 	<string name="prefKeyKeepScreenOnInForeground">prefKeyKeepScreenOnInForeground</string>
-	<string name="prefValKeepScreenOnInForeground">Keep screen on when in foreground</string>
+	<string name="prefValKeepScreenOnInForeground">Keep screen on</string>
 	<string name="prefKeyTurnScreenOnForAlerts">prefKeyTurnScreenOnForAlerts</string>
-	<string name="prefValTurnScreenOnForAlerts">Turn Screen On For Alerts</string>
+	<string name="prefValTurnScreenOnForAlerts">Turn Screen On</string>
 	<string name="prefKeyLogLocation">prefKeyLogLocation</string>
 	<string name="prefValLogLocation">Log threat location</string>
 	<string name="prefSumLogLocation">Records GPS location. Will consume more battery!</string>
@@ -99,7 +99,9 @@
 	<string name="prefDlgTextThreatShowMinSpeed">"Will not show any alerts unless speed is above entered value (km/h) "</string>
 	<string name="log">Log</string>
 	<string name="aboutTxtAbout">Radar Notifier Application\nVisit https://github.com/rootkit007/cobra-iradar-notifier to submit bug report or get source code\nQuestions? Email rootkit007@gmail.com</string>
-	<string name="aboutTxtCopyright">Icon by http://www.visualpharm.com/</string>
+	<string name="aboutTxtCopyright">Icon Image Credit: <a href="http://vector.me/browse/339809/radar" title="Radar" target="_blank">Radar</a> from <a href="http://vector.me/" title="Vector.me" target="_blank">Vector.me</a> (by mola)</string>
 	<string name="itemTextAbout">About</string>
 	<string name="ok">OK</string>
+	<string name="prefSumKeepScreenOnInForeground">Will keep screen on while app is running in foreground</string>
+	<string name="prefSumTurnScreenOnForAlerts">Will turn screen on and disable keyguard when alerts occur</string>
 </resources>

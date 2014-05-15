@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -30,23 +31,39 @@ public class RadarConnectionThread extends Thread {
 	private InputStream rxStream;
 	private OutputStream txStream;
     private EventBus eventBus;
+    @SuppressWarnings("unused")
+	private RadarConnectivityListener listener;
     
     public static AtomicBoolean isRunning = new AtomicBoolean(false);
+    public AtomicInteger connectionStatus = new AtomicInteger(ConnectivityStatus.UNKNOWN.getCode());
 	
 	public RadarConnectionThread(BluetoothDevice dev) {
 		iRadar = dev;
 		eventBus = EventBus.getDefault();
+		listener = new RadarConnectivityListener() {
+			@Override
+			public void onDisconnected() {
+				RadarScanManager.eventDisconnect();
+			}
+			@Override
+			public void onConnected() {
+				RadarScanManager.eventConnect();
+			}
+		};
 		setName("BT Connection");
 	}
 	
 	@Override
 	public synchronized void run() {
 		
+		Log.i(TAG,"BT thread " + this.getId() + " starting");
+		
 		isRunning.set(true);
 		
 		if ( iRadar == null ) {
 			this.interrupt();
 			isRunning.set(false);
+			connectionStatus.set(ConnectivityStatus.UNKNOWN.getCode());
 			return;
 		}
 		
@@ -56,6 +73,7 @@ public class RadarConnectionThread extends Thread {
 		try {
 			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connecting to " + iRadar.getName(),
 					ConnectivityStatus.CONNECTING.getCode()));
+			connectionStatus.set(ConnectivityStatus.CONNECTING.getCode());
 			
 			try {
 				socket = iRadar.createRfcommSocketToServiceRecord(MY_UUID);
@@ -69,6 +87,7 @@ public class RadarConnectionThread extends Thread {
 			txStream = socket.getOutputStream();
 			
 		} catch (Exception e) {
+			connectionStatus.set(ConnectivityStatus.DISCONNECTED.getCode());
 			eventBus.post(new RadarMessageNotification("Connection failed"));
 			isRunning.set(false);
 			return;
@@ -76,6 +95,7 @@ public class RadarConnectionThread extends Thread {
 
 		eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
 				ConnectivityStatus.CONNECTED.getCode()));
+		connectionStatus.set(ConnectivityStatus.CONNECTED.getCode());
 		isConnectionSuccess = true;
 
 		byte[] packet;
@@ -88,6 +108,7 @@ public class RadarConnectionThread extends Thread {
 				eventBus.post(new RadarMessageStopAlert(0));
 				eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Error in data connection",
 						ConnectivityStatus.PROTOCOL_ERROR.getCode()));
+				connectionStatus.set(ConnectivityStatus.PROTOCOL_ERROR.getCode());
 				this.interrupt(); 
 			}
 		}
@@ -101,6 +122,7 @@ public class RadarConnectionThread extends Thread {
 			Log.i(TAG, e.getLocalizedMessage());
 		}
 		
+		connectionStatus.set(ConnectivityStatus.DISCONNECTED.getCode());
 		// if we were successfully connected, notify clients of conn status change
 		if ( isConnectionSuccess ) {
 			eventBus.post(new RadarMessageStopAlert(0));
