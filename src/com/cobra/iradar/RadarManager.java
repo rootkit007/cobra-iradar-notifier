@@ -82,8 +82,11 @@ public class RadarManager {
 	}
 	  
 	public static synchronized void stop() {
-		appContext.stopService(new Intent(appContext, RadarConnectionService.class));
+		if ( listenerToIntent != null ) {
+			listenerToIntent.stop();
+		}
 		RadarScanManager.stop();
+		appContext.stopService(new Intent(appContext, RadarConnectionService.class));
 	}
 	  
 	public static synchronized void startConnectionService() {

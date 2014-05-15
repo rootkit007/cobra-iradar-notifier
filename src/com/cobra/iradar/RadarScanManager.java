@@ -69,7 +69,7 @@ public class RadarScanManager {
 		if ( runScan && scanInterval > 0 &&
 				  ( !runInCarModeOnly || ( runInCarModeOnly && isCarMode.get() ) ) ) {
 			// yes, active. set up system alarm to wake monitor service
-			stop();
+			stopAlarm();
 			startConnectionMonitor();
 		} else {
 			// stop any current system alarms
@@ -87,14 +87,21 @@ public class RadarScanManager {
 		if ( instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
 		
-		Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
-		reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
-		instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-		alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 1000L, ((long) scanInterval) * 1000L, 
-				instance.reconnectionIntent);
+		if ( runScan ) {
+			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
+			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
+			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 1000L, ((long) scanInterval) * 1000L, 
+					instance.reconnectionIntent);
+		}
 	}
 	  
 	public static void stop() {
+		runScan = false;
+		stopAlarm();
+	}
+	
+	public static void stopAlarm() {
 		if ( instance.reconnectionIntent == null ) {
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
@@ -121,7 +128,7 @@ public class RadarScanManager {
 	}
 
 	public static void eventConnect() {
-		stop();
+		stopAlarm();
 	}
 	
 }

@@ -49,6 +49,7 @@ public class RadarConnectionService extends Service {
 	
 	@Override
 	public void onDestroy() {
+    	Log.i(TAG, "Service Stop");
 		super.onDestroy();
     	if ( RadarManager.isShowNotification() ) {
     		stopForeground(true);

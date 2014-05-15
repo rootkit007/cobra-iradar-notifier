@@ -19,7 +19,7 @@ public abstract class RadarConnectivityListener {
 		eventBus.register(this);
 	}
 	
-	public void destroy() {
+	public void stop() {
 		if ( eventBus.isRegistered(this) )
 			eventBus.unregister(this);
 	}
@@ -29,7 +29,7 @@ public abstract class RadarConnectivityListener {
 			onConnected();
 		}
 		if ( msg.connectionStatus == ConnectivityStatus.DISCONNECTED.getCode() ) {
-			onConnected();
+			onDisconnected();
 		}
 	}
 	
