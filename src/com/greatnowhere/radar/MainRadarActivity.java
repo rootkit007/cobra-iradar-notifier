@@ -138,9 +138,16 @@ public class MainRadarActivity extends Activity {
         	getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         else 
         	getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        refreshScreen();
         super.onResume();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+    	super.onConfigurationChanged(newConfig);
+    	refreshScreen();
+    }
+    
     @Override
     public void onBackPressed() {
        Log.d(TAG, "onBackPressed Called");
@@ -275,6 +282,11 @@ public class MainRadarActivity extends Activity {
      */
     public void onEventMainThread(UIRefreshLogEvent event) {
     	log.setText(CollectorService.getLog());
+    }
+    
+    public void refreshScreen() {
+    	eventBus.post(new UIRefreshLogEvent());
+    	eventBus.post(new UIRefreshEvent());
     }
     
     public static class UIRefreshEvent {

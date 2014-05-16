@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="1sp"
+    android:showDividers="middle"
     android:stretchColumns="1"
     >
 
@@ -31,6 +32,7 @@
             android:text="Status" 
 	        android:textStyle="bold"
 	        android:layout_width="wrap_content"
+	        android:paddingRight="5dp"
             />
         
 	    <TextView
@@ -47,6 +49,7 @@
         <TextView
             android:text="Voltage" 
 	        android:layout_width="wrap_content"
+	        android:paddingRight="5dp"
             />
         
 	    <TextView
@@ -63,6 +66,7 @@
         <TextView
             android:text="UI Mode" 
 	        android:layout_width="wrap_content"
+	        android:paddingRight="5dp"
             />
         
 	    <TextView
@@ -79,6 +83,7 @@
         <TextView
             android:text="Speed" 
 	        android:layout_width="wrap_content"
+	        android:paddingRight="5dp"
             />
         
 	    <TextView
@@ -95,6 +100,7 @@
         <TextView
             android:text="@string/log" 
 	        android:layout_width="wrap_content"
+	        android:paddingRight="5dp"
             />
         
 	    <TextView
@@ -111,17 +117,19 @@
 	</TableRow>
 	
 </TableLayout>
-<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_horizontal">
 	        <Button
 	        android:id="@+id/btnReconnect"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
 	        android:text="Reconnect" />
 	
 	    	<Button
 	        android:id="@+id/btnQuit"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
 	        android:text="Quit" />
 </LinearLayout>
 </LinearLayout>
