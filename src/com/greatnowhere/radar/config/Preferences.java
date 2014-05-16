@@ -1,6 +1,6 @@
 package com.greatnowhere.radar.config;
 
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 
 import de.greenrobot.event.EventBus;
 import android.content.Context;
@@ -45,6 +45,11 @@ public class Preferences {
 	public static int getAlertLevelHeadSet() {
 		int i = prefs.getInt(res.getString(R.string.prefKeyAlertLevelHeadSet), 1);
 		return i;
+	}
+	
+	public static int getAlertAutoMuteDelay() {
+		String v = prefs.getString(res.getString(R.string.prefKeyAutoMuteDelay), Integer.toString(5));
+		return Integer.parseInt(v);
 	}
 	
 	public static boolean isScanForDevice() {
@@ -105,6 +110,14 @@ public class Preferences {
 	
 	public static int getNotifyWhileConnectedInterval() {
 		return Integer.parseInt(prefs.getString(res.getString(R.string.prefKeyTextDeviceWorkingInterval), "300"));
+	}
+	
+	/**
+	 * Offset for TTS volume
+	 * @return
+	 */
+	public static int getNotificationVolumeOffset() {
+		return Integer.parseInt(prefs.getString(res.getString(R.string.prefKeyTTSVolumeOffset), "0"));
 	}
 	
 	public static boolean isKeepScreenOnForeground() {

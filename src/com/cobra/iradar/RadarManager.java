@@ -68,8 +68,8 @@ public class RadarManager {
 		
 		for ( BluetoothDevice dev : mBluetoothAdapter.getBondedDevices() ) {
 			if ( Constants.BT_DEVICE_NAMES.contains(dev.getName()) ) {
+				mBTDevice = dev; // scanner will take care of the rest
 				RadarScanManager.init(ctx, scanNotification, runScan, scanInterval, scanInCarModeOnly);
-				connectRadarDevice(dev);
 				return true;
 			}
 		}
@@ -99,11 +99,6 @@ public class RadarManager {
 					  RadarManager.mBTDevice, RadarManager.ongoingNotification ));
 	}
 	  
-	  
-	private static synchronized void connectRadarDevice( BluetoothDevice dev ) {
-		mBTDevice = dev;
-		startConnectionService();
-	}
 	  
 	public static boolean isShowNotification() {
 		return showNotification;

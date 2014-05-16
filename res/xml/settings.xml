@@ -4,8 +4,8 @@
     xmlns:robobunny="http://robobunny.com">
 
     <PreferenceScreen android:title="@string/prefCatAudio" android:persistent="false">
-	    <CheckBoxPreference android:title="Set Alerts Sound Level" android:key="@string/prefKeyAlertLevelSetFlag" 
-	        android:selectable="true" android:defaultValue="false" android:enabled="true" android:disableDependentsState="false" android:summary="@string/app_name"/>
+	    <CheckBoxPreference android:title="@string/prefValAlertLevelSetFlag" android:key="@string/prefKeyAlertLevelSetFlag" 
+	        android:selectable="true" android:defaultValue="false" android:enabled="true" android:disableDependentsState="false" android:summary="@string/prefSumAlertLevelSetFlag"/>
         <com.robobunny.SeekBarPreference
 	            android:key="@string/prefKeyAlertLevel" android:dependency="@string/prefKeyAlertLevelSetFlag"
 	            android:title="Speaker Alert Level"
@@ -36,6 +36,8 @@
 	            robobunny:unitsLeft=""
 	            robobunny:unitsRight=""
 	    />
+        <EditTextPreference android:key="@string/prefKeyAutoMuteDelay" android:summary="@string/prefSumAutoMuteDelay" 
+            android:title="@string/prefValAutoMuteDelay" android:numeric="integer" android:defaultValue="3"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/prefCatVisibleNotifications" android:persistent="false">
         <CheckBoxPreference android:key="@string/prefKeyOngoingNotificationWhileConnected" android:title="@string/prefValOngoingNotificationWhileConnected" android:summary="@string/prefSumOngoingNotificationWhileConnected" android:defaultValue="true"/>
@@ -65,6 +67,12 @@
 	        android:dependency="@string/prefKeySpeakEvents"
 	        android:numeric="integer"  />
 	    <EditTextPreference android:title="@string/prefValTextDeviceDisconnect" android:key="@string/prefKeyTextDeviceDisconnect" android:dialogTitle="Text to speak when device disconnects" android:dependency="@string/prefKeySpeakEvents" android:defaultValue="Radar Device Disconnected"/>
+	    <ListPreference android:title="@string/prefValTTSVolumeOffset" 
+	        android:summary="@string/prefSumTTSVolumeOffset" android:key="@string/prefKeyTTSVolumeOffset" 
+	        android:entries="@array/arrayLabelTTSVolumeOffset" 
+	        android:entryValues="@array/arrayValTTSVolumeOffset" 
+	        android:dependency="@string/prefKeySpeakEvents" 
+	        android:defaultValue="0"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/prefCatThreats" android:persistent="false">
 	  <CheckBoxPreference android:key="@string/prefKeyLogThreats" android:title="@string/prefValLogThreats" android:summary="@string/prefSumLogThreats" android:defaultValue="true" android:disableDependentsState="false"/>
@@ -72,9 +80,9 @@
 	  <CheckBoxPreference android:key="@string/prefKeyLogThreatsLimitNum" android:title="@string/prefValLogThreatsLimitNum" android:defaultValue="false" android:dependency="@string/prefKeyLogThreats" android:disableDependentsState="false"/>
 	  <EditTextPreference android:key="@string/prefKeyLogThreatsLimitNumVal" android:dependency="@string/prefKeyLogThreatsLimitNum" android:title="@string/prefValLogThreatsLimitNumVal" android:defaultValue="500" android:numeric="integer"/>
 	  <CheckBoxPreference android:summary="@string/prefSumFakeAlertDetection" android:title="@string/prefValFakeAlertDetection" android:key="@string/prefKeyFakeAlertDetection" android:dependency="@string/prefKeyLogLocation" android:defaultValue="true" android:disableDependentsState="false"/>
-	  <EditTextPreference android:key="@string/prefKeyFakeAlertDetectionRadius" android:summary="@string/prefSumFakeAlertDetectionRadius" android:title="@string/prefValFakeAlertDetectionRadius" android:digits="0123456789." android:inputType="numberDecimal" android:dependency="@string/prefKeyFakeAlertDetection"/>
+	  <EditTextPreference android:key="@string/prefKeyFakeAlertDetectionRadius" android:summary="@string/prefSumFakeAlertDetectionRadius" android:title="@string/prefValFakeAlertDetectionRadius" android:digits="0123456789." android:inputType="numberDecimal" android:dependency="@string/prefKeyFakeAlertDetection" android:defaultValue="0.2"/>
 	  <EditTextPreference android:key="@string/prefKeyFakeAlertDetectionOccurenceThreshold" android:summary="@string/prefSumFakeAlertDetectionOccurenceThreshold" android:title="@string/prefValFakeAlertDetectionOccurenceThreshold" android:defaultValue="5" android:dependency="@string/prefKeyFakeAlertDetection" android:numeric="integer"/>
-	  <EditTextPreference android:dialogMessage="@string/prefDlgTextThreatShowMinSpeed" android:key="@string/prefKeyThreatShowMinSpeed" android:summary="@string/prefSumThreatShowMinSpeed" android:title="@string/prefValThreatShowMinSpeed" android:dependency="@string/prefKeyLogLocation" android:numeric="integer"/>
+	  <EditTextPreference android:dialogMessage="@string/prefDlgTextThreatShowMinSpeed" android:key="@string/prefKeyThreatShowMinSpeed" android:summary="@string/prefSumThreatShowMinSpeed" android:title="@string/prefValThreatShowMinSpeed" android:dependency="@string/prefKeyLogLocation" android:numeric="integer" android:defaultValue="45"/>
     </PreferenceScreen>
     <ListPreference android:key="@string/prefKeyUnits" android:title="@string/prefValUnits" android:entries="@array/unitsTitles" android:entryValues="@array/unitsKeys" android:defaultValue="1"/>
     

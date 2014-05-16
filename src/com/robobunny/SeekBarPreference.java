@@ -1,6 +1,6 @@
 package com.robobunny;
 
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 
 import android.content.Context;
 import android.content.res.TypedArray;

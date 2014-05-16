@@ -4,19 +4,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.SoundPool;
+import android.os.PowerManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.cobra.iradar.protocol.CobraRadarMessageAlert;
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.RadarLocationManager;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
@@ -46,6 +49,9 @@ public class ThreatManager {
 	private static EventBus eventBus;
 	protected static ThreatManager instance;
 	private static Threat currentThreat;
+	private static PowerManager pm;
+	private static AtomicBoolean wasScreenOn = new AtomicBoolean(false);
+	private Timer autoMuteTimer;
 	
 	private static Context ctx;
 	
@@ -79,6 +85,7 @@ public class ThreatManager {
 		        params.gravity = Gravity.CENTER | Gravity.TOP;
 		        params.dimAmount = 0.3f;
 		        wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
+		        pm = (PowerManager) ctx.getSystemService(Context.POWER_SERVICE);
 		        
 		        instance.mainThreatLayout = (LinearLayout) instance.mainThreatView.findViewById(R.id.layoutThreats);
 		        
@@ -141,12 +148,7 @@ public class ThreatManager {
 		}
 		
 		if ( !isThreatActive.get() && Threat.isShowVisibleThreat(cred) ) {
-			isThreatActive.set(true);
-			eventBus.post(new UIRunnableEvent(new Runnable() {
-				public void run() {
-					wm.addView(instance.mainThreatView, params);
-				}
-			}));
+			showMainView();
 		}
 		Threat t = findExistingThreat( alert );
 		if ( t == null ) {
@@ -162,6 +164,20 @@ public class ThreatManager {
 		currentThreat = t;
 		
 		return cred;
+	}
+	
+	private synchronized static void showMainView() {
+		isThreatActive.set(true);
+		wasScreenOn.set(pm.isScreenOn());
+		eventBus.post(new UIRunnableEvent(new Runnable() {
+			public void run() {
+				wm.addView(instance.mainThreatView, params);
+			}
+		}));
+		if ( Preferences.getAlertAutoMuteDelay() > 0 ) {
+			instance.autoMuteTimer = new Timer();
+			instance.autoMuteTimer.schedule(instance.new AutoMuteTask(), (long) Preferences.getAlertAutoMuteDelay() * 1000L );
+		}
 	}
 	
 	public synchronized static void removeThreats() {
@@ -183,7 +199,15 @@ public class ThreatManager {
 				wm.removeView(instance.mainThreatView);
 			}
 		}));
+		
+		if ( wasScreenOn.get() ) {
+			turnScreenOff();
+		}
 
+	}
+	
+	private static void turnScreenOff() {
+		//pm.goToSleep(SystemClock.uptimeMillis());
 	}
 	
 	private static Threat findExistingThreat(RadarMessageThreat other) {
@@ -232,6 +256,13 @@ public class ThreatManager {
 	
 	public static void addLogMessage(String s) {
 		eventBus.post(new RadarMessageNotification(s));
+	}
+	
+	private class AutoMuteTask extends TimerTask {
+		@Override
+		public void run() {
+			AlertAudioManager.setAutoMuteVolume();
+		}
 	}
 
 	/**

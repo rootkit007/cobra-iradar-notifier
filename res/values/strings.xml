@@ -104,4 +104,11 @@
 	<string name="ok">OK</string>
 	<string name="prefSumKeepScreenOnInForeground">Will keep screen on while app is running in foreground</string>
 	<string name="prefSumTurnScreenOnForAlerts">Will turn screen on and disable keyguard when alerts occur</string>
+	<string name="prefKeyTTSVolumeOffset">prefKeyTTSVolumeOffset</string>
+	<string name="prefValTTSVolumeOffset">Change volume for TTS notifications</string>
+	<string name="prefSumTTSVolumeOffset">Increase or decrease TTS volume relative to alerts volume</string>
+	<string name="prefKeyAutoMuteDelay">prefKeyAutoMuteDelay</string>
+	<string name="prefValAutoMuteDelay">Auto Mute</string>
+	<string name="prefSumAutoMuteDelay">After how many seconds to reduce alert volume</string>
+	<string name="prefValAlertLevelSetFlag">Set Volume for Alerts</string>
 </resources>

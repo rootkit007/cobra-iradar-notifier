@@ -34,7 +34,7 @@ public class AlertInjectionReceiver extends BootReceiver {
 			a = Alert.X;
 			break;
 		}
-		CobraRadarMessageAlert msg = new CobraRadarMessageAlert(a, r.nextInt(4), Math.round(r.nextFloat()*150f + 200f)/10f, 3000L );
+		CobraRadarMessageAlert msg = new CobraRadarMessageAlert(a, r.nextInt(4), Math.round(r.nextFloat()*150f + 200f)/10f, r.nextInt(6000) );
 		eventBus.post(msg);
 	}
 

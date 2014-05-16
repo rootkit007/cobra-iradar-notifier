@@ -4,7 +4,7 @@ import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 
 import android.app.Application;
 

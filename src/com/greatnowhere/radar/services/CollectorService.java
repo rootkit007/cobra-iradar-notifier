@@ -20,7 +20,7 @@ import android.util.Log;
 
 import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.RadarScanManager;
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.MainRadarActivity;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.RadarLocationManager;
@@ -135,30 +135,6 @@ public class CollectorService extends Service {
     	RadarScanManager.scan(Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly());
     }
 
-    // The Handler that gets information back from the IRadar
-    // All event handlers are called in background thread, so care must be taken when updating UI
-	private CobraMessageHandler radarMessageHandler = new CobraMessageHandler() {
-		@Override
-		public void onEventBackgroundThread(final RadarMessageConnectivityNotification msg) {
-			// nothing to do here. CobraMessageConnectivityNotification is a subclass of
-			// CobraMessageNotification so this message will get logged there
-			// and actual connectivity changes are handled elsewhere
-		}
-		
-		@Override
-		public void onEventBackgroundThread(final RadarMessageThreat msg) {
-	        	ThreatManager.newThreat(msg);
-		}
-		@Override
-		public void onEventBackgroundThread(final RadarMessageAllClear msg) {
-				ThreatManager.removeThreats();
-		}
-		@Override
-		public void onEventBackgroundThread(final RadarMessageNotification msg) {
-				addLogMessage(msg.message);
-		}
-	};
-	
     public synchronized static String getConnStatus() {
 		return RadarManager.getConnectivityStatus().getStatusName();
 	}
@@ -216,4 +192,28 @@ public class CollectorService extends Service {
     	}
     }
     
+    // The Handler that gets information back from the IRadar
+    // All event handlers are called in background thread, so care must be taken when updating UI
+	private CobraMessageHandler radarMessageHandler = new CobraMessageHandler() {
+		@Override
+		public void onEventBackgroundThread(final RadarMessageConnectivityNotification msg) {
+			// nothing to do here. CobraMessageConnectivityNotification is a subclass of
+			// CobraMessageNotification so this message will get logged there
+			// and actual connectivity changes are handled elsewhere
+		}
+		
+		@Override
+		public void onEventBackgroundThread(final RadarMessageThreat msg) {
+	        	ThreatManager.newThreat(msg);
+		}
+		@Override
+		public void onEventBackgroundThread(final RadarMessageAllClear msg) {
+				ThreatManager.removeThreats();
+		}
+		@Override
+		public void onEventBackgroundThread(final RadarMessageNotification msg) {
+				addLogMessage(msg.message);
+		}
+	};
+	
 }

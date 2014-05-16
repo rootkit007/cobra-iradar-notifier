@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.RadarLocationManager;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;

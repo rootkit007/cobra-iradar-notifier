@@ -14,9 +14,9 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.greatnowhere.iradar"
-      android:versionCode="1"
-      android:versionName="1.0">
+      package="com.greatnowhere.radar"
+      android:versionCode="2"
+      android:versionName="1.0beta2">
     <uses-sdk android:minSdkVersion="15" android:maxSdkVersion="19" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />

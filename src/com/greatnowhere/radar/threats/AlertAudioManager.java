@@ -21,14 +21,13 @@ public class AlertAudioManager {
 	private static AudioManager am;
 	private static int originalVolume = 0;
 	public static final int OUTPUT_STREAM = AudioManager.STREAM_MUSIC;
-	
+	public static final int AUTOMUTE_VOLUME_OFFSET = -3;
 	
 	public static void init(Context ctx) {
 		am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
 	}
 	
 	public static void setOurAlertVolume() {
-		
 		// only set volume if we already havent done so, and preferences indicate we should do it
 		if ( Preferences.isSetAlertLevel() && !isOurAlertVolumeSet.get() ) {
 			if ( am != null ) {
@@ -40,7 +39,26 @@ public class AlertAudioManager {
 				isOurAlertVolumeSet.set(true);
 			}
 		}
+	}
+
+	/**
+	 * Adjusts current volume for TTS
+	 */
+	public static void setTTSVolume() {
+		setOurAlertVolume();
+		if ( Preferences.getNotificationVolumeOffset() != 0 ) {
+			int ttsVolume = getOurAlertLevel() + Preferences.getNotificationVolumeOffset();
+			am.setStreamVolume(OUTPUT_STREAM, getTranslatedVolume(ttsVolume), 0);
+		}
 		
+	}
+	
+	public static void setAutoMuteVolume() {
+		// only set volume if we are on our volume
+		if ( isOurAlertVolumeSet.get() ) {
+			int autoMuteVolume = getTranslatedVolume( getOurAlertLevel() + AUTOMUTE_VOLUME_OFFSET );
+			am.setStreamVolume(OUTPUT_STREAM, autoMuteVolume, 0);
+		}
 	}
 	
 	/**
@@ -79,6 +97,9 @@ public class AlertAudioManager {
 	 * @return
 	 */
 	private static int getTranslatedVolume(int vol) {
+		// ensure volume is in 0-7 range
+		vol = Math.max(vol, 0);
+		vol = Math.min(vol, 7);
 		return Math.round((((float) vol)/7f) * ((float) getMaxAudioVolume()));
 	}
 	

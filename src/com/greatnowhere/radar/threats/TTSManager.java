@@ -91,7 +91,7 @@ public class TTSManager {
 		if ( Preferences.isNotifyConnectivityNotDuringCalls() && tm.getCallState() != TelephonyManager.CALL_STATE_IDLE )
 			return;
 		if ( isReady.get() && Preferences.isNotifyConnectivity() && text != null && !text.isEmpty() ) {
-			AlertAudioManager.setOurAlertVolume();
+			AlertAudioManager.setTTSVolume();
 			int i = tts.speak(text, TextToSpeech.QUEUE_ADD, ttsParams);
 			Log.d(TAG, "speak " + text + " :result " + i);
 		}

@@ -12,13 +12,17 @@ import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.util.Log;
 
 public class RadarScanManager {
+	
+	private static final String TAG = RadarScanManager.class.getCanonicalName();
 	
 	/**
 	 * "Scanning" notification ID
 	 */
 	public static final int NOTIFICATION_SCAN = 2;
+	
 
 	private static Context ctx;
 	static AtomicBoolean isCarMode = new AtomicBoolean();
@@ -51,11 +55,25 @@ public class RadarScanManager {
 		alarmManager = (AlarmManager) RadarScanManager.ctx.getSystemService(Context.ALARM_SERVICE);
 		notifManager = (NotificationManager) RadarScanManager.ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		isCarMode.set( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR );
+		initializeListener();
 		scan(runScan,scanInterval,runInCarModeOnly);
 	}
 	
 	public static boolean isInitialized() {
 		return ( ctx != null );
+	}
+	
+	private static void initializeListener() {
+		listener = new RadarConnectivityListener() {
+			@Override
+			public void onDisconnected() {
+				RadarScanManager.eventDisconnect();
+			}
+			@Override
+			public void onConnected() {
+				RadarScanManager.eventConnect();
+			}
+		};		
 	}
 	
 	public static void scan(boolean runScan, int scanInterval, boolean runInCarModeOnly) {
@@ -89,11 +107,12 @@ public class RadarScanManager {
 	 * @param seconds
 	 */
 	private static void startConnectionMonitor() {
-		showNotification();
+		Log.i(TAG,"start monitor");
 		if ( instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
 		
 		if ( runScan ) {
+			showNotification();
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
 			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -103,12 +122,14 @@ public class RadarScanManager {
 	}
 	  
 	public static void stop() {
+		Log.i(TAG,"complete stop");
 		runScan = false;
 		listener.stop();
 		stopAlarm();
 	}
 	
 	public static void stopAlarm() {
+		Log.i(TAG,"stop alarm");
 		if ( instance.reconnectionIntent == null ) {
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
@@ -138,15 +159,6 @@ public class RadarScanManager {
 		stopAlarm();
 	}
 
-	private static RadarConnectivityListener listener = new RadarConnectivityListener() {
-		@Override
-		public void onDisconnected() {
-			RadarScanManager.eventDisconnect();
-		}
-		@Override
-		public void onConnected() {
-			RadarScanManager.eventConnect();
-		}
-	};
+	private static RadarConnectivityListener listener;
 
 }

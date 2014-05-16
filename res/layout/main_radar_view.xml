@@ -6,6 +6,7 @@
     android:id="@+id/mainViewLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="1sp"
     android:stretchColumns="1"
     >
 

@@ -3,7 +3,7 @@ package com.greatnowhere.radar.config;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 
 public class SettingsFragment extends PreferenceFragment {
 

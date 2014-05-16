@@ -1,6 +1,6 @@
 package com.greatnowhere.radar.config;
 
-import com.greatnowhere.iradar.R;
+import com.greatnowhere.radar.R;
 
 import android.app.Activity;
 import android.os.Bundle;
