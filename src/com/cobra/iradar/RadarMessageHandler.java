@@ -6,15 +6,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.util.Log;
 
-import com.cobra.iradar.messaging.CobraMessage;
-import com.cobra.iradar.messaging.CobraMessageAllClear;
-import com.cobra.iradar.messaging.CobraMessageConnectivityNotification;
-import com.cobra.iradar.messaging.CobraMessageNotification;
-import com.cobra.iradar.messaging.CobraMessageThreat;
-import com.cobra.iradar.messaging.ConnectivityStatus;
-import com.cobra.iradar.protocol.RadarMessageAlert;
-import com.cobra.iradar.protocol.RadarMessageNotification;
-import com.cobra.iradar.protocol.RadarMessageStopAlert;
+import com.cobra.iradar.protocol.CobraRadarMessageAlert;
+import com.cobra.iradar.protocol.CobraRadarMessageNotification;
+import com.cobra.iradar.protocol.CobraRadarMessageStopAlert;
+import com.greatnowhere.radar.messaging.RadarMessage;
+import com.greatnowhere.radar.messaging.RadarMessageAllClear;
+import com.greatnowhere.radar.messaging.RadarMessageConnectivityNotification;
+import com.greatnowhere.radar.messaging.RadarMessageNotification;
+import com.greatnowhere.radar.messaging.RadarMessageThreat;
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
 import de.greenrobot.event.EventBus;
 
@@ -51,20 +51,20 @@ public abstract class RadarMessageHandler {
 	/**
 	 * Receives raw messages from {@link RadarConnectionService} and calls onRadarMessage as needed 
 	 */
-    public final void onEventAsync(RadarMessageNotification msg) {
+    public final void onEventAsync(CobraRadarMessageNotification msg) {
     	
     	Log.i(TAG,"Got " + msg.toString());
     	
     	switch (msg.type) {
-    	case RadarMessageNotification.TYPE_CONN:
-        	CobraMessageConnectivityNotification msgConn = new CobraMessageConnectivityNotification();
+    	case CobraRadarMessageNotification.TYPE_CONN:
+        	RadarMessageConnectivityNotification msgConn = new RadarMessageConnectivityNotification();
         	msgConn.message = msg.message;
         	msgConn.status = ConnectivityStatus.fromCode(msg.connectionStatus);
         	connStatus = msgConn.status;
         	onRadarMessage(msgConn);
         	break;
-    	case RadarMessageNotification.TYPE_NOTIFY:
-        	CobraMessageNotification msgNotify = new CobraMessageNotification();
+    	case CobraRadarMessageNotification.TYPE_NOTIFY:
+        	RadarMessageNotification msgNotify = new RadarMessageNotification();
         	msgNotify.message = msg.message;
         	onRadarMessage(msgNotify);
         	break;
@@ -72,8 +72,8 @@ public abstract class RadarMessageHandler {
     	}
     }
     
-    public final void onEventAsync(RadarMessageAlert alertMsg) {
-    	CobraMessageThreat msgThreat = new CobraMessageThreat(alertMsg.alert, alertMsg.strength, alertMsg.frequency);
+    public final void onEventAsync(CobraRadarMessageAlert alertMsg) {
+    	RadarMessageThreat msgThreat = new RadarMessageThreat(alertMsg.alert, alertMsg.strength, alertMsg.frequency);
     	isThreatActive = true;
     	if ( alertMsg.minAlerTime != null ) {
     		isThreatForcedActive.set(true);
@@ -84,7 +84,7 @@ public abstract class RadarMessageHandler {
 				@Override
 				public void run() {
 		    		isThreatForcedActive.set(false);
-		    		eventBus.post(new RadarMessageStopAlert(batteryVoltage));
+		    		eventBus.post(new CobraRadarMessageStopAlert(batteryVoltage));
 				}
 			}, alertMsg.minAlerTime);
     	}
@@ -92,8 +92,8 @@ public abstract class RadarMessageHandler {
     }
     
     
-    public final void onEventAsync(RadarMessageStopAlert stopAlertMsg) {
-    	CobraMessageAllClear msgClear = new CobraMessageAllClear();
+    public final void onEventAsync(CobraRadarMessageStopAlert stopAlertMsg) {
+    	RadarMessageAllClear msgClear = new RadarMessageAllClear();
     	this.batteryVoltage = stopAlertMsg.batteryVoltage;
     	// Send "All Clear" message only if threats are active, and not forcibly held active 
     	if ( isThreatActive && !isThreatForcedActive.get() ) {
@@ -110,6 +110,6 @@ public abstract class RadarMessageHandler {
     	return connStatus;
     }
     
-    public abstract void onRadarMessage(CobraMessage msg);
+    public abstract void onRadarMessage(RadarMessage msg);
 	
 }

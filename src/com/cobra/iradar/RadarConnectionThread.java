@@ -12,11 +12,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.cobra.iradar.messaging.ConnectivityStatus;
-import com.cobra.iradar.protocol.RadarMessage;
-import com.cobra.iradar.protocol.RadarMessageNotification;
-import com.cobra.iradar.protocol.RadarMessageStopAlert;
-import com.cobra.iradar.protocol.RadarPacketProcessor;
+import com.cobra.iradar.protocol.CobraRadarMessage;
+import com.cobra.iradar.protocol.CobraRadarMessageNotification;
+import com.cobra.iradar.protocol.CobraRadarMessageStopAlert;
+import com.cobra.iradar.protocol.CobraRadarPacketProcessor;
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
 import de.greenrobot.event.EventBus;
 
@@ -31,26 +31,18 @@ public class RadarConnectionThread extends Thread {
 	private InputStream rxStream;
 	private OutputStream txStream;
     private EventBus eventBus;
-    @SuppressWarnings("unused")
-	private RadarConnectivityListener listener;
     
     public static AtomicBoolean isRunning = new AtomicBoolean(false);
-    public AtomicInteger connectionStatus = new AtomicInteger(ConnectivityStatus.UNKNOWN.getCode());
+    private static AtomicInteger connectionStatus = new AtomicInteger(ConnectivityStatus.UNKNOWN.getCode());
 	
 	public RadarConnectionThread(BluetoothDevice dev) {
 		iRadar = dev;
 		eventBus = EventBus.getDefault();
-		listener = new RadarConnectivityListener() {
-			@Override
-			public void onDisconnected() {
-				RadarScanManager.eventDisconnect();
-			}
-			@Override
-			public void onConnected() {
-				RadarScanManager.eventConnect();
-			}
-		};
-		setName("BT Connection");
+		setName("BT Connection " + getId());
+	}
+	
+	protected static ConnectivityStatus getConnectivityStatus() {
+		return ConnectivityStatus.fromCode(connectionStatus.get());
 	}
 	
 	@Override
@@ -71,7 +63,7 @@ public class RadarConnectionThread extends Thread {
 		
 		// connection attempt
 		try {
-			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connecting to " + iRadar.getName(),
+			eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Connecting to " + iRadar.getName(),
 					ConnectivityStatus.CONNECTING.getCode()));
 			connectionStatus.set(ConnectivityStatus.CONNECTING.getCode());
 			
@@ -88,12 +80,12 @@ public class RadarConnectionThread extends Thread {
 			
 		} catch (Exception e) {
 			connectionStatus.set(ConnectivityStatus.DISCONNECTED.getCode());
-			eventBus.post(new RadarMessageNotification("Connection failed"));
+			eventBus.post(new CobraRadarMessageNotification("Connection failed"));
 			isRunning.set(false);
 			return;
 		}
 
-		eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
+		eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
 				ConnectivityStatus.CONNECTED.getCode()));
 		connectionStatus.set(ConnectivityStatus.CONNECTED.getCode());
 		isConnectionSuccess = true;
@@ -101,12 +93,12 @@ public class RadarConnectionThread extends Thread {
 		byte[] packet;
 		while ( !isInterrupted() ) {
 			try {
-				packet = RadarPacketProcessor.getPacket(rxStream);
-				eventBus.post(RadarMessage.fromPacket(packet));
+				packet = CobraRadarPacketProcessor.getPacket(rxStream);
+				eventBus.post(CobraRadarMessage.fromPacket(packet));
 			} catch (Exception e) {
 				Log.e(TAG, "IO Exception", e);
-				eventBus.post(new RadarMessageStopAlert(0));
-				eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Error in data connection",
+				eventBus.post(new CobraRadarMessageStopAlert(0));
+				eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Error in data connection",
 						ConnectivityStatus.PROTOCOL_ERROR.getCode()));
 				connectionStatus.set(ConnectivityStatus.PROTOCOL_ERROR.getCode());
 				this.interrupt(); 
@@ -125,8 +117,8 @@ public class RadarConnectionThread extends Thread {
 		connectionStatus.set(ConnectivityStatus.DISCONNECTED.getCode());
 		// if we were successfully connected, notify clients of conn status change
 		if ( isConnectionSuccess ) {
-			eventBus.post(new RadarMessageStopAlert(0));
-			eventBus.post(new RadarMessageNotification(RadarMessageNotification.TYPE_CONN, "Disconnected",
+			eventBus.post(new CobraRadarMessageStopAlert(0));
+			eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Disconnected",
 				ConnectivityStatus.DISCONNECTED.getCode()));
 		}
 		

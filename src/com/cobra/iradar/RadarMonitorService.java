@@ -14,6 +14,7 @@ public class RadarMonitorService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		if ( intent != null && intent.getBooleanExtra(KEY_INTENT_RECONNECT, false) ) {
+			RadarScanManager.showNotification();
 			RadarManager.startConnectionService();
 		}
 	}

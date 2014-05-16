@@ -1,15 +1,11 @@
 package com.cobra.iradar;
 
-import com.cobra.iradar.messaging.ConnectivityStatus;
-import com.cobra.iradar.protocol.RadarMessageNotification;
-
 import android.app.Notification;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-import de.greenrobot.event.EventBus;
 
 /**
  * A service handling connection to iRadar
@@ -26,7 +22,6 @@ public class RadarConnectionService extends Service {
 	private RadarConnectionThread radarThread;
     @SuppressWarnings("unused")
 	private int notificationId = 1;
-    private EventBus eventBus;
     private Notification connectedNotification;
 	
 	@Override
@@ -35,9 +30,6 @@ public class RadarConnectionService extends Service {
     	
     	Log.i(TAG, "Service Start");
     	
-		eventBus = EventBus.getDefault();
-		if ( !eventBus.isRegistered(this) )
-    		eventBus.register(this);
     	if ( intent != null && intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE) != null ) {
     		iRadarDevice = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE);
     		connectedNotification = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_NOTIFICATION);
@@ -51,12 +43,11 @@ public class RadarConnectionService extends Service {
 	public void onDestroy() {
     	Log.i(TAG, "Service Stop");
 		super.onDestroy();
+		connectivityListener.stop();
     	if ( RadarManager.isShowNotification() ) {
     		stopForeground(true);
     	}
     	stopConnection();
-		if ( eventBus.isRegistered(this) )
-    		eventBus.unregister(this);
 	}
 	
 	public synchronized void runConnection() {
@@ -86,22 +77,19 @@ public class RadarConnectionService extends Service {
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
-	
-	public void onEventAsync(RadarMessageNotification msg) {
-		if ( msg.type == RadarMessageNotification.TYPE_CONN ) {
-			switch (ConnectivityStatus.fromCode(msg.connectionStatus)) {
-			case DISCONNECTED:
-				stopForeground(true);
-				stopSelf();
-				break;
-			case CONNECTED:
-	        	if ( connectedNotification != null ) {
-	        		startForeground(NOTIFICATION_CONNECTED, connectedNotification );
-	        	}
-				break;
-			default:
-			}
-		}
-	}
 
+	public RadarConnectivityListener connectivityListener = new RadarConnectivityListener() {
+		@Override
+		public void onDisconnected() {
+			stopForeground(true);
+			stopSelf();
+		}
+		@Override
+		public void onConnected() {
+        	if ( connectedNotification != null ) {
+        		startForeground(NOTIFICATION_CONNECTED, connectedNotification );
+        	}
+		}
+	};
+	
 }

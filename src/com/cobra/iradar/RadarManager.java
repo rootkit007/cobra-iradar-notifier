@@ -1,7 +1,7 @@
 package com.cobra.iradar;
 
-import com.cobra.iradar.messaging.CobraMessage;
-import com.cobra.iradar.messaging.ConnectivityStatus;
+import com.greatnowhere.radar.messaging.RadarMessage;
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
 import android.app.Notification;
 import android.app.Service;
@@ -126,9 +126,15 @@ public class RadarManager {
 	}
 	
 	public static ConnectivityStatus getConnectivityStatus() {
-		return listenerToIntent.getConnStatus();
+		return RadarConnectionThread.getConnectivityStatus();
 	}
 	
+	/**
+	 * Notifies data collector service via intents
+	 * This ensures collector service is up and running for all events
+	 * @author pzeltins
+	 *
+	 */
 	private static class ListenerToIntent extends RadarMessageHandler {
 		private static final String TAG = ListenerToIntent.class.getCanonicalName();
 		
@@ -138,7 +144,7 @@ public class RadarManager {
 			eventBus.register(this);
 		}
 		
-		public void onRadarMessage(CobraMessage msg) {
+		public void onRadarMessage(RadarMessage msg) {
 			Log.i(TAG,"Got Cobra message " + msg.toString());
 			Intent i = new Intent(appContext, serviceClass);
 			i.putExtra(INTENT_ACTIVITY_EXTRA_KEY_MSG, msg);

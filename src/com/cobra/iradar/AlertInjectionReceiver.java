@@ -5,9 +5,9 @@ import java.util.Random;
 import android.content.Context;
 import android.content.Intent;
 
-import com.cobra.iradar.protocol.RadarMessageAlert;
-import com.cobra.iradar.protocol.RadarMessageAlert.Alert;
-import com.greatnowhere.iradar.receiver.BootReceiver;
+import com.cobra.iradar.protocol.CobraRadarMessageAlert;
+import com.cobra.iradar.protocol.CobraRadarMessageAlert.Alert;
+import com.greatnowhere.radar.receiver.BootReceiver;
 
 import de.greenrobot.event.EventBus;
 
@@ -34,7 +34,7 @@ public class AlertInjectionReceiver extends BootReceiver {
 			a = Alert.X;
 			break;
 		}
-		RadarMessageAlert msg = new RadarMessageAlert(a, r.nextInt(4), Math.round(r.nextFloat()*150f + 200f)/10f, 3000L );
+		CobraRadarMessageAlert msg = new CobraRadarMessageAlert(a, r.nextInt(4), Math.round(r.nextFloat()*150f + 200f)/10f, 3000L );
 		eventBus.post(msg);
 	}
 

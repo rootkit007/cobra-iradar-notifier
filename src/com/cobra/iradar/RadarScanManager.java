@@ -2,6 +2,8 @@ package com.cobra.iradar;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -66,7 +68,7 @@ public class RadarScanManager {
 	public static void scan() {
 		// determine if scan should be active
 		// only if not connected
-		if ( runScan && scanInterval > 0 &&
+		if ( runScan && scanInterval > 0 && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED &&
 				  ( !runInCarModeOnly || ( runInCarModeOnly && isCarMode.get() ) ) ) {
 			// yes, active. set up system alarm to wake monitor service
 			stopAlarm();
@@ -77,13 +79,17 @@ public class RadarScanManager {
 		}
 	}
 	
+	public static void showNotification() {
+		if ( notify != null )
+			notifManager.notify(NOTIFICATION_SCAN, notify);
+	}
+	
 	/**
 	 * Starts periodic attempts to monitor/reconnect
 	 * @param seconds
 	 */
 	private static void startConnectionMonitor() {
-		if ( notify != null )
-			notifManager.notify(NOTIFICATION_SCAN, notify);
+		showNotification();
 		if ( instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
 		
@@ -98,6 +104,7 @@ public class RadarScanManager {
 	  
 	public static void stop() {
 		runScan = false;
+		listener.stop();
 		stopAlarm();
 	}
 	
@@ -130,5 +137,16 @@ public class RadarScanManager {
 	public static void eventConnect() {
 		stopAlarm();
 	}
-	
+
+	private static RadarConnectivityListener listener = new RadarConnectivityListener() {
+		@Override
+		public void onDisconnected() {
+			RadarScanManager.eventDisconnect();
+		}
+		@Override
+		public void onConnected() {
+			RadarScanManager.eventConnect();
+		}
+	};
+
 }

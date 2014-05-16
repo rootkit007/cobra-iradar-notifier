@@ -1,7 +1,7 @@
 package com.cobra.iradar;
 
-import com.cobra.iradar.messaging.ConnectivityStatus;
-import com.cobra.iradar.protocol.RadarMessageNotification;
+import com.cobra.iradar.protocol.CobraRadarMessageNotification;
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
 import de.greenrobot.event.EventBus;
 
@@ -24,7 +24,7 @@ public abstract class RadarConnectivityListener {
 			eventBus.unregister(this);
 	}
 	
-	public void onEventAsync(RadarMessageNotification msg) {
+	public void onEventAsync(CobraRadarMessageNotification msg) {
 		if ( msg.connectionStatus == ConnectivityStatus.CONNECTED.getCode() ) {
 			onConnected();
 		}

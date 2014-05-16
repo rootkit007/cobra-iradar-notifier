@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.cobra.iradar.protocol.RadarMessageNotification;
+import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 
 import de.greenrobot.event.EventBus;
 
@@ -26,35 +26,35 @@ public class UIModeReceiver extends BroadcastReceiver {
 		if ( intent.getAction().equals(Intent.ACTION_DOCK_EVENT) ) {
 			if ( intent.getIntExtra(Intent.EXTRA_DOCK_STATE, -1) == Intent.EXTRA_DOCK_STATE_CAR ) {
 				RadarScanManager.isCarMode.set(true);
-				eventBus.post(new RadarMessageNotification("Car mode activated"));
+				eventBus.post(new CobraRadarMessageNotification("Car mode activated"));
 				RadarScanManager.scan();
 			} else {
 				RadarScanManager.isCarMode.set(false);
-				eventBus.post(new RadarMessageNotification("Car mode deactivated"));
+				eventBus.post(new CobraRadarMessageNotification("Car mode deactivated"));
 				RadarScanManager.scan();
 			}
 		}
 		if ( intent.getAction().equals(UiModeManager.ACTION_ENTER_CAR_MODE)  ) {
 			RadarScanManager.isCarMode.set(true);
-			eventBus.post(new RadarMessageNotification("Car mode activated"));
+			eventBus.post(new CobraRadarMessageNotification("Car mode activated"));
 			RadarScanManager.scan();
 		} 
 		if ( intent.getAction().equals(UiModeManager.ACTION_EXIT_CAR_MODE)  ) {
 			RadarScanManager.isCarMode.set(false);
-			eventBus.post(new RadarMessageNotification("Car mode deactivated"));
+			eventBus.post(new CobraRadarMessageNotification("Car mode deactivated"));
 			RadarScanManager.scan();
 		}
 		if ( intent.getAction().equals(UIModeReceiver.MOTO_X_CONTEXT_CHANGE_BROADCAST) &&
 				intent.getType().equals(UIModeReceiver.MOTO_X_CONTEXT_BROADCAST_MIME_TYPE)) {
-			eventBus.post(new RadarMessageNotification("Got Moto X context change event"));
+			eventBus.post(new CobraRadarMessageNotification("Got Moto X context change event"));
 		}
 		if ( intent.getAction().equals(UIModeReceiver.MOTO_X_CONTEXT_ACTION_DRIVE)  ) {
-			eventBus.post(new RadarMessageNotification("Got Moto X drive status event"));
+			eventBus.post(new CobraRadarMessageNotification("Got Moto X drive status event"));
 		}
 		if ( intent.getAction().equals(UIModeReceiver.MOTO_X_MODE_CHANGED_BROADCAST)  ) {
 			int state = intent.getIntExtra(MOTO_X_MODE_CHANGED_BROADCAST_STATE, 0);
 			int prevState = intent.getIntExtra(MOTO_X_MODE_CHANGED_BROADCAST_STATE_PREV, 0);
-			eventBus.post(new RadarMessageNotification("Got Moto X status changed event: " + state + " prev " + prevState ));
+			eventBus.post(new CobraRadarMessageNotification("Got Moto X status changed event: " + state + " prev " + prevState ));
 		}
 	}
 }

@@ -11,19 +11,15 @@
 
     <TableRow android:layout_width="match_parent">
         
-        <TextView
-            android:text="Threats" 
-	        android:textStyle="bold"
-	        android:layout_width="wrap_content"
-	        android:textAppearance="?android:attr/textAppearanceMediumInverse"
-            />
-        
 	    <TextView
 	        android:id="@+id/radarState"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:textSize="50sp"
+	        android:layout_span="2"
+	        android:textSize="30sp"
+	        android:minHeight="60sp"
 	        android:textStyle="bold"
+	        android:gravity="center_horizontal"
 	        android:textAppearance="?android:attr/textAppearanceLarge" />
         
     </TableRow>
@@ -64,7 +60,7 @@
     <TableRow android:layout_width="match_parent">
         
         <TextView
-            android:text="Mode" 
+            android:text="UI Mode" 
 	        android:layout_width="wrap_content"
             />
         
