@@ -29,8 +29,8 @@
     <TableRow android:layout_width="match_parent">
 
         <TextView
-            android:text="Status" 
-	        android:textStyle="bold"
+            android:text="@string/status" 
+	        android:textAppearance="?android:attr/textAppearanceMedium"
 	        android:layout_width="wrap_content"
 	        android:paddingRight="5dp"
             />
@@ -47,8 +47,9 @@
     <TableRow android:layout_width="match_parent">
         
         <TextView
-            android:text="Voltage" 
+            android:text="@string/voltage" 
 	        android:layout_width="wrap_content"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
 	        android:paddingRight="5dp"
             />
         
@@ -64,8 +65,9 @@
     <TableRow android:layout_width="match_parent">
         
         <TextView
-            android:text="UI Mode" 
+            android:text="@string/ui_mode" 
 	        android:layout_width="wrap_content"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
 	        android:paddingRight="5dp"
             />
         
@@ -81,8 +83,27 @@
     <TableRow android:layout_width="match_parent">
         
         <TextView
-            android:text="Speed" 
+            android:text="@string/activity" 
 	        android:layout_width="wrap_content"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+	        android:paddingRight="5dp"
+            />
+        
+	    <TextView
+	        android:id="@+id/mainViewTextActivityMode"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:textStyle="bold"
+	        android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+    </TableRow>
+    
+    <TableRow android:layout_width="match_parent">
+        
+        <TextView
+            android:text="@string/speed" 
+	        android:layout_width="wrap_content"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
 	        android:paddingRight="5dp"
             />
         
@@ -100,6 +121,7 @@
         <TextView
             android:text="@string/log" 
 	        android:layout_width="wrap_content"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
 	        android:paddingRight="5dp"
             />
         
@@ -117,19 +139,25 @@
 	</TableRow>
 	
 </TableLayout>
-<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_horizontal">
+<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" android:layout_gravity="center_horizontal"
+    style="?android:attr/buttonBarStyle">
 	        <Button
 	        android:id="@+id/btnReconnect"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_gravity="center_horizontal"
-	        android:text="Reconnect" />
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+	        style="?android:attr/buttonBarButtonStyle"
+	        android:text="@string/reconnect" />
 	
 	    	<Button
 	        android:id="@+id/btnQuit"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+	        style="?android:attr/buttonBarButtonStyle"
 	        android:layout_gravity="center_horizontal"
-	        android:text="Quit" />
+	        android:text="@string/quit" />
 </LinearLayout>
 </LinearLayout>

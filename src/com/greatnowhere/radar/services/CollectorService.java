@@ -23,6 +23,7 @@ import com.cobra.iradar.RadarScanManager;
 import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.MainRadarActivity;
 import com.greatnowhere.radar.config.Preferences;
+import com.greatnowhere.radar.location.PhoneActivityDetector;
 import com.greatnowhere.radar.location.RadarLocationManager;
 import com.greatnowhere.radar.messaging.RadarMessageAllClear;
 import com.greatnowhere.radar.messaging.RadarMessageConnectivityNotification;
@@ -85,6 +86,9 @@ public class CollectorService extends Service {
 	    // Initialize TTS 
 	    TTSManager.init(getApplicationContext());
 
+	    // Initialize activity detector
+	    PhoneActivityDetector.init(getApplicationContext());
+	    
 	    // ongoing notifications
     	Builder b;
     	Notification scanNotification = null;
@@ -126,6 +130,7 @@ public class CollectorService extends Service {
         RadarManager.stop();
         TTSManager.stop();
         ThreatManager.stop();
+	    PhoneActivityDetector.stop();
         RadarLocationManager.stop();
         radarMessageHandler.stop();
         eventBus = null;

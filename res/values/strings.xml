@@ -43,7 +43,7 @@
 	<string name="prefKeyTextDeviceDisconnect">prefKeyTextDeviceDisconnect</string>
 	<string name="prefValTextDeviceDisconnect">Text to speak on disconnection</string>
 	<string name="done">Done</string>
-	<string name="crashNotificationText">Cobra iRadar application has crashed. Developer would greatly appreciate if you agree to send a crash report which could help track down the cause of the crash. All you have to do is (optionally) enter your comments, and click OK button. The report is shared as email, so please choose your email application in the following popup and send. Thank you!</string>
+	<string name="crashNotificationText">Cobra iRadar application has crashed. Developer would greatly appreciate if you agree to send a crash report which could help track down the cause of the crash. All you have to do is (optionally) enter your comments, and click OK button. The report is shared as email, so please choose your email application in the following popup and send to rootkit007@gmail.com. Thank you!</string>
 	<string name="crashNotificationTitle">Cobra iRadar Has Crashed!</string>
 	<string name="quit">Quit</string>
 	<string name="prefKeyStartScanOnBoot">prefKeyStartScanOnBoot</string>
@@ -60,8 +60,8 @@
 	<string name="prefKeyScanOnlyInCarMode">prefKeyScanOnlyInCarMode</string>
 	<string name="prefValScanOnlyInCarMode">Only scan if in car mode</string>
 	<string name="prefKeyScanOnlyInDrivingMode">prefKeyScanOnlyInDrivingMode</string>
-	<string name="prefValScanOnlyInDrivingMode">Only scan if in Moto X driving mode</string>
-	<string name="prefSumScanOnlyInDrivingMode">Only for Moto X devices</string>
+	<string name="prefValScanOnlyInDrivingMode">Only scan if in driving mode</string>
+	<string name="prefSumScanOnlyInDrivingMode">Attempts to detect if you are driving and activate scan only then</string>
 	<string name="prefCatThreats">Threat Management</string>
 	<string name="prefKeyLogThreats">prefKeyLogThreats</string>
 	<string name="prefValLogThreats">Log threats</string>
@@ -111,4 +111,13 @@
 	<string name="prefValAutoMuteDelay">Auto Mute</string>
 	<string name="prefSumAutoMuteDelay">After how many seconds to reduce alert volume</string>
 	<string name="prefValAlertLevelSetFlag">Set Volume for Alerts</string>
+	<string name="prefKeyAutoMuteImmediatelyDuringCalls">prefKeyAutoMuteImmediatelyDuringCalls</string>
+	<string name="prefValAutoMuteImmediatelyDuringCalls">Automute immediately during calls</string>
+	<string name="prefSumAutoMuteImmediatelyDuringCalls">Will automute immediately (without delay) if call is active</string>
+	<string name="ui_mode">UI Mode</string>
+	<string name="activity">Activity</string>
+	<string name="speed">Speed</string>
+	<string name="reconnect">Reconnect</string>
+	<string name="voltage">Voltage</string>
+	<string name="status">Status</string>
 </resources>

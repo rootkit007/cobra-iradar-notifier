@@ -38,6 +38,7 @@
 	    />
         <EditTextPreference android:key="@string/prefKeyAutoMuteDelay" android:summary="@string/prefSumAutoMuteDelay" 
             android:title="@string/prefValAutoMuteDelay" android:numeric="integer" android:defaultValue="3"/>
+        <CheckBoxPreference android:key="@string/prefKeyAutoMuteImmediatelyDuringCalls" android:title="@string/prefValAutoMuteImmediatelyDuringCalls" android:summary="@string/prefSumAutoMuteImmediatelyDuringCalls"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/prefCatVisibleNotifications" android:persistent="false">
         <CheckBoxPreference android:key="@string/prefKeyOngoingNotificationWhileConnected" android:title="@string/prefValOngoingNotificationWhileConnected" android:summary="@string/prefSumOngoingNotificationWhileConnected" android:defaultValue="true"/>
@@ -54,7 +55,7 @@
 	        android:numeric="integer"  />
 	    <CheckBoxPreference android:key="@string/prefKeyStartScanOnBoot" android:title="@string/prefValStartScanOnBoot" android:summary="@string/prefSumStartScanOnBoot" android:defaultValue="true" android:dependency="@string/prefKeyScanForDevice"/>
 	    <CheckBoxPreference android:key="@string/prefKeyScanOnlyInCarMode" android:title="@string/prefValScanOnlyInCarMode" android:defaultValue="false" android:dependency="@string/prefKeyScanForDevice"/>
-	    <CheckBoxPreference android:key="@string/prefKeyScanOnlyInDrivingMode" android:title="@string/prefValScanOnlyInDrivingMode" android:summary="@string/prefSumScanOnlyInDrivingMode" android:defaultValue="false" android:dependency="@string/prefKeyScanForDevice" android:enabled="false"/>
+	    <CheckBoxPreference android:key="@string/prefKeyScanOnlyInDrivingMode" android:title="@string/prefValScanOnlyInDrivingMode" android:summary="@string/prefSumScanOnlyInDrivingMode" android:defaultValue="false" android:dependency="@string/prefKeyScanForDevice"/>
    	</PreferenceScreen>
     <PreferenceScreen android:title="Connectivity Notification" android:persistent="false">
 	    <CheckBoxPreference android:title="@string/prefValSpeakEvents" android:disableDependentsState="false" android:key="@string/prefKeySpeakEvents" android:defaultValue="true"/>

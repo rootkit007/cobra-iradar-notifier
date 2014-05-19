@@ -13,6 +13,8 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.SoundPool;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.telephony.TelephonyManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -52,6 +54,8 @@ public class ThreatManager {
 	private static PowerManager pm;
 	private static AtomicBoolean wasScreenOn = new AtomicBoolean(false);
 	private Timer autoMuteTimer;
+	private WakeLock wl;
+	private static TelephonyManager tm;
 	
 	private static Context ctx;
 	
@@ -66,6 +70,7 @@ public class ThreatManager {
 		
 		ctx = appContext;
 		
+		tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
         // Inflate main threats layout
         instance.mainThreatView = View.inflate(ctx, R.layout.threats_view, null);
         
@@ -129,11 +134,9 @@ public class ThreatManager {
 		if ( Preferences.isFakeAlertDetection() && Preferences.isLogThreatLocation() && RadarLocationManager.isReady() ) {
 			int countSimilar = ThreatLogger.countSimilarThreatOccurences(alert, RadarLocationManager.getCurrentLoc(), Preferences.getFakeAlertDetectionRadius());
 			if ( countSimilar > Preferences.getFakeAlertOccurenceThreshold() ) {
-				addLogMessage("Fake alert detected " + alert.alertType.getName() + " " + alert.frequency);
 				cred = ThreatCredibility.FAKE;
 			}
 			if ( countSimilar > 1 && countSimilar <= Preferences.getFakeAlertOccurenceThreshold() ) {
-				addLogMessage("Possible fake alert detected " + alert.alertType.getName() + " " + alert.frequency);
 				cred = ThreatCredibility.SUSPECT_FAKE;
 			}
 		}
@@ -141,8 +144,6 @@ public class ThreatManager {
 		// check if we are above min required speed
 		if ( Preferences.getThreatShowMinSpeed() > 0 && RadarLocationManager.isReady() ) {
 			if ( RadarLocationManager.getCurrentSpeedKph() <= Preferences.getThreatShowMinSpeed() ) {
-				addLogMessage("Hiding alert (speed below " + Preferences.getThreatShowMinSpeed()
-						+ "kph) " + alert.alertType.getName() + " " + alert.frequency);
 				cred = ThreatCredibility.HIDDEN;
 			}
 		}
@@ -169,6 +170,10 @@ public class ThreatManager {
 	private synchronized static void showMainView() {
 		isThreatActive.set(true);
 		wasScreenOn.set(pm.isScreenOn());
+		if ( pm.isScreenOn() ) {
+			instance.wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, ThreatManager.class.getCanonicalName());
+			instance.wl.acquire();
+		}
 		eventBus.post(new UIRunnableEvent(new Runnable() {
 			public void run() {
 				wm.addView(instance.mainThreatView, params);
@@ -188,6 +193,7 @@ public class ThreatManager {
 			return;
 		
 		for ( Threat t : activeThreats ) {
+			addLogMessage("Ended threat " + t.toString());
 			t.removeThreat();
 		}
 		activeThreats = new ArrayList<Threat>();
@@ -207,7 +213,10 @@ public class ThreatManager {
 	}
 	
 	private static void turnScreenOff() {
-		//pm.goToSleep(SystemClock.uptimeMillis());
+		if ( instance.wl != null ) {
+			instance.wl.release();
+			instance.wl = null;
+		}
 	}
 	
 	private static Threat findExistingThreat(RadarMessageThreat other) {
@@ -256,6 +265,10 @@ public class ThreatManager {
 	
 	public static void addLogMessage(String s) {
 		eventBus.post(new RadarMessageNotification(s));
+	}
+	
+	public static boolean isPhoneCallActive() {
+		return (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE);
 	}
 	
 	private class AutoMuteTask extends TimerTask {

@@ -94,6 +94,9 @@ public class Threat {
 	
 	private void playAlert() {
 		AlertAudioManager.setOurAlertVolume();
+		if ( Preferences.isAutoMuteImmediatelyDuringCalls() && ThreatManager.isPhoneCallActive() ) {
+			AlertAudioManager.setAutoMuteVolume();
+		}
 		// start looping play
 		soundStreamId = ThreatManager.alertSounds.play(ThreatManager.alertSoundsLoaded.get(alert.alertType.getSound()), 1, 1, 1, -1, 
 				ThreatManager.getThreatSoundPitch(alert.strength));
@@ -177,6 +180,9 @@ public class Threat {
 				( SHOW_FALSE_THREATS );
 	}
 	
+	/**
+	 * Human-readable one-line threat description
+	 */
 	@Override
 	public String toString() {
 		return "Threat " + alert.alertType.getName() + " " + alert.frequency + " (" + credibility.getName() + ")"; 

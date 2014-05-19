@@ -21,7 +21,7 @@ public class AlertAudioManager {
 	private static AudioManager am;
 	private static int originalVolume = 0;
 	public static final int OUTPUT_STREAM = AudioManager.STREAM_MUSIC;
-	public static final int AUTOMUTE_VOLUME_OFFSET = -3;
+	public static final int AUTOMUTE_VOLUME_OFFSET = -2;
 	
 	public static void init(Context ctx) {
 		am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
@@ -57,6 +57,7 @@ public class AlertAudioManager {
 		// only set volume if we are on our volume
 		if ( isOurAlertVolumeSet.get() ) {
 			int autoMuteVolume = getTranslatedVolume( getOurAlertLevel() + AUTOMUTE_VOLUME_OFFSET );
+			autoMuteVolume = Math.max(1, autoMuteVolume); // no lower than 1, cant mute altogether
 			am.setStreamVolume(OUTPUT_STREAM, autoMuteVolume, 0);
 		}
 	}

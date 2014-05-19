@@ -41,6 +41,7 @@ import com.cobra.iradar.protocol.CobraRadarMessageAlert.Alert;
 import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.config.SettingsActivity;
+import com.greatnowhere.radar.location.PhoneActivityDetector;
 import com.greatnowhere.radar.location.RadarLocationManager;
 import com.greatnowhere.radar.services.CollectorService;
 
@@ -70,6 +71,7 @@ public class MainRadarActivity extends Activity {
     private TextView voltage;
     private TextView uiMode;
     private TextView location;
+    private TextView activity;
     private Button btnReconnect;
     private Button btnQuit;
     private Runnable uiRefreshRunnable;
@@ -103,6 +105,7 @@ public class MainRadarActivity extends Activity {
         btnReconnect = (Button) findViewById(R.id.btnReconnect);
         uiMode = (TextView) findViewById(R.id.mainViewTextuiMode);
         location = (TextView) findViewById(R.id.mainViewLocation);
+        activity = (TextView) findViewById(R.id.mainViewTextActivityMode);
         btnReconnect.setOnClickListener( new OnClickListener() {
 			public void onClick(View v) {
 				initialize();
@@ -281,9 +284,17 @@ public class MainRadarActivity extends Activity {
     	log.setText(CollectorService.getLog());
     }
     
+    /**
+     * Phone activity change detected
+     */
+    public void onEventMainThread(PhoneActivityDetector.EventActivityChanged event) {
+    	activity.setText(event.activity.getName());
+    }
+    
     public void refreshScreen() {
     	eventBus.post(new UIRefreshLogEvent());
     	eventBus.post(new UIRefreshEvent());
+    	activity.setText(PhoneActivityDetector.getActivityStatus().getName());
     }
     
     public static class UIRefreshEvent {

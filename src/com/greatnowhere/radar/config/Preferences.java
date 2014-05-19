@@ -56,6 +56,10 @@ public class Preferences {
 		return Integer.parseInt(v);
 	}
 	
+	public static boolean isAutoMuteImmediatelyDuringCalls() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyAutoMuteImmediatelyDuringCalls), true);
+	}
+	
 	public static boolean isScanForDevice() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyScanForDevice), true);
 	}
