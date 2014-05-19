@@ -25,7 +25,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -94,8 +93,6 @@ public class MainRadarActivity extends Activity {
         
         uiModeManager = (UiModeManager) getApplicationContext().getSystemService(UI_MODE_SERVICE);
 
-        // set defaults for preferences
-        PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.settings, false);
         Preferences.init(getApplicationContext());
         
         log = (TextView) findViewById(R.id.logScroll);

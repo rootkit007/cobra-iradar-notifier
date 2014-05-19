@@ -19,9 +19,13 @@ public class Preferences {
 	private static EventBus eventBus = EventBus.getDefault();
 	
 	public static void init(Context ctx) {
-		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-		res = ctx.getResources();
-		prefs.registerOnSharedPreferenceChangeListener(new PreferenceChangeListener());
+		if ( prefs == null ) {
+			prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+			res = ctx.getResources();
+			prefs.registerOnSharedPreferenceChangeListener(new PreferenceChangeListener());
+	        // set defaults for preferences
+	        PreferenceManager.setDefaultValues(ctx, R.xml.settings, false);
+		}
 	}
 	
 	public static boolean isInitialized() {

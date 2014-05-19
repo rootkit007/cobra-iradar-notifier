@@ -72,6 +72,10 @@ public class CollectorService extends Service {
     }
     
     private void init() {
+
+    	// Initialize preferences
+    	Preferences.init(getApplicationContext());
+    	
 	    // Initialize alerts audio manager
 	    AlertAudioManager.init(getApplicationContext());
 	    
