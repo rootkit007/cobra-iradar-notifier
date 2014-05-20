@@ -108,7 +108,7 @@ public class MainRadarActivity extends Activity {
         activity = (TextView) findViewById(R.id.mainViewTextActivityMode);
         btnReconnect.setOnClickListener( new OnClickListener() {
 			public void onClick(View v) {
-				initialize();
+				attemptConnect();
 			}
 		});
         btnQuit = (Button) findViewById(R.id.btnQuit);
@@ -162,6 +162,12 @@ public class MainRadarActivity extends Activity {
     }
     
 	
+    private void attemptConnect() {
+    	Intent i = new Intent(getApplicationContext(), CollectorService.class);
+    	i.putExtra(CollectorService.INTENT_KEY_MANUAL_RECONNECT, true);
+    	getApplicationContext().startService(i);
+    }
+    
     public void initialize() {
 
         // Start data collector service

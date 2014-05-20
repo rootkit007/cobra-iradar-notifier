@@ -1,5 +1,7 @@
 package com.cobra.iradar;
 
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
+
 import android.app.Notification;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
@@ -20,8 +22,6 @@ public class RadarConnectionService extends Service {
 	
 	private BluetoothDevice iRadarDevice;
 	private RadarConnectionThread radarThread;
-    @SuppressWarnings("unused")
-	private int notificationId = 1;
     private Notification connectedNotification;
 	
 	@Override
@@ -32,8 +32,8 @@ public class RadarConnectionService extends Service {
     	
     	if ( intent != null && intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE) != null ) {
     		iRadarDevice = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_DEVICE);
-    		connectedNotification = intent.getParcelableExtra(RadarConnectionServiceIntent.RADAR_NOTIFICATION);
     	}
+		connectedNotification = RadarManager.getOngoingNotification();
     	if ( iRadarDevice != null )
     		runConnection();
     	return START_STICKY;
@@ -44,9 +44,7 @@ public class RadarConnectionService extends Service {
     	Log.i(TAG, "Service Stop");
 		super.onDestroy();
 		connectivityListener.stop();
-    	if ( RadarManager.isShowNotification() ) {
-    		stopForeground(true);
-    	}
+		setNotification();
     	stopConnection();
 	}
 	
@@ -69,6 +67,14 @@ public class RadarConnectionService extends Service {
     		radarThread.interrupt();
     	}
 	}
+	
+	private void setNotification() {
+		if ( connectedNotification != null && RadarManager.getConnectivityStatus() == ConnectivityStatus.CONNECTED ) {
+			startForeground(NOTIFICATION_CONNECTED, connectedNotification);
+		} else {
+			stopForeground(true);
+		}
+	}
 
 	/**
 	 * Not intended to be bound
@@ -81,14 +87,12 @@ public class RadarConnectionService extends Service {
 	public RadarConnectivityListener connectivityListener = new RadarConnectivityListener() {
 		@Override
 		public void onDisconnected() {
-			stopForeground(true);
+			setNotification();
 			stopSelf();
 		}
 		@Override
 		public void onConnected() {
-        	if ( connectedNotification != null ) {
-        		startForeground(NOTIFICATION_CONNECTED, connectedNotification );
-        	}
+			setNotification();
 		}
 	};
 	

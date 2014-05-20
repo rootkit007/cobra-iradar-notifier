@@ -90,9 +90,12 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		SQLiteDatabase db = instance.getReadableDatabase();
 		Set<Integer> threat_ids = new LinkedHashSet<Integer>();
 		String partialDistance = Double.toString(convertKmToPartialDistance(radius));
-		Log.d(TAG, "radius " + radius + " part dist " + partialDistance);
+		Log.d(TAG, "Looking for threats " + threat.alert.alertType.getName() + " freq " + threat.alert.frequency 
+				+ " radius " + radius + " part dist " + partialDistance);
 		if ( threat.locations != null ) {
 			for ( Location l : threat.locations ) {
+				Log.d(TAG, "Looking for threats close to lat " + l.getLatitude()
+						+ " long " + l.getLongitude());
 				String sql = "select distinct id from threats where type=? and abs(?-freq)<0.05 and exists (select * from threats_locations "
 						+ "where threat_id=threats.id and " + buildDistanceQuery(l.getLatitude(),l.getLongitude()) + " > ?)";
 				Cursor c = db.rawQuery(sql, new String[] { Integer.toString(threat.alert.alertType.getCode()),
@@ -101,10 +104,12 @@ public class ThreatLogger extends SQLiteOpenHelper {
 				if ( c.getCount() > 0 ) {
 					while (c.moveToNext() ) {
 						threat_ids.add(c.getInt(0));
+						Log.d(TAG,"added threat id " + c.getInt(0));
 					}
 				}
 			}
 		}
+		Log.d(TAG,"found " + threat_ids.size() + " unique threats");
 		return threat_ids.size();
 	}
 	

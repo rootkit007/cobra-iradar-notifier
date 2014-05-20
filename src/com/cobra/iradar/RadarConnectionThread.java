@@ -63,9 +63,9 @@ public class RadarConnectionThread extends Thread {
 		
 		// connection attempt
 		try {
+			connectionStatus.set(ConnectivityStatus.CONNECTING.getCode());
 			eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Connecting to " + iRadar.getName(),
 					ConnectivityStatus.CONNECTING.getCode()));
-			connectionStatus.set(ConnectivityStatus.CONNECTING.getCode());
 			
 			try {
 				socket = iRadar.createRfcommSocketToServiceRecord(MY_UUID);
@@ -85,9 +85,9 @@ public class RadarConnectionThread extends Thread {
 			return;
 		}
 
+		connectionStatus.set(ConnectivityStatus.CONNECTED.getCode());
 		eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
 				ConnectivityStatus.CONNECTED.getCode()));
-		connectionStatus.set(ConnectivityStatus.CONNECTED.getCode());
 		isConnectionSuccess = true;
 
 		byte[] packet;
@@ -97,10 +97,10 @@ public class RadarConnectionThread extends Thread {
 				eventBus.post(CobraRadarMessage.fromPacket(packet));
 			} catch (Exception e) {
 				Log.e(TAG, "IO Exception", e);
+				connectionStatus.set(ConnectivityStatus.PROTOCOL_ERROR.getCode());
 				eventBus.post(new CobraRadarMessageStopAlert(0));
 				eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Error in data connection",
 						ConnectivityStatus.PROTOCOL_ERROR.getCode()));
-				connectionStatus.set(ConnectivityStatus.PROTOCOL_ERROR.getCode());
 				this.interrupt(); 
 			}
 		}

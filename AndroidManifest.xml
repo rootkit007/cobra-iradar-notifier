@@ -15,9 +15,9 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.greatnowhere.radar"
-      android:versionCode="3"
-      android:versionName="1.0beta3">
-    <uses-sdk android:minSdkVersion="15" android:maxSdkVersion="19" android:targetSdkVersion="19" />
+      android:versionCode="4"
+      android:versionName="1.0beta4">
+    <uses-sdk android:minSdkVersion="16" android:maxSdkVersion="19" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -29,8 +29,6 @@
 	<uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 	<uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>	
-	<!-- Moto X specific -->
-    <uses-permission android:name="com.motorola.context.permission.CONTEXT" />
 				
     <application android:label="@string/app_name" android:allowBackup="true"
                  android:icon="@drawable/app_icon" android:name="com.greatnowhere.radar.MainRadarApplication">
@@ -47,13 +45,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-		<activity
-            android:name="org.acra.CrashReportDialog"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Dialog">
-        </activity>
         <activity android:name="com.greatnowhere.radar.config.SettingsActivity" android:label="Settings" android:noHistory="true" android:excludeFromRecents="true"></activity>
         <service android:label="iRadar Connectivity Service" android:permission="android.permission.BLUETOOTH" android:name="com.cobra.iradar.RadarConnectionService" android:enabled="true" android:singleUser="true"></service>
         <service android:label="iRadar Monitoring Service" android:name="com.cobra.iradar.RadarMonitorService" android:enabled="true" android:singleUser="true"></service>
@@ -65,14 +56,9 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name="com.cobra.iradar.UIModeReceiver" android:enabled="true" android:exported="true" >
+        <receiver android:name="com.greatnowhere.radar.receiver.UIModeReceiver" android:enabled="true" android:exported="true" >
             <intent-filter>
-                <action android:name="com.motorola.context.CONTEXT_CHANGE" />
-                <action android:name="com.motorola.contextaware.intent.action.DRIVE_CURRENT_STATE" />
                 <action android:name="android.intent.action.DOCK_EVENT"/>
-                <action android:name="android.app.action.ENTER_CAR_MODE"/>
-                <action android:name="android.app.action.EXIT_CAR_MODE"/>
-                <!--  <data android:mimeType="context/com.motorola.context.publisher.InVehicle" />  -->
             </intent-filter>
         </receiver>
 		<!-- Receiver for triggering random alerts -->           

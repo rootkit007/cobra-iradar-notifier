@@ -1,18 +1,22 @@
 package com.greatnowhere.radar.location;
 
-import com.cobra.iradar.RadarScanManager;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.greatnowhere.radar.services.RadarScanner;
 
 import de.greenrobot.event.EventBus;
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 public class PhoneActivityDetector implements GooglePlayServicesClient.ConnectionCallbacks,
@@ -23,18 +27,23 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	private static ActivityStatus activity = ActivityStatus.UNKNOWN;
 	private static Context ctx;
 	private static final long ACTIVITY_UPDATE_INTERVAL = 60000L; // every 60 secs
+	private static UiModeManager uiManager;
+	private static AtomicBoolean isCarMode = new AtomicBoolean();
 	private static EventBus eventBus;
 	
 	public static void init(Context ctx) {
 		instance = new PhoneActivityDetector();
 		PhoneActivityDetector.ctx = ctx;
 		eventBus = EventBus.getDefault();
+		uiManager = (UiModeManager) ctx.getSystemService(Context.UI_MODE_SERVICE);
+		isCarMode.set( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR );
 		activityClient = new ActivityRecognitionClient(ctx, instance, instance);
 		activityClient.connect();
 	}
 	
 	public static void stop() {
-		activityClient.disconnect();
+		if ( activityClient.isConnected() )
+			activityClient.disconnect();
 	}
 
 	public static ActivityStatus getActivityStatus() {
@@ -45,6 +54,8 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 	private static void setActivityStatus(ActivityStatus a) {
 		synchronized (activity) {
+			if ( a != activity )
+				eventBus.post(new CobraRadarMessageNotification("Activity change: " + a.getName()));
 			activity = a;
 		}
 	}
@@ -64,6 +75,17 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 	public void onDisconnected() {
 		setActivityStatus(ActivityStatus.UNKNOWN);
+	}
+
+	public static boolean getIsCarMode() {
+		return isCarMode.get();
+	}
+
+	public static void setIsCarMode(boolean isCarMode) {
+		if (isCarMode != PhoneActivityDetector.isCarMode.get() )
+			eventBus.post(new CobraRadarMessageNotification("Car mode " + (isCarMode ? "activated" : "deactivated")));
+		PhoneActivityDetector.isCarMode.set(isCarMode);
+		eventBus.post(new EventCarModeChange());
 	}
 
 	public enum ActivityStatus {
@@ -109,8 +131,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 		         setActivityStatus(ActivityStatus.fromDetectedActivity(result.getMostProbableActivity()));
 		         eventBus.post(new EventActivityChanged(getActivityStatus()));
 		         // Also see if we should start scanning
-				 eventBus.post(new CobraRadarMessageNotification("Activity change: " + getActivityStatus().getName()));
-				 RadarScanManager.scan();
+				 RadarScanner.scan();
 		    }
 		}
 	}
@@ -131,5 +152,9 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 		}
 		
 		public ActivityStatus activity;
+	}
+	
+	public static class EventCarModeChange {
+		
 	}
 }

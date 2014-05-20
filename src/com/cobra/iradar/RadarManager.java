@@ -26,7 +26,6 @@ public class RadarManager {
 	private static BluetoothDevice mBTDevice = null;
 	private static Context appContext;
 	private static String lastError;
-	private static boolean showNotification = false; 
 	/**
 	 * Service to which send device activity intents
 	 */
@@ -50,11 +49,10 @@ public class RadarManager {
 	 * @param reconnectInterval interval in seconds
 	 * @return True if radar device found and connection attempt started, false otherwise. Call {@link getLastError} to retrieve any error messages
 	 */
-	public static synchronized boolean initialize(Context ctx, boolean showNotification, Notification notify, Notification scanNotification,
-			  boolean runScan, int scanInterval, boolean scanInCarModeOnly, Class<? extends Service> serviceClass) {
+	public static synchronized boolean initialize(Context ctx, Notification notify, Notification scanNotification,
+			  boolean runScan, int scanInterval, Class<? extends Service> serviceClass) {
 		appContext = ctx;
 		eventBus = EventBus.getDefault();
-		RadarManager.showNotification = showNotification;
 		RadarManager.ongoingNotification = notify;
 		RadarManager.serviceClass = serviceClass;
 		if ( listenerToIntent != null )
@@ -69,7 +67,7 @@ public class RadarManager {
 		for ( BluetoothDevice dev : mBluetoothAdapter.getBondedDevices() ) {
 			if ( Constants.BT_DEVICE_NAMES.contains(dev.getName()) ) {
 				mBTDevice = dev; // scanner will take care of the rest
-				RadarScanManager.init(ctx, scanNotification, runScan, scanInterval, scanInCarModeOnly);
+				RadarScanManager.init(ctx, scanNotification);
 				return true;
 			}
 		}
@@ -101,11 +99,7 @@ public class RadarManager {
 	  
 	  
 	public static boolean isShowNotification() {
-		return showNotification;
-	}
-	
-	public static void setShowNotification(boolean showNotification) {
-		RadarManager.showNotification = showNotification;
+		return ongoingNotification != null;
 	}
 	
 	public static Notification getOngoingNotification() {
@@ -114,6 +108,7 @@ public class RadarManager {
 	
 	public static void setOngoingNotification(Notification ongoingNotification) {
 		RadarManager.ongoingNotification = ongoingNotification;
+		startConnectionService();
 	}
 	
 	public static double getBatteryVoltage() {

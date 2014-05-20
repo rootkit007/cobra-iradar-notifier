@@ -8,9 +8,6 @@ import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import android.app.Notification;
-import android.app.Notification.Builder;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Environment;
@@ -20,19 +17,19 @@ import android.util.Log;
 
 import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.RadarScanManager;
-import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.MainRadarActivity;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.PhoneActivityDetector;
 import com.greatnowhere.radar.location.RadarLocationManager;
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
 import com.greatnowhere.radar.messaging.RadarMessageAllClear;
 import com.greatnowhere.radar.messaging.RadarMessageConnectivityNotification;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;
-import com.greatnowhere.radar.messaging.ConnectivityStatus;
 import com.greatnowhere.radar.threats.AlertAudioManager;
 import com.greatnowhere.radar.threats.TTSManager;
 import com.greatnowhere.radar.threats.ThreatManager;
+import com.greatnowhere.radar.util.NotificationBuilder;
 
 import de.greenrobot.event.EventBus;
 
@@ -44,6 +41,8 @@ import de.greenrobot.event.EventBus;
 public class CollectorService extends Service {
 
 	private static final String TAG = CollectorService.class.getCanonicalName();
+	
+	public static final String INTENT_KEY_MANUAL_RECONNECT = "attemptReconnect";
 	
     private EventBus eventBus;
 	private boolean isRadarInitialized = false;
@@ -61,15 +60,21 @@ public class CollectorService extends Service {
     	
     	instance = this;
     	
-    	if ( intent != null && intent.hasExtra(RadarManager.INTENT_ACTIVITY_EXTRA_KEY_MSG) && isRadarInitialized ) {
-    		Serializable s = intent.getSerializableExtra(RadarManager.INTENT_ACTIVITY_EXTRA_KEY_MSG);
-    		Log.i(TAG, "Posting Cobra message " + s.toString());
-    		eventBus.post(s);
-    	} else {
+    	if ( !isRadarInitialized ) {
     		init();
     	}
     	
-	    return START_STICKY;
+    	if ( intent != null && intent.hasExtra(RadarManager.INTENT_ACTIVITY_EXTRA_KEY_MSG) && isRadarInitialized ) {
+    		Serializable s = intent.getSerializableExtra(RadarManager.INTENT_ACTIVITY_EXTRA_KEY_MSG);
+    		Log.i(TAG, "Collector received Cobra message " + s.toString());
+    		eventBus.post(s);
+    	}
+    	
+    	if ( intent != null && intent.hasExtra(INTENT_KEY_MANUAL_RECONNECT) ) { 
+    		RadarScanManager.scanForced();
+    	}
+    	
+    	return START_STICKY;
     }
     
     private void init() {
@@ -90,37 +95,15 @@ public class CollectorService extends Service {
 	    PhoneActivityDetector.init(getApplicationContext());
 	    
 	    // ongoing notifications
-    	Builder b;
-    	Notification scanNotification = null;
-    	Notification connectedNotification = null;
-    	Intent resumeAppIntent;
-    	if ( Preferences.isNotifyOngoingScan() ) {
-    		b = new Notification.Builder(getApplicationContext());
-    		b.setContentText("iRadar Scanning For Devices");
-    		resumeAppIntent = new Intent(getApplicationContext(), MainRadarActivity.class);
-    		resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
-    		b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
-    		b.setContentTitle("iRadar Notifier");
-    		b.setOngoing(true);
-    		b.setSmallIcon(R.drawable.app_icon);
-    		scanNotification = b.build();
-    	}
-    	if ( Preferences.isNotifyOngoingConnected() ) {
-			b = new Notification.Builder(getApplicationContext());
-			b.setContentText("iRadar Notifier Connected");
-			resumeAppIntent = new Intent(getApplicationContext(), MainRadarActivity.class);
-			resumeAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP );
-			b.setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, resumeAppIntent , 0));
-			b.setContentTitle("iRadar Notifier");
-    		b.setOngoing(true);
-			b.setSmallIcon(R.drawable.app_icon);
-			connectedNotification = b.build();
-    	}
-    	isRadarInitialized = RadarManager.initialize(getApplicationContext(), Preferences.isNotifyOngoingConnected(),
-				connectedNotification, scanNotification, 
-				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly(),
-				CollectorService.class);
+	    NotificationBuilder.init(getApplicationContext());
+	    
+    	isRadarInitialized = RadarManager.initialize(getApplicationContext(), 
+    			NotificationBuilder.getConnectedNotification(), NotificationBuilder.getScanNotification(), 
+				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), CollectorService.class);
     	
+	    // Scan manager, must be initialized after RadarManager 
+	    RadarScanner.init();
+	    
     }
     
     @Override
@@ -132,7 +115,9 @@ public class CollectorService extends Service {
         ThreatManager.stop();
 	    PhoneActivityDetector.stop();
         RadarLocationManager.stop();
+        RadarScanner.getInstance().stop();
         radarMessageHandler.stop();
+        isRadarInitialized = false;
         eventBus = null;
     }
     
@@ -140,10 +125,6 @@ public class CollectorService extends Service {
 		return null;
 	}
 	
-    public void onEvent(Preferences.PreferenceScanChangedEvent event) {
-    	RadarScanManager.scan(Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), Preferences.isScanForDeviceInCarModeOnly());
-    }
-
     public synchronized static String getConnStatus() {
 		return RadarManager.getConnectivityStatus().getStatusName();
 	}
@@ -159,7 +140,9 @@ public class CollectorService extends Service {
 	}
 
 	public synchronized static String getLog() {
-		return instance.screenLogString;
+		if ( instance != null )
+			return instance.screenLogString;
+		return "";
 	}
 	
 	private synchronized static String getLogAsString() {

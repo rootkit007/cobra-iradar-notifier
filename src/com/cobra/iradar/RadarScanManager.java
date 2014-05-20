@@ -1,18 +1,14 @@
 package com.cobra.iradar;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.greatnowhere.radar.messaging.ConnectivityStatus;
-
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.util.Log;
+
+import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
 public class RadarScanManager {
 	
@@ -25,8 +21,6 @@ public class RadarScanManager {
 	
 
 	private static Context ctx;
-	static AtomicBoolean isCarMode = new AtomicBoolean();
-	private static UiModeManager uiManager;
 	private static AlarmManager alarmManager;
 	private static NotificationManager notifManager;
 	private PendingIntent reconnectionIntent;
@@ -34,7 +28,6 @@ public class RadarScanManager {
 	
 	private static boolean runScan;
 	private static int scanInterval;
-	private static boolean runInCarModeOnly;
 	private static Notification notify;
 	
 	static RadarScanManager instance;
@@ -47,16 +40,13 @@ public class RadarScanManager {
 	 * @param scanInterval scan interval in seconds
 	 * @param runInCarModeOnly if true, will only run scan while in car mode
 	 */
-	public static void init(Context ctx, Notification notify, boolean runScan, int scanInterval, boolean runInCarModeOnly) {
+	public static void init(Context ctx, Notification notify) {
 		RadarScanManager.ctx = ctx;
 		instance = new RadarScanManager();
 		RadarScanManager.notify = notify;
-		uiManager = (UiModeManager) RadarScanManager.ctx.getSystemService(Context.UI_MODE_SERVICE);
 		alarmManager = (AlarmManager) RadarScanManager.ctx.getSystemService(Context.ALARM_SERVICE);
 		notifManager = (NotificationManager) RadarScanManager.ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-		isCarMode.set( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR );
 		initializeListener();
-		scan(runScan,scanInterval,runInCarModeOnly);
 	}
 	
 	public static boolean isInitialized() {
@@ -67,6 +57,7 @@ public class RadarScanManager {
 		listener = new RadarConnectivityListener() {
 			@Override
 			public void onDisconnected() {
+				Log.i(TAG, "Disconnect event received");
 				RadarScanManager.eventDisconnect();
 			}
 			@Override
@@ -76,18 +67,23 @@ public class RadarScanManager {
 		};		
 	}
 	
-	public static void scan(boolean runScan, int scanInterval, boolean runInCarModeOnly) {
+	public static void scan(boolean runScan, int scanInterval) {
 		RadarScanManager.runScan = runScan;
 		RadarScanManager.scanInterval = scanInterval;
-		RadarScanManager.runInCarModeOnly = runInCarModeOnly;
 		scan();
+	}
+	
+	/**
+	 * Manual one-time scan, forced regardless of other settings
+	 */
+	public static void scanForced() {
+		RadarManager.startConnectionService();
 	}
 	
 	public static void scan() {
 		// determine if scan should be active
 		// only if not connected
-		if ( runScan && scanInterval > 0 && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED &&
-				  ( !runInCarModeOnly || ( runInCarModeOnly && isCarMode.get() ) ) ) {
+		if ( runScan && scanInterval > 0 && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED ) {
 			// yes, active. set up system alarm to wake monitor service
 			stopAlarm();
 			startConnectionMonitor();
@@ -112,7 +108,6 @@ public class RadarScanManager {
 			alarmManager.cancel(instance.reconnectionIntent);
 		
 		if ( runScan ) {
-			showNotification();
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
 			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -149,6 +144,14 @@ public class RadarScanManager {
 	
 	public static Notification getNotification() {
 		return notify;
+	}
+	
+	public static void setNotification(Notification n) {
+		if ( n == null && notify != null )
+			notifManager.cancel(NOTIFICATION_SCAN);
+		notify = n;
+		if ( n != null && isScanActive() ) 
+			showNotification();
 	}
 	
 	public static void eventDisconnect() {

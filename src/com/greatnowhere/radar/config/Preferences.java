@@ -69,7 +69,11 @@ public class Preferences {
 	}
 	
 	public static boolean isScanForDeviceInCarModeOnly() {
-		return prefs.getBoolean(res.getString(R.string.prefKeyScanOnlyInCarMode), true);
+		return prefs.getBoolean(res.getString(R.string.prefKeyScanOnlyInCarMode), false);
+	}
+	
+	public static boolean isScanForDeviceInDrivingModeOnly() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyScanOnlyInDrivingMode), false);
 	}
 	
 	public static boolean isScanForDeviceAfterRestart() {
@@ -204,12 +208,20 @@ public class Preferences {
 			// If periodic scanning has been changed, must notify the service
 			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyScanForDevice)) ||
 			     key.equalsIgnoreCase(res.getString(R.string.prefKeyScanInterval)) ||
+			     key.equalsIgnoreCase(res.getString(R.string.prefKeyScanOnlyInDrivingMode)) ||
 			     key.equalsIgnoreCase(res.getString(R.string.prefKeyScanOnlyInCarMode))) {
 				
-				eventBus.post(new PreferenceScanChangedEvent());
+				eventBus.post(new PreferenceDeviceScanSettingsChangedEvent());
 				
 			}
 				
+			// If periodic scanning has been changed, must notify the service
+			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyOngoingNotificationWhileConnected)) ||
+				 key.equalsIgnoreCase(res.getString(R.string.prefKeyOngoingNotificationWhileScanning)) ) {
+
+				eventBus.post(new PreferenceOngoingNotificationsChangedEvent());
+
+			}
 			
 		}
 	}
@@ -219,7 +231,11 @@ public class Preferences {
 	 * @author pzeltins
 	 *
 	 */
-	public static class PreferenceScanChangedEvent {
+	public static class PreferenceDeviceScanSettingsChangedEvent {
+		
+	}
+	
+	public static class PreferenceOngoingNotificationsChangedEvent {
 		
 	}
 }
