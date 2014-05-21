@@ -94,7 +94,7 @@ public class RadarScanManager {
 	}
 	
 	public static void showNotification() {
-		if ( notify != null )
+		if ( notify != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED )
 			notifManager.notify(NOTIFICATION_SCAN, notify);
 	}
 	
@@ -104,10 +104,10 @@ public class RadarScanManager {
 	 */
 	private static void startConnectionMonitor() {
 		Log.i(TAG,"start monitor");
-		if ( instance.reconnectionIntent != null ) 
+		if ( instance != null && instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
 		
-		if ( runScan ) {
+		if ( instance != null && runScan ) {
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
 			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -119,19 +119,18 @@ public class RadarScanManager {
 	public static void stop() {
 		Log.i(TAG,"complete stop");
 		runScan = false;
-		listener.stop();
+		if ( listener != null )
+			listener.unRegister();
 		stopAlarm();
 	}
 	
 	public static void stopAlarm() {
 		Log.i(TAG,"stop alarm");
-		if ( instance.reconnectionIntent == null ) {
-			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
-			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
-			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+		if ( instance != null && instance.reconnectionIntent != null ) {
+			Log.i(TAG,"cancel alarm " + instance.reconnectionIntent.toString());
+			alarmManager.cancel(instance.reconnectionIntent);
+			instance.reconnectionIntent = null;
 		}
-		alarmManager.cancel(instance.reconnectionIntent);
-		instance.reconnectionIntent = null;
 
 		if ( notify != null ) {
 			notifManager.cancel(NOTIFICATION_SCAN);

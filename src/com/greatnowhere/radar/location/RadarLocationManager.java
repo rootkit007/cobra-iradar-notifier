@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.greatnowhere.radar.config.Preferences;
@@ -13,6 +14,8 @@ import de.greenrobot.event.EventBus;
 
 public class RadarLocationManager {
 
+	private static final String TAG = RadarLocationManager.class.getCanonicalName();
+	
 	private static Context ctx;
 	private static LocationManager lm;
 	private static Location currentLoc;
@@ -44,6 +47,7 @@ public class RadarLocationManager {
 	}
 	
 	public static void stop() {
+    	Log.d(TAG, "stop");
 		if ( locListener != null ) {
 			lm.removeUpdates(locListener);
 			locListener = null;

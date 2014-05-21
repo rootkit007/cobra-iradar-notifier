@@ -135,7 +135,7 @@
 	        android:maxLines="300"
 	        android:scrollHorizontally="false"
 	        android:scrollbarStyle="outsideOverlay"
-		    android:scrollbars="horizontal|vertical"
+		    android:scrollbars="vertical"
 	        android:textAppearance="?android:attr/textAppearanceSmall" />
 	</TableRow>
 	

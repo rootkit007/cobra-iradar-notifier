@@ -35,6 +35,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	private static EventBus eventBus;
 	
 	public static void init(Context ctx) {
+		Log.d(TAG,"init");
 		instance = new PhoneActivityDetector();
 		PhoneActivityDetector.ctx = ctx;
 		eventBus = EventBus.getDefault();
@@ -45,6 +46,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	}
 	
 	public static void stop() {
+		Log.d(TAG,"stop");
 		if ( activityClient.isConnected() )
 			activityClient.disconnect();
 	}
@@ -64,11 +66,13 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	}
 	
 	public void onConnectionFailed(ConnectionResult result) {
+		Log.d(TAG,"connection failed");
 		setActivityStatus(ActivityStatus.UNKNOWN);
 	}
 
 
 	public void onConnected(Bundle connectionHint) {
+		Log.d(TAG,"connected");
 		Intent i = new Intent(ctx, ActivityDetectorIntentReceiver.class);
 		PendingIntent callbackIntent = PendingIntent.getService(ctx, 0, i,
 	             PendingIntent.FLAG_CANCEL_CURRENT);
@@ -77,6 +81,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 
 	public void onDisconnected() {
+		Log.d(TAG,"disconnected");
 		setActivityStatus(ActivityStatus.UNKNOWN);
 	}
 
@@ -126,6 +131,8 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	}
 	
 	public static class ActivityDetectorIntentReceiver extends IntentService {
+		
+		private static final String TAG = ActivityDetectorIntentReceiver.class.getCanonicalName();
 
 		public ActivityDetectorIntentReceiver() {
 			super(PhoneActivityDetector.class.getCanonicalName());
@@ -133,6 +140,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 		@Override
 		protected void onHandleIntent(Intent intent) {
+			Log.d(TAG,"onHandleIntent");
 			if (ActivityRecognitionResult.hasResult(intent)) {
 		         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 		         ActivityStatus newActivity = ActivityStatus.fromDetectedActivity(result.getMostProbableActivity());

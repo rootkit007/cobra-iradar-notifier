@@ -80,6 +80,7 @@ public class RadarManager {
 	}
 	  
 	public static synchronized void stop() {
+    	Log.d(TAG, "stop");
 		if ( listenerToIntent != null ) {
 			listenerToIntent.stop();
 		}

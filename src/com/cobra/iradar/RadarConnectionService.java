@@ -43,7 +43,7 @@ public class RadarConnectionService extends Service {
 	public void onDestroy() {
     	Log.i(TAG, "Service Stop");
 		super.onDestroy();
-		connectivityListener.stop();
+		connectivityListener.unRegister();
 		setNotification();
     	stopConnection();
 	}

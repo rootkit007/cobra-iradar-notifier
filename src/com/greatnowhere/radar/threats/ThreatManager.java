@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.SoundPool;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -34,6 +35,8 @@ import de.greenrobot.event.EventBus;
  */
 public class ThreatManager {
 
+	private static final String TAG = ThreatManager.class.getCanonicalName();
+	
 	/**
 	 * Threats currently displayed
 	 */
@@ -115,6 +118,7 @@ public class ThreatManager {
 	}
 	
 	public static void stop() {
+    	Log.d(TAG, "stop");
 		removeThreats();
 		RadarLocationManager.stop();
 	}

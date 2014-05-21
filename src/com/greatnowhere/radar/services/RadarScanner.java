@@ -1,5 +1,7 @@
 package com.greatnowhere.radar.services;
 
+import android.util.Log;
+
 import com.cobra.iradar.RadarScanManager;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.config.Preferences.PreferenceDeviceScanSettingsChangedEvent;
@@ -17,6 +19,8 @@ import com.greatnowhere.radar.util.AbstractEventBusListener;
  */
 public class RadarScanner extends AbstractEventBusListener {
 
+	private static final String TAG = RadarScanner.class.getCanonicalName();
+	
 	private static RadarScanner instance;
 	
 	private RadarScanner() {
@@ -52,6 +56,12 @@ public class RadarScanner extends AbstractEventBusListener {
 		}
 	}
 	
+	public static void stop() {
+    	Log.d(TAG, "stop");
+		if ( getInstance() != null )
+			getInstance().unRegister();
+		RadarScanManager.stop();
+	}
 	
 	// Preferences changed listener
 	public void onEventBackgroundThread(PreferenceDeviceScanSettingsChangedEvent event) {

@@ -2,27 +2,14 @@ package com.cobra.iradar;
 
 import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
-
-import de.greenrobot.event.EventBus;
+import com.greatnowhere.radar.util.AbstractEventBusListener;
 
 /**
  * Helper class for listening to connectivity events
  * @author pzeltins
  *
  */
-public abstract class RadarConnectivityListener {
-	
-	private EventBus eventBus;
-	
-	public RadarConnectivityListener() {
-		eventBus = EventBus.getDefault();
-		eventBus.register(this);
-	}
-	
-	public void stop() {
-		if ( eventBus.isRegistered(this) )
-			eventBus.unregister(this);
-	}
+public abstract class RadarConnectivityListener extends AbstractEventBusListener {
 	
 	public void onEventAsync(CobraRadarMessageNotification msg) {
 		if ( msg.connectionStatus == ConnectivityStatus.CONNECTED.getCode() ) {

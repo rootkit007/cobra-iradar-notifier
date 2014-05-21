@@ -43,6 +43,7 @@ public class TTSManager {
 	}
 	
 	public static void stop() {
+    	Log.d(TAG, "stop");
 		if ( tts != null ) 
 			tts.shutdown();
 		if ( timer != null )

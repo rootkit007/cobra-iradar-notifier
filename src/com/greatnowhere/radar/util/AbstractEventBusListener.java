@@ -16,7 +16,7 @@ public abstract class AbstractEventBusListener {
 		eventBus.register(this);
 	}
 	
-	public void stop() {
+	public void unRegister() {
 		if ( eventBus.isRegistered(this))
 			eventBus.unregister(this);
 	}
