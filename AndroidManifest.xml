@@ -15,8 +15,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.greatnowhere.radar"
-      android:versionCode="4"
-      android:versionName="1.0beta4">
+      android:versionCode="5"
+      android:versionName="1.0beta5">
     <uses-sdk android:minSdkVersion="16" android:maxSdkVersion="19" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -51,6 +51,8 @@
         <service android:label="Data Collector Service" android:name="com.greatnowhere.radar.services.CollectorService" android:enabled="true" android:singleUser="true"></service>
         <service android:label="Threat Logger Service" android:name="com.greatnowhere.radar.threats.ThreatLogger$ThreatLoggerService" android:enabled="true" android:singleUser="true"></service>
         <service android:label="DB Pruner Service" android:name="com.greatnowhere.radar.threats.ThreatLogger$DBPruneService" android:enabled="true"></service>
+        <service android:name=".location.PhoneActivityDetector$ActivityDetectorIntentReceiver" android:enabled="true"
+             ></service>
         <receiver android:name="com.greatnowhere.radar.receiver.BootReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -67,6 +69,5 @@
                 <action android:name="com.cobra.iradar.InjectRandomAlert"/>
             </intent-filter>
         </receiver>
-        <service android:name=".location.PhoneActivityDetector$ActivityDetectorIntentReceiver"></service>
     </application>
 </manifest>

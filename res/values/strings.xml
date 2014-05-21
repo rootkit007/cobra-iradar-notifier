@@ -114,10 +114,21 @@
 	<string name="prefKeyAutoMuteImmediatelyDuringCalls">prefKeyAutoMuteImmediatelyDuringCalls</string>
 	<string name="prefValAutoMuteImmediatelyDuringCalls">Automute immediately during calls</string>
 	<string name="prefSumAutoMuteImmediatelyDuringCalls">Will automute immediately (without delay) if call is active</string>
-	<string name="ui_mode">UI Mode</string>
+	<string name="ui_mode">Dock Mode</string>
 	<string name="activity">Activity</string>
 	<string name="speed">Speed</string>
 	<string name="reconnect">Reconnect</string>
 	<string name="voltage">Voltage</string>
 	<string name="status">Status</string>
+	<string name="prefSumCatAudio">Set fixed alert levels for audible alerts</string>
+	<string name="prefSumCatVisibleNotifications">Ongoing notifications in your status bar. Also contains settings whether to turn screen on for alerts</string>
+	<string name="prefCatScanning">Scanning for iRadar device</string>
+	<string name="prefSumCatScanning">Cobra iRadar device does not connect to the phone. Instead phone must initiate connection. Contains settings to govern when phone will attempt to connect.</string>
+	<string name="prefCatConnectivityNotification">Connectivity Notifications</string>
+	<string name="prefSumCatConnectivityNotification">Settings to control audible notifications about iRadar device connectivity status</string>
+	<string name="prefSumCatThreats">Settings to control threat handling</string>
+	<string name="prefKeyShowFakeHiddenThreats">prefKeyShowFakeHiddenThreats</string>
+	<string name="prefValShowFakeHiddenThreats">Show visible alerts for false/hidden threats</string>
+	<string name="prefSumShowFakeHiddenThreats">Will display visible (not audible) alerts for any threats that are hidden (speed below threshold) or determined as fake. Hidden alerts will be blue, false alerts green</string>
+	<string name="prefSumScanOnlyInCarMode">"Will only attempt to connect when phone is connected to car dock. "</string>
 </resources>

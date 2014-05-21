@@ -14,6 +14,8 @@ public class Preferences {
 	public static final int PREF_UNITS_METRIC = 1;
 	public static final int PREF_UNITS_IMPERIAL = 2;
 	
+	private static final String DEFAULT_LOG_FILE_NAME = "com.greatnowhere.radar.log";
+	
 	private static SharedPreferences prefs;
 	private static Resources res;
 	private static EventBus eventBus = EventBus.getDefault();
@@ -175,9 +177,12 @@ public class Preferences {
 		return Integer.parseInt(v);
 	}
 	
+	public static boolean isShowHiddenThreats() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyShowFakeHiddenThreats), true);
+	}
 	
 	public static String getLogFileName() {
-		return prefs.getString(res.getString(R.string.prefKeyLogFileName), "iradar.log");
+		return prefs.getString(res.getString(R.string.prefKeyLogFileName), DEFAULT_LOG_FILE_NAME);
 	}
 	
 	/**

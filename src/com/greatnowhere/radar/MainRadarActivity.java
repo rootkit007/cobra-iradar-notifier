@@ -19,9 +19,11 @@ package com.greatnowhere.radar;
 import java.util.Random;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.UiModeManager;
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -55,9 +57,6 @@ public class MainRadarActivity extends Activity {
     private static final String TAG = "CobraIRadarActivity";
     private static final boolean D = true;
 
-    // Intent request codes
-    private static final int REQUEST_ENABLE_BT = 3;
-    
     public static final String INTENT_BACKGROUND = "runInBackground";
     
     // Local Bluetooth adapter
@@ -120,10 +119,14 @@ public class MainRadarActivity extends Activity {
 
         // If BT is not on, request that it be enabled.
         // setupChat() will then be called during onActivityResult
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-        // Otherwise, setup the chat session
+        if ( mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+        	showDialog("Bluetooth not available!", new Dialog.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+					finish();
+				}
+			} );
         } else {
            	initialize();
            	if ( getIntent().getBooleanExtra(INTENT_BACKGROUND, false)) {
@@ -243,6 +246,15 @@ public class MainRadarActivity extends Activity {
 			}
 		});
     	d.show();
+    }
+    
+    private void showDialog(String textToShow, DialogInterface.OnClickListener clickListener) {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setMessage(textToShow)
+    	       .setCancelable(false)
+    	       .setPositiveButton("OK", clickListener);
+    	AlertDialog alert = builder.create();
+    	alert.show();    
     }
     
     private String getCurrentUIModeString(int mode) {

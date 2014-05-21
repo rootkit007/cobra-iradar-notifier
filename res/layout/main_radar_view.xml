@@ -8,6 +8,7 @@
     android:layout_height="wrap_content"
     android:padding="1sp"
     android:showDividers="middle"
+    android:scrollbars="horizontal|vertical"
     android:stretchColumns="1"
     >
 
@@ -134,12 +135,12 @@
 	        android:maxLines="300"
 	        android:scrollHorizontally="false"
 	        android:scrollbarStyle="outsideOverlay"
-	        android:scrollbars="vertical"
+		    android:scrollbars="horizontal|vertical"
 	        android:textAppearance="?android:attr/textAppearanceSmall" />
 	</TableRow>
 	
 </TableLayout>
-<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" 
+<LinearLayout android:orientation="horizontal" android:layout_width="match_parent" 
     android:layout_height="wrap_content" android:layout_gravity="center_horizontal"
     style="?android:attr/buttonBarStyle">
 	        <Button

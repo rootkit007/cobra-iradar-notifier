@@ -12,8 +12,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.SoundPool;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.telephony.TelephonyManager;
 import android.view.Gravity;
 import android.view.View;
@@ -51,10 +49,8 @@ public class ThreatManager {
 	private static EventBus eventBus;
 	protected static ThreatManager instance;
 	private static Threat currentThreat;
-	private static PowerManager pm;
 	private static AtomicBoolean wasScreenOn = new AtomicBoolean(false);
 	private Timer autoMuteTimer;
-	private WakeLock wl;
 	private static TelephonyManager tm;
 	
 	private static Context ctx;
@@ -88,9 +84,8 @@ public class ThreatManager {
 		                PixelFormat.TRANSLUCENT);
 			    
 		        params.gravity = Gravity.CENTER | Gravity.TOP;
-		        params.dimAmount = 0.3f;
+		        params.dimAmount = 0.4f;
 		        wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
-		        pm = (PowerManager) ctx.getSystemService(Context.POWER_SERVICE);
 		        
 		        instance.mainThreatLayout = (LinearLayout) instance.mainThreatView.findViewById(R.id.layoutThreats);
 		        
@@ -157,8 +152,7 @@ public class ThreatManager {
 			t = new Threat(v, alert, cred);
 			t.showThreat();
 			activeThreats.add(t);
-			if ( cred == ThreatCredibility.LEGIT ) 
-				addLogMessage(t.toString());
+			addLogMessage(t.toString());
 		} else {
 			t.updateThreat(alert, cred);
 		}
@@ -169,11 +163,6 @@ public class ThreatManager {
 	
 	private synchronized static void showMainView() {
 		isThreatActive.set(true);
-		wasScreenOn.set(pm.isScreenOn());
-		if ( pm.isScreenOn() ) {
-			instance.wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, ThreatManager.class.getCanonicalName());
-			instance.wl.acquire();
-		}
 		eventBus.post(new UIRunnableEvent(new Runnable() {
 			public void run() {
 				wm.addView(instance.mainThreatView, params);
@@ -212,11 +201,8 @@ public class ThreatManager {
 
 	}
 	
+	// TODO: add fake blank activity 
 	private static void turnScreenOff() {
-		if ( instance.wl != null ) {
-			instance.wl.release();
-			instance.wl = null;
-		}
 	}
 	
 	private static Threat findExistingThreat(RadarMessageThreat other) {

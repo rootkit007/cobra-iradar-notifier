@@ -23,7 +23,6 @@ import com.greatnowhere.radar.threats.ThreatManager.ThreatCredibility;
  */
 public class Threat {
 	
-	public static final boolean SHOW_FALSE_THREATS = true;
 	public static final boolean AUDIBLE_FALSE_THREATS = false;
 	
 	/**
@@ -177,7 +176,7 @@ public class Threat {
 	
 	public static boolean isShowVisibleThreat(ThreatCredibility c) {
 		return ( c != ThreatCredibility.FAKE && c != ThreatCredibility.HIDDEN) ||
-				( SHOW_FALSE_THREATS );
+				( Preferences.isShowHiddenThreats() );
 	}
 	
 	/**

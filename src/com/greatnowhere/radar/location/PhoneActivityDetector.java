@@ -18,10 +18,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 
 public class PhoneActivityDetector implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
 
+	private static final String TAG = PhoneActivityDetector.class.getCanonicalName();
+	
 	private static PhoneActivityDetector instance;
 	private static ActivityRecognitionClient activityClient;
 	private static ActivityStatus activity = ActivityStatus.UNKNOWN;
@@ -68,7 +71,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	public void onConnected(Bundle connectionHint) {
 		Intent i = new Intent(ctx, ActivityDetectorIntentReceiver.class);
 		PendingIntent callbackIntent = PendingIntent.getService(ctx, 0, i,
-	             PendingIntent.FLAG_UPDATE_CURRENT);
+	             PendingIntent.FLAG_CANCEL_CURRENT);
 		activityClient.requestActivityUpdates(ACTIVITY_UPDATE_INTERVAL, callbackIntent);
 	}
 
@@ -91,7 +94,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	public enum ActivityStatus {
 		DRIVING("Driving",DetectedActivity.IN_VEHICLE),STILL("Still",DetectedActivity.STILL),
 		FOOT("Walking",DetectedActivity.ON_FOOT),BICYCLE("Bicycling",DetectedActivity.ON_BICYCLE),
-		TILTED("Tilting",DetectedActivity.TILTING),UNKNOWN("Unknown",DetectedActivity.UNKNOWN);
+		UNKNOWN("Unknown",DetectedActivity.UNKNOWN);
 
 		private ActivityStatus(String n,int c) {
 			code=c;
@@ -114,6 +117,10 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 					return s;
 				}
 			}
+			// Exception for TILTING - useless activity anyway
+			if ( act.getType() == DetectedActivity.TILTING )
+				return ActivityStatus.STILL;
+			
 			return UNKNOWN;
 		}
 	}
@@ -128,10 +135,15 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 		protected void onHandleIntent(Intent intent) {
 			if (ActivityRecognitionResult.hasResult(intent)) {
 		         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
-		         setActivityStatus(ActivityStatus.fromDetectedActivity(result.getMostProbableActivity()));
-		         eventBus.post(new EventActivityChanged(getActivityStatus()));
-		         // Also see if we should start scanning
-				 RadarScanner.scan();
+		         ActivityStatus newActivity = ActivityStatus.fromDetectedActivity(result.getMostProbableActivity());
+		         boolean activityChanged = ( newActivity != getActivityStatus() );
+		         Log.d(TAG,"Got activity update " + result.getMostProbableActivity());
+		         setActivityStatus(newActivity);
+		         if ( activityChanged ) {
+		        	 eventBus.post(new EventActivityChanged(getActivityStatus()));
+			         // Also see if we should start scanning
+					 RadarScanner.scan();
+		         }
 		    }
 		}
 	}
