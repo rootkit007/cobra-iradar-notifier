@@ -18,9 +18,13 @@ public class RadarMonitorService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		Log.i(TAG, "Service started");
 		if ( intent != null && intent.getBooleanExtra(KEY_INTENT_RECONNECT, false) ) {
-			Log.i(TAG, "Connection attempt initiated");
-			RadarScanManager.showNotification();
-			RadarManager.startConnectionService();
+			if ( !RadarScanManager.isScanActive() ) {
+				Log.w(TAG, "Scan alarm active when it shouldnt be!");
+			} else {
+				Log.i(TAG, "Connection attempt initiated");
+				RadarScanManager.showNotification();
+				RadarManager.startConnectionService();
+			}
 		}
 	}
 	

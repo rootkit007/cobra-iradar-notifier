@@ -5,9 +5,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.services.RadarScanner;
 
 import de.greenrobot.event.EventBus;
@@ -41,8 +43,15 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 		eventBus = EventBus.getDefault();
 		uiManager = (UiModeManager) ctx.getSystemService(Context.UI_MODE_SERVICE);
 		isCarMode.set( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR );
-		activityClient = new ActivityRecognitionClient(ctx, instance, instance);
-		activityClient.connect();
+
+		int gpsResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(ctx);
+		if ( gpsResultCode == ConnectionResult.SUCCESS ) {
+			activityClient = new ActivityRecognitionClient(ctx, instance, instance);
+			activityClient.connect();
+		} else {
+			eventBus.post(new RadarMessageNotification("Activity detection not available! Error code " + gpsResultCode));
+		}
+
 	}
 	
 	public static void stop() {

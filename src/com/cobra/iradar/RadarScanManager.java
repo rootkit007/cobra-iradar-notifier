@@ -93,9 +93,15 @@ public class RadarScanManager {
 		}
 	}
 	
+	/**
+	 * Shows/hides notification as appropriate
+	 */
 	public static void showNotification() {
-		if ( notify != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED )
+		if ( notify != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED ) {
 			notifManager.notify(NOTIFICATION_SCAN, notify);
+		} else {
+			notifManager.cancel(NOTIFICATION_SCAN);
+		}
 	}
 	
 	/**
@@ -104,10 +110,14 @@ public class RadarScanManager {
 	 */
 	private static void startConnectionMonitor() {
 		Log.i(TAG,"start monitor");
+		
+		if ( listener == null )
+			initializeListener();
+		
 		if ( instance != null && instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
 		
-		if ( instance != null && runScan ) {
+		if ( instance != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED ) {
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
 			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -132,13 +142,11 @@ public class RadarScanManager {
 			instance.reconnectionIntent = null;
 		}
 
-		if ( notify != null ) {
-			notifManager.cancel(NOTIFICATION_SCAN);
-		}
+		showNotification();
 	}
 	
 	public static boolean isScanActive() {
-		return ( instance.reconnectionIntent != null );
+		return ( instance != null && instance.reconnectionIntent != null );
 	}
 	
 	public static Notification getNotification() {

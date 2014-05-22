@@ -61,7 +61,7 @@
 	<string name="prefValScanOnlyInCarMode">Only scan if in car mode</string>
 	<string name="prefKeyScanOnlyInDrivingMode">prefKeyScanOnlyInDrivingMode</string>
 	<string name="prefValScanOnlyInDrivingMode">Only scan if in driving mode</string>
-	<string name="prefSumScanOnlyInDrivingMode">Attempts to detect if you are driving and activate scan only then</string>
+	<string name="prefSumScanOnlyInDrivingMode">Attempts to detect if you are driving and activate scan only then. This may or may not work on your device</string>
 	<string name="prefCatThreats">Threat Management</string>
 	<string name="prefKeyLogThreats">prefKeyLogThreats</string>
 	<string name="prefValLogThreats">Log threats</string>
@@ -130,5 +130,5 @@
 	<string name="prefKeyShowFakeHiddenThreats">prefKeyShowFakeHiddenThreats</string>
 	<string name="prefValShowFakeHiddenThreats">Show visible alerts for false/hidden threats</string>
 	<string name="prefSumShowFakeHiddenThreats">Will display visible (not audible) alerts for any threats that are hidden (speed below threshold) or determined as fake. Hidden alerts will be blue, false alerts green</string>
-	<string name="prefSumScanOnlyInCarMode">"Will only attempt to connect when phone is connected to car dock. "</string>
+	<string name="prefSumScanOnlyInCarMode">Will only attempt to connect when phone is connected to car dock</string>
 </resources>
