@@ -7,7 +7,7 @@ The app is in beta stage: UI is sucky, and there are bugs. It does connect to iR
 
 You can grap latest "release" apk from /export folder, or latest cutting edge apk from /bin. Releases are also on Google Play, see https://play.google.com/store/apps/details?id=com.greatnowhere.radar
 
-All code is open-source without any licensing model implied. Take it, use it as you see fit, provide me credits if you think its appropriate.
+All code is open-source without any licensing model implied. Take it, use it as you see fit, provide me credits if you think its appropriate. Or, join the party and contribute. The app could really use some UI work.
 
 TODO:
  * clean up UI
