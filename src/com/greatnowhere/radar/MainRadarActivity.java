@@ -121,7 +121,6 @@ public class MainRadarActivity extends Activity {
         // setupChat() will then be called during onActivityResult
         if ( mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
         	showDialog("Bluetooth not available!", new Dialog.OnClickListener() {
-				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.cancel();
 					finish();

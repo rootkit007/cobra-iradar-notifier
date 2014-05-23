@@ -101,11 +101,12 @@ public class CollectorService extends Service {
     			NotificationBuilder.getConnectedNotification(), NotificationBuilder.getScanNotification(), 
 				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), CollectorService.class);
     	
-	    // Scan manager, must be initialized after RadarManager 
-	    RadarScanner.init();
 	    
 	    if ( !isRadarInitialized ) {
 	    	addLogMessage("Unable to initialize: BT not active, or device not paired");
+	    } else {
+		    // Scan manager, must be initialized after RadarManager 
+		    RadarScanner.init();
 	    }
 	    
     }

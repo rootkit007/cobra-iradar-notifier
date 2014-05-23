@@ -49,8 +49,9 @@ public class RadarScanner extends AbstractEventBusListener {
 	
 	// decide whether to run scanner
 	public static void scan() {
-		if ( isScanAllowed() ) {
-			RadarScanManager.scan(Preferences.isScanForDevice(), Preferences.getDeviceScanInterval());
+		boolean scanAllowed = isScanAllowed(); 
+		if ( scanAllowed ) {
+			RadarScanManager.scan(scanAllowed, Preferences.getDeviceScanInterval());
 		} else {
 			RadarScanManager.stop();
 		}
@@ -58,8 +59,10 @@ public class RadarScanner extends AbstractEventBusListener {
 	
 	public static void stop() {
     	Log.d(TAG, "stop");
-		if ( getInstance() != null )
+		if ( getInstance() != null ) {
 			getInstance().unRegister();
+			instance = null;
+		}
 		RadarScanManager.stop();
 	}
 	

@@ -97,6 +97,8 @@ public class RadarScanManager {
 	 * Shows/hides notification as appropriate
 	 */
 	public static void showNotification() {
+		if ( notifManager == null )
+			return;
 		if ( notify != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED ) {
 			notifManager.notify(NOTIFICATION_SCAN, notify);
 		} else {

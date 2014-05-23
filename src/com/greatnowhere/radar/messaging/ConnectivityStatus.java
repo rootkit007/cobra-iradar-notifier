@@ -24,7 +24,7 @@ public enum ConnectivityStatus {
 			if ( s.getCode() == c ) 
 				return s;
 		}
-		return null;
+		return UNKNOWN;
 	}
 
 	public String getStatusName() {
