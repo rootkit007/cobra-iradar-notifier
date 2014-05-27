@@ -18,7 +18,6 @@ package com.greatnowhere.radar;
 
 import java.util.Random;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.UiModeManager;
@@ -27,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -39,8 +39,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.cobra.iradar.protocol.CobraRadarMessageAlert;
+import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.cobra.iradar.protocol.CobraRadarMessageAlert.Alert;
-import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.config.SettingsActivity;
 import com.greatnowhere.radar.location.PhoneActivityDetector;
@@ -52,7 +52,7 @@ import de.greenrobot.event.EventBus;
 /**
  * This is the main Activity that displays the radar status.
  */
-public class MainRadarActivity extends Activity {
+public class MainRadarActivity extends FragmentActivity {
     // Debugging
     private static final String TAG = "CobraIRadarActivity";
     private static final boolean D = true;
@@ -173,7 +173,7 @@ public class MainRadarActivity extends Activity {
     public void initialize() {
 
         // Start data collector service
-        getApplicationContext().startService(new Intent(getApplicationContext(), CollectorService.class));
+        attemptConnect();
         
     	if ( uiRefreshRunnable != null ) {
     		rootView.removeCallbacks(uiRefreshRunnable);
@@ -200,7 +200,7 @@ public class MainRadarActivity extends Activity {
     		uiRefreshRunnable = null;
     	}
     	boolean serviceStopped = getApplicationContext().stopService(new Intent(getApplicationContext(), CollectorService.class));
-    	Log.d(TAG, "service " + serviceStopped);
+    	Log.d(TAG, "service CollectorService stop " + serviceStopped);
     }
     
     @Override
@@ -305,6 +305,7 @@ public class MainRadarActivity extends Activity {
      * Phone activity change detected
      */
     public void onEventMainThread(PhoneActivityDetector.EventActivityChanged event) {
+		eventBus.post(new CobraRadarMessageNotification("Activity change: " + event.activity.getName() ));
     	activity.setText(event.activity.getName());
     }
     

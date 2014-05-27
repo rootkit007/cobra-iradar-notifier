@@ -2,17 +2,6 @@ package com.greatnowhere.radar.location;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.cobra.iradar.protocol.CobraRadarMessageNotification;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.ActivityRecognitionClient;
-import com.google.android.gms.location.ActivityRecognitionResult;
-import com.google.android.gms.location.DetectedActivity;
-import com.greatnowhere.radar.messaging.RadarMessageNotification;
-import com.greatnowhere.radar.services.RadarScanner;
-
-import de.greenrobot.event.EventBus;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.UiModeManager;
@@ -21,6 +10,17 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.cobra.iradar.protocol.CobraRadarMessageNotification;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.ActivityRecognitionClient;
+import com.google.android.gms.location.ActivityRecognitionResult;
+import com.google.android.gms.location.DetectedActivity;
+import com.greatnowhere.radar.messaging.RadarMessageNotification;
+
+import de.greenrobot.event.EventBus;
 
 public class PhoneActivityDetector implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
@@ -34,7 +34,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	private static final long ACTIVITY_UPDATE_INTERVAL = 60000L; // every 60 secs
 	private static UiModeManager uiManager;
 	private static AtomicBoolean isCarMode = new AtomicBoolean();
-	private static EventBus eventBus;
+	private static EventBus eventBus = EventBus.getDefault();
 	
 	public static void init(Context ctx) {
 		Log.d(TAG,"init");
@@ -49,7 +49,9 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 			activityClient = new ActivityRecognitionClient(ctx, instance, instance);
 			activityClient.connect();
 		} else {
-			eventBus.post(new RadarMessageNotification("Activity detection not available! Error code " + gpsResultCode));
+			activityClient = null;
+			setActivityStatus(ActivityStatus.UNAVAILABLE);
+			eventBus.post(new RadarMessageNotification("Activity detection not available!\nError code " + gpsResultCode));
 		}
 
 	}
@@ -68,8 +70,9 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 	private static void setActivityStatus(ActivityStatus a) {
 		synchronized (activity) {
-			if ( a != activity )
-				eventBus.post(new CobraRadarMessageNotification("Activity change: " + a.getName()));
+			if ( a != activity ) {
+				eventBus.post(new EventActivityChanged(a));
+			}
 			activity = a;
 		}
 	}
@@ -84,7 +87,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 		Log.d(TAG,"connected");
 		Intent i = new Intent(ctx, ActivityDetectorIntentReceiver.class);
 		PendingIntent callbackIntent = PendingIntent.getService(ctx, 0, i,
-	             PendingIntent.FLAG_CANCEL_CURRENT);
+	             PendingIntent.FLAG_UPDATE_CURRENT);
 		activityClient.requestActivityUpdates(ACTIVITY_UPDATE_INTERVAL, callbackIntent);
 	}
 
@@ -108,7 +111,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	public enum ActivityStatus {
 		DRIVING("Driving",DetectedActivity.IN_VEHICLE),STILL("Still",DetectedActivity.STILL),
 		FOOT("Walking",DetectedActivity.ON_FOOT),BICYCLE("Bicycling",DetectedActivity.ON_BICYCLE),
-		UNKNOWN("Unknown",DetectedActivity.UNKNOWN);
+		UNKNOWN("Unknown",DetectedActivity.UNKNOWN), UNAVAILABLE("Service Unavailable",-1);
 
 		private ActivityStatus(String n,int c) {
 			code=c;
@@ -152,14 +155,10 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 			Log.d(TAG,"onHandleIntent");
 			if (ActivityRecognitionResult.hasResult(intent)) {
 		         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
-		         ActivityStatus newActivity = ActivityStatus.fromDetectedActivity(result.getMostProbableActivity());
-		         boolean activityChanged = ( newActivity != getActivityStatus() );
-		         Log.d(TAG,"Got activity update " + result.getMostProbableActivity());
-		         setActivityStatus(newActivity);
-		         if ( activityChanged ) {
-		        	 eventBus.post(new EventActivityChanged(getActivityStatus()));
-			         // Also see if we should start scanning
-					 RadarScanner.scan();
+		         if ( result != null ) {
+			         Log.d(TAG,"Got activity update " + result.getMostProbableActivity());
+			         ActivityStatus newActivity = ActivityStatus.fromDetectedActivity(result.getMostProbableActivity());
+			         setActivityStatus(newActivity);
 		         }
 		    }
 		}
