@@ -131,4 +131,10 @@
 	<string name="prefValShowFakeHiddenThreats">Show visible alerts for false/hidden threats</string>
 	<string name="prefSumShowFakeHiddenThreats">Will display visible (not audible) alerts for any threats that are hidden (speed below threshold) or determined as fake. Hidden alerts will be blue, false alerts green</string>
 	<string name="prefSumScanOnlyInCarMode">Will only attempt to connect when phone is connected to car dock</string>
+	<string name="prefCatLocation">Location awareness</string>
+	<string name="prefCatLocationSum">"Controls whether to query online services about current location (such as max allowed speed, street name, etc) "</string>
+	<string name="prefKeyLookupMaxSpeed">prefKeyLookupMaxSpeed</string>
+	<string name="prefValLookupMaxSpeed">Lookup speed limit</string>
+	<string name="prefSumLookupMaxSpeed">Will try to determine current speed limit. This depends on online services data availability, and is not guaranteed</string>
+	<string name="locationInfo">Road</string>
 </resources>

@@ -206,6 +206,10 @@ public class Preferences {
 		return Integer.parseInt(v); 
 	}
 	
+	public static boolean isLookupSpeedLimit() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLookupMaxSpeed), true);
+	}
+	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {

@@ -43,6 +43,7 @@ import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.cobra.iradar.protocol.CobraRadarMessageAlert.Alert;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.config.SettingsActivity;
+import com.greatnowhere.radar.location.LocationInfoLookupManager;
 import com.greatnowhere.radar.location.PhoneActivityDetector;
 import com.greatnowhere.radar.location.RadarLocationManager;
 import com.greatnowhere.radar.services.CollectorService;
@@ -69,6 +70,7 @@ public class MainRadarActivity extends FragmentActivity {
     private TextView log;
     private TextView voltage;
     private TextView uiMode;
+    private TextView roadInfo;
     private TextView location;
     private TextView activity;
     private Button btnReconnect;
@@ -103,6 +105,7 @@ public class MainRadarActivity extends FragmentActivity {
         voltage = (TextView) findViewById(R.id.voltageText);
         btnReconnect = (Button) findViewById(R.id.btnReconnect);
         uiMode = (TextView) findViewById(R.id.mainViewTextuiMode);
+        roadInfo = (TextView) findViewById(R.id.mainViewTextLocationInfo);
         location = (TextView) findViewById(R.id.mainViewLocation);
         activity = (TextView) findViewById(R.id.mainViewTextActivityMode);
         btnReconnect.setOnClickListener( new OnClickListener() {
@@ -307,6 +310,14 @@ public class MainRadarActivity extends FragmentActivity {
     public void onEventMainThread(PhoneActivityDetector.EventActivityChanged event) {
 		eventBus.post(new CobraRadarMessageNotification("Activity change: " + event.activity.getName() ));
     	activity.setText(event.activity.getName());
+    }
+    
+    public void onEventMainThread(LocationInfoLookupManager.EventOSMWayChange event) {
+    	if ( event.way == null ) {
+    		roadInfo.setText("Unknown");
+    	} else {
+    		roadInfo.setText(event.way.getRoadName() + "\n" + event.way.getMaxSpeed());
+    	}
     }
     
     public void refreshScreen() {

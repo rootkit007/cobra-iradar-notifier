@@ -19,6 +19,7 @@ import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.RadarScanManager;
 import com.greatnowhere.radar.MainRadarActivity;
 import com.greatnowhere.radar.config.Preferences;
+import com.greatnowhere.radar.location.LocationInfoLookupManager;
 import com.greatnowhere.radar.location.PhoneActivityDetector;
 import com.greatnowhere.radar.location.RadarLocationManager;
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
@@ -97,6 +98,10 @@ public class CollectorService extends Service {
 	    // ongoing notifications
 	    NotificationBuilder.init(getApplicationContext());
 	    
+	    // Webservices client init
+	    if ( Preferences.isLookupSpeedLimit() )
+	    	LocationInfoLookupManager.init(getApplicationContext());
+	    
     	isRadarInitialized = RadarManager.initialize(getApplicationContext(), 
     			NotificationBuilder.getConnectedNotification(), NotificationBuilder.getScanNotification(), 
 				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), CollectorService.class);
@@ -121,6 +126,7 @@ public class CollectorService extends Service {
 	    PhoneActivityDetector.stop();
         RadarLocationManager.stop();
         RadarScanner.stop();
+        LocationInfoLookupManager.stop();
         radarMessageHandler.unRegister();
         isRadarInitialized = false;
         eventBus = null;

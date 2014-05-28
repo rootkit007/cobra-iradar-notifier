@@ -86,6 +86,9 @@
 	  <EditTextPreference android:dialogMessage="@string/prefDlgTextThreatShowMinSpeed" android:key="@string/prefKeyThreatShowMinSpeed" android:summary="@string/prefSumThreatShowMinSpeed" android:title="@string/prefValThreatShowMinSpeed" android:dependency="@string/prefKeyLogLocation" android:numeric="integer" android:defaultValue="45"/>
 	  <CheckBoxPreference android:key="@string/prefKeyShowFakeHiddenThreats" android:summary="@string/prefSumShowFakeHiddenThreats" android:title="@string/prefValShowFakeHiddenThreats" android:defaultValue="true"/>
     </PreferenceScreen>
+    <PreferenceScreen android:summary="@string/prefCatLocationSum" android:title="@string/prefCatLocation">
+        <CheckBoxPreference android:summary="@string/prefSumLookupMaxSpeed" android:title="@string/prefValLookupMaxSpeed" android:key="@string/prefKeyLookupMaxSpeed" android:defaultValue="true"/>
+    </PreferenceScreen>
     <ListPreference android:key="@string/prefKeyUnits" android:title="@string/prefValUnits" android:entries="@array/unitsTitles" android:entryValues="@array/unitsKeys" android:defaultValue="1"/>
     
 </PreferenceScreen>

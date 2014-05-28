@@ -15,9 +15,12 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.greatnowhere.radar"
-      android:versionCode="12"
-      android:versionName="1.0beta12">
+      android:versionCode="14"
+      android:versionName="1.0beta14">
     <uses-sdk android:minSdkVersion="16" android:maxSdkVersion="19" android:targetSdkVersion="19" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -48,8 +51,8 @@
         <service android:label="Data Collector Service" android:name="com.greatnowhere.radar.services.CollectorService" android:enabled="true" android:singleUser="true"></service>
         <service android:label="Threat Logger Service" android:name="com.greatnowhere.radar.threats.ThreatLogger$ThreatLoggerService" android:enabled="true" android:singleUser="true"></service>
         <service android:label="DB Pruner Service" android:name="com.greatnowhere.radar.threats.ThreatLogger$DBPruneService" android:enabled="true"></service>
-        <service android:name=".location.PhoneActivityDetector$ActivityDetectorIntentReceiver" android:enabled="true"
-             ></service>
+        <service android:name=".location.PhoneActivityDetector$ActivityDetectorIntentReceiver" android:enabled="true"></service>
+        <service android:name="com.octo.android.robospice.XmlSpringAndroidSpiceService" android:enabled="true"></service>
         <receiver android:name="com.greatnowhere.radar.receiver.BootReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
