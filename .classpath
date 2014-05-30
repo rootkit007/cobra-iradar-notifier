@@ -16,5 +16,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.greatnowhere.osmclient"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.greatnowhere.wikispeedia"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

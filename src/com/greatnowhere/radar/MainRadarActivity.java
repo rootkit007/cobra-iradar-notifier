@@ -72,6 +72,7 @@ public class MainRadarActivity extends FragmentActivity {
     private TextView uiMode;
     private TextView roadInfo;
     private TextView location;
+    private TextView speedLimit;
     private TextView activity;
     private Button btnReconnect;
     private Button btnQuit;
@@ -107,6 +108,7 @@ public class MainRadarActivity extends FragmentActivity {
         uiMode = (TextView) findViewById(R.id.mainViewTextuiMode);
         roadInfo = (TextView) findViewById(R.id.mainViewTextLocationInfo);
         location = (TextView) findViewById(R.id.mainViewLocation);
+        speedLimit = (TextView) findViewById(R.id.mainViewTextSpeedLimit);
         activity = (TextView) findViewById(R.id.mainViewTextActivityMode);
         btnReconnect.setOnClickListener( new OnClickListener() {
 			public void onClick(View v) {
@@ -316,7 +318,16 @@ public class MainRadarActivity extends FragmentActivity {
     	if ( event.way == null ) {
     		roadInfo.setText("Unknown");
     	} else {
-    		roadInfo.setText(event.way.getRoadName() + "\n" + event.way.getMaxSpeed());
+    		roadInfo.setText(event.way.getRoadName());
+    	}
+    }
+    
+    public void onEventMainThread(LocationInfoLookupManager.EventSpeedLimitChange event) {
+    	if ( event.limit != null ) {
+    		speedLimit.setText(
+    				( Preferences.getUnits() == Preferences.PREF_UNITS_METRIC ?
+    						event.getKPH() + "kph" :
+    						event.getMPH() + "mph" ));
     	}
     }
     

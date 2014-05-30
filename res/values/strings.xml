@@ -137,4 +137,5 @@
 	<string name="prefValLookupMaxSpeed">Lookup speed limit</string>
 	<string name="prefSumLookupMaxSpeed">Will try to determine current speed limit. This depends on online services data availability, and is not guaranteed</string>
 	<string name="locationInfo">Road</string>
+	<string name="speedLimit">Speed Limit</string>
 </resources>
