@@ -120,9 +120,10 @@ public class RadarScanManager {
 			alarmManager.cancel(instance.reconnectionIntent);
 		
 		if ( instance != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED ) {
+			Log.d(TAG,"setting alarm for " + RadarMonitorService.class.getCanonicalName());
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
-			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			instance.reconnectionIntent = PendingIntent.getService(ctx, 0, reconnectIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 1000L, ((long) scanInterval) * 1000L, 
 					instance.reconnectionIntent);
 		}
@@ -138,9 +139,11 @@ public class RadarScanManager {
 	
 	public static void stopAlarm() {
 		Log.i(TAG,"stop alarm");
+
 		if ( instance != null && instance.reconnectionIntent != null ) {
 			Log.i(TAG,"cancel alarm " + instance.reconnectionIntent.toString());
 			alarmManager.cancel(instance.reconnectionIntent);
+			instance.reconnectionIntent.cancel();
 			instance.reconnectionIntent = null;
 		}
 

@@ -71,9 +71,9 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 	private static void setActivityStatus(ActivityStatus a) {
 		synchronized (activity) {
 			if ( a != activity ) {
+				activity = a;
 				eventBus.postSticky(new EventActivityChanged(a));
 			}
-			activity = a;
 		}
 	}
 	

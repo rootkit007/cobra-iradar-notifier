@@ -1,5 +1,7 @@
 package com.greatnowhere.radar.location;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.wikispeedia.models.Marker;
 
 import com.greatnowhere.osmclient.OSMLocationListener;
@@ -25,24 +27,43 @@ public class LocationInfoLookupManager {
 	private static Way currentWay;
 	private static Context ctx;
 	private static LocationInfoLookupManager instance;
+	private static AtomicBoolean isRunning = new AtomicBoolean(false);
 	
 	public static void init(Context ctx) {
 		LocationInfoLookupManager.ctx = ctx;
 		instance = new LocationInfoLookupManager();
 		eventBus = EventBus.getDefault();
 		eventBus.register(instance);
-		instance.onEvent(eventBus.getStickyEvent(PhoneActivityDetector.EventActivityChanged.class));
+		activate();
 	}
 	
-	public void onEvent(PhoneActivityDetector.EventActivityChanged event) {
-		if ( event != null && event.activity == ActivityStatus.DRIVING && Preferences.isLookupSpeedLimit() ) {
-			osmListener = new OSMLocationListener(ctx);
-			osmListener.setOSMWayListener(new OSMListener());
-			wsListener = new WikiSpeedChangeListener(ctx);
-			wsListener.setWikiSpeedChangedListener(new WSListener());
-		} else {
+	/**
+	 * Returns TRUE if location info lookup should be active as per preferences
+	 * @return
+	 */
+	private static boolean isActivated() {
+		return ( Preferences.isLookupSpeedLimit() &&
+				( Preferences.isLookupSpeedLimitOnlyInCarMode() ? PhoneActivityDetector.getIsCarMode() : true ) &&
+				( Preferences.isLookupSpeedLimitOnlyWhenDriving() ? PhoneActivityDetector.getActivityStatus() == ActivityStatus.DRIVING : true ) );
+	}
+	
+	/**
+	 * Activates or stops location info lookup
+	 */
+	private synchronized static void activate() {
+		if ( isRunning.get() && !isActivated() ) {
 			stop();
+		} else if ( !isRunning.get() && isActivated() ) {
+			start();
 		}
+	}
+	
+	private static void start() {
+		osmListener = new OSMLocationListener(ctx);
+		osmListener.setOSMWayListener(new OSMListener());
+		wsListener = new WikiSpeedChangeListener(ctx);
+		wsListener.setWikiSpeedChangedListener(new WSListener());
+		isRunning.set(true);
 	}
 	
 	public static void stop() {
@@ -52,6 +73,7 @@ public class LocationInfoLookupManager {
 		if ( wsListener != null )
 			wsListener.stop();
 		wsListener = null;
+		isRunning.set(false);
 	}
 
 	public static String getCurrentWayName() {
@@ -117,4 +139,21 @@ public class LocationInfoLookupManager {
 			return Double.valueOf((Math.floor(limit / MPH_TO_MS))).intValue();
 		}
 	}
+
+	/**
+	 * Event handlers to start/stop lookup
+	 * @param event
+	 */
+	public void onEvent(PhoneActivityDetector.EventActivityChanged event) {
+		activate();
+	}
+
+	public void onEvent(PhoneActivityDetector.EventCarModeChange event) {
+		activate();
+	}
+	
+	public void onEvent(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
+		activate();
+	}
+	
 }

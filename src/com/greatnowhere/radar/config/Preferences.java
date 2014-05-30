@@ -210,6 +210,14 @@ public class Preferences {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupMaxSpeed), true);
 	}
 	
+	public static boolean isLookupSpeedLimitOnlyInCarMode() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenCarMode), true);
+	}
+	
+	public static boolean isLookupSpeedLimitOnlyWhenDriving() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenDriving), true);
+	}
+	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
@@ -232,6 +240,13 @@ public class Preferences {
 
 			}
 			
+			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupMaxSpeed)) ||
+					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenCarMode)) ||
+					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenDriving))) {
+
+					eventBus.post(new PreferenceLocationLookupSettingsChangedEvent());
+
+				}
 		}
 	}
 	
@@ -247,4 +262,9 @@ public class Preferences {
 	public static class PreferenceOngoingNotificationsChangedEvent {
 		
 	}
+	
+	public static class PreferenceLocationLookupSettingsChangedEvent {
+		
+	}
+
 }

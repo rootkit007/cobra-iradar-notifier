@@ -195,6 +195,14 @@ public class CollectorService extends Service {
     	}
     }
     
+    /**
+     * handler to let other components log to file
+     * @param event
+     */
+    public void onEventBackgroundThread(EventLogFileMessage event) {
+    	addFileLogMessage(event.msg);
+    }
+    
     // The Handler that gets information back from the IRadar
     // All event handlers are called in background thread, so care must be taken when updating UI
 	private CobraMessageHandler radarMessageHandler = new CobraMessageHandler() {
@@ -218,5 +226,12 @@ public class CollectorService extends Service {
 				addLogMessage(msg.message);
 		}
 	};
+	
+	public static class EventLogFileMessage {
+		public String msg;
+		public EventLogFileMessage(String s) {
+			msg = s;
+		}
+	}
 	
 }

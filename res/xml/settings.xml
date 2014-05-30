@@ -87,7 +87,9 @@
 	  <CheckBoxPreference android:key="@string/prefKeyShowFakeHiddenThreats" android:summary="@string/prefSumShowFakeHiddenThreats" android:title="@string/prefValShowFakeHiddenThreats" android:defaultValue="true"/>
     </PreferenceScreen>
     <PreferenceScreen android:summary="@string/prefCatLocationSum" android:title="@string/prefCatLocation">
-        <CheckBoxPreference android:summary="@string/prefSumLookupMaxSpeed" android:title="@string/prefValLookupMaxSpeed" android:key="@string/prefKeyLookupMaxSpeed" android:defaultValue="true"/>
+        <CheckBoxPreference android:summary="@string/prefSumLookupMaxSpeed" android:title="@string/prefValLookupMaxSpeed" android:key="@string/prefKeyLookupMaxSpeed" android:defaultValue="true" android:disableDependentsState="false"/>
+        <CheckBoxPreference android:summary="@string/prefSumLookupWhenDriving" android:title="@string/prefValLookupWhenDriving" android:key="@string/prefKeyLookupWhenDriving" android:defaultValue="true" android:dependency="@string/prefKeyLookupMaxSpeed"/>
+        <CheckBoxPreference android:summary="@string/prefSumLookupWhenCarMode" android:title="@string/prefValLookupWhenCarMode" android:key="@string/prefKeyLookupWhenCarMode" android:defaultValue="false" android:dependency="@string/prefKeyLookupMaxSpeed"/>
     </PreferenceScreen>
     <ListPreference android:key="@string/prefKeyUnits" android:title="@string/prefValUnits" android:entries="@array/unitsTitles" android:entryValues="@array/unitsKeys" android:defaultValue="1"/>
     

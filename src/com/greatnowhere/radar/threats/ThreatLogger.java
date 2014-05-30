@@ -21,8 +21,11 @@ import android.util.Log;
 
 import com.greatnowhere.radar.MainRadarApplication;
 import com.greatnowhere.radar.config.Preferences;
+import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;
 import com.greatnowhere.radar.threats.ThreatManager.ThreatCredibility;
+
+import de.greenrobot.event.EventBus;
 
 public class ThreatLogger extends SQLiteOpenHelper {
 
@@ -43,11 +46,13 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	private static Context ctx;
 	private static AlarmManager alarmManager;
 	private static PendingIntent logCleanupIntent;
+	private static EventBus eventBus;
 	
 	public static synchronized void init(Context ctx) {
 		instance = new ThreatLogger(ctx, DB_NAME, null, DB_VERSION);
 		alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
 		ThreatLogger.ctx = ctx;
+		eventBus = EventBus.getDefault();
 		
 		if ( Preferences.isLogThreats() && Preferences.isLogThreatLimitNumeric() ) {
 			Intent i = new Intent(ctx, DBPruneService.class);
@@ -110,6 +115,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 			}
 		}
 		Log.d(TAG,"found " + threat_ids.size() + " unique threats");
+		eventBus.post(new RadarMessageNotification("False threat scanner found " + threat_ids.size() + " similar threats"));
 		return threat_ids.size();
 	}
 	

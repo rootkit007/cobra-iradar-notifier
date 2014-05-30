@@ -48,11 +48,13 @@ public class RadarScanner extends AbstractEventBusListener {
 	}
 	
 	// decide whether to run scanner
-	public static void scan() {
+	public static synchronized void scan() {
 		boolean scanAllowed = isScanAllowed(); 
 		if ( scanAllowed ) {
+			Log.d(TAG,"scan allowed, starting");
 			RadarScanManager.scan(scanAllowed, Preferences.getDeviceScanInterval());
 		} else {
+			Log.d(TAG,"scan prohibited, stopping");
 			RadarScanManager.stop();
 		}
 	}
