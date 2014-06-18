@@ -29,6 +29,9 @@ public class LocationInfoLookupManager {
 	private static LocationInfoLookupManager instance;
 	private static AtomicBoolean isRunning = new AtomicBoolean(false);
 	
+	public static final String SOURCE_WS = "WikiSpeedia";
+	public static final String SOURCE_OSM = "OpenStreetMaps";
+	
 	public static void init(Context ctx) {
 		LocationInfoLookupManager.ctx = ctx;
 		instance = new LocationInfoLookupManager();
@@ -59,10 +62,19 @@ public class LocationInfoLookupManager {
 	}
 	
 	private static void start() {
-		osmListener = new OSMLocationListener(ctx);
-		osmListener.setOSMWayListener(new OSMListener());
-		wsListener = new WikiSpeedChangeListener(ctx);
-		wsListener.setWikiSpeedChangedListener(new WSListener());
+		Log.i(TAG, "Starting");
+		try {
+			osmListener = new OSMLocationListener(ctx);
+			osmListener.setOSMWayListener(new OSMListener());
+		} catch (Exception ex) {
+			Log.w(TAG, ex);
+		}
+		try {
+			wsListener = new WikiSpeedChangeListener(ctx, Preferences.getWikiSpeediaUserName());
+			wsListener.setWikiSpeedChangedListener(new WSListener());
+		} catch (Exception ex) {
+			Log.w(TAG, ex);
+		}
 		isRunning.set(true);
 	}
 	
@@ -82,8 +94,8 @@ public class LocationInfoLookupManager {
 		return null;
 	}
 	
-	private static void setSpeedLimit(Double l) {
-		eventBus.postSticky(new EventSpeedLimitChange(l));
+	private static void setSpeedLimit(Double l, String source) {
+		eventBus.postSticky(new EventSpeedLimitChange(l,source));
 	}
 	
 	public EventSpeedLimitChange getSpeedLimit() {
@@ -95,7 +107,7 @@ public class LocationInfoLookupManager {
 			Log.i(TAG, "Got OSM way " + way);
 			currentWay = way;
 			if ( currentWay != null && currentWay.getMaxSpeed() != null ) {
-					setSpeedLimit(currentWay.getMaxSpeed());
+					setSpeedLimit(currentWay.getMaxSpeed(), SOURCE_OSM);
 			}
 			eventBus.post(new EventOSMWayChange(way));
 			eventBus.post(new RadarMessageNotification("OSM way " + way + "\nspeed limit " + ( way != null ? way.getMaxSpeed() : "")));
@@ -106,7 +118,7 @@ public class LocationInfoLookupManager {
 		public void onWikiSpeedChangedListener(Marker m) {
 			Log.i(TAG, "Got WS marker " + m);
 			if ( m != null ) {
-				setSpeedLimit(m.getSpeedLimitMS());
+				setSpeedLimit(m.getSpeedLimitMS(), SOURCE_WS);
 			}
 		}
 	}
@@ -127,8 +139,11 @@ public class LocationInfoLookupManager {
 		
 		public Double limit;
 		
-		public EventSpeedLimitChange(Double l) {
+		public String source;
+		
+		public EventSpeedLimitChange(Double l,String s) {
 			limit = l;
+			source = s;
 		}
 		
 		public Integer getKPH() {

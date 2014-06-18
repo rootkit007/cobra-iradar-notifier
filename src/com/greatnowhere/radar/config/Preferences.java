@@ -210,12 +210,29 @@ public class Preferences {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupMaxSpeed), true);
 	}
 	
+	public static String getWikiSpeediaUserName() {
+		return prefs.getString(res.getString(R.string.prefKeyWSTag), "ALL");
+	}
+	
 	public static boolean isLookupSpeedLimitOnlyInCarMode() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenCarMode), true);
 	}
 	
 	public static boolean isLookupSpeedLimitOnlyWhenDriving() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenDriving), true);
+	}
+	
+	public static boolean isWarnOverSpeed() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyWarnOverSpeed), true);
+	}
+	
+	/**
+	 * Speed excess (in kmh) before audible warning starts
+	 * @return
+	 */
+	public static int getWarnOverSpeedLimit() {
+		String v = prefs.getString(res.getString(R.string.prefKeyOverSpeedWarnLimit), Integer.toString(0));
+		return Integer.parseInt(v);
 	}
 	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
@@ -241,12 +258,19 @@ public class Preferences {
 			}
 			
 			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupMaxSpeed)) ||
+					
 					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenCarMode)) ||
 					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenDriving))) {
-
 					eventBus.post(new PreferenceLocationLookupSettingsChangedEvent());
 
-				}
+			}
+			
+			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyWarnOverSpeed)) ) {
+				
+				eventBus.post(new PreferenceOverSpeedSettingsChangedEvent());
+				
+			}
+			
 		}
 	}
 	
@@ -267,4 +291,7 @@ public class Preferences {
 		
 	}
 
+	public static class PreferenceOverSpeedSettingsChangedEvent {
+		
+	}
 }

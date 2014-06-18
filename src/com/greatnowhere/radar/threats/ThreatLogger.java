@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -18,19 +18,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.os.Parcelable;
 import android.util.Log;
-
 import com.greatnowhere.radar.MainRadarApplication;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;
 import com.greatnowhere.radar.threats.ThreatManager.ThreatCredibility;
-
 import de.greenrobot.event.EventBus;
 
 public class ThreatLogger extends SQLiteOpenHelper {
 
 	private static final String DB_NAME = MainRadarApplication.class.getCanonicalName();
-	private static final int DB_VERSION = 4;
+	private static final int DB_VERSION = 5;
 	
 	private static final String TAG = ThreatLogger.class.getCanonicalName();
 	
@@ -94,15 +92,15 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	public static int countSimilarThreatOccurences(Threat threat, float radius) {
 		SQLiteDatabase db = instance.getReadableDatabase();
 		Set<Integer> threat_ids = new LinkedHashSet<Integer>();
-		String partialDistance = Double.toString(convertKmToPartialDistance(radius));
+		String partialDistance = double2String(convertKmToPartialDistance(radius));
 		Log.d(TAG, "Looking for threats " + threat.alert.alertType.getName() + " freq " + threat.alert.frequency 
 				+ " radius " + radius + " part dist " + partialDistance);
 		if ( threat.locations != null ) {
 			for ( Location l : threat.locations ) {
-				Log.d(TAG, "Looking for threats close to lat " + l.getLatitude()
-						+ " long " + l.getLongitude());
 				String sql = "select distinct id from threats where type=? and abs(?-freq)<0.05 and exists (select * from threats_locations "
 						+ "where threat_id=threats.id and " + buildDistanceQuery(l.getLatitude(),l.getLongitude()) + " > ?)";
+				Log.d(TAG, "Looking for threats close to lat " + double2String(l.getLatitude())
+						+ " long " + double2String(l.getLongitude()) + " sql " + sql);
 				Cursor c = db.rawQuery(sql, new String[] { Integer.toString(threat.alert.alertType.getCode()),
 						Float.toString(threat.alert.frequency), partialDistance
 						} );
@@ -144,12 +142,12 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	}
 	
 	public static void injectLocationValues(ContentValues values, double latitude, double longitude) {
-	    values.put(LATITUDE, latitude);
-	    values.put(LONGITUDE, longitude);
-	    values.put(COSLAT, Math.cos(deg2rad(latitude)));
-	    values.put(SINLAT, Math.sin(deg2rad(latitude)));
-	    values.put(COSLNG, Math.cos(deg2rad(longitude)));
-	    values.put(SINLNG, Math.sin(deg2rad(longitude)));
+	    values.put(LATITUDE, double2String(latitude));
+	    values.put(LONGITUDE, double2String(longitude));
+	    values.put(COSLAT, double2String(Math.cos(deg2rad(latitude))));
+	    values.put(SINLAT, double2String(Math.sin(deg2rad(latitude))));
+	    values.put(COSLNG, double2String(Math.cos(deg2rad(longitude))));
+	    values.put(SINLNG, double2String(Math.sin(deg2rad(longitude))));
 	}
 
 	public static double deg2rad(double deg) {
@@ -162,6 +160,16 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	
 	public static double convertKmToPartialDistance(double km) {
 	    return Math.cos(km/EARTH_R);
+	}
+	
+	/**
+	 * Ensures double is converted to String while maintaining at least 13 digits of precision
+	 * @param d
+	 * @return
+	 */
+	@SuppressLint("DefaultLocale")
+	public static String double2String(double d) {
+		return String.format("%19.13f", d);
 	}
 	
 	/**
@@ -197,10 +205,10 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	    final double coslng = Math.cos(deg2rad(longitude));
 	    final double sinlng = Math.sin(deg2rad(longitude));
 	    //@formatter:off
-	    return "(" + coslat + "*" + COSLAT
-	            + "*(" + COSLNG + "*" + coslng
-	            + "+" + SINLNG + "*" + sinlng
-	            + ")+" + sinlat + "*" + SINLAT 
+	    return "(" + double2String(coslat) + "*" + COSLAT
+	            + "*(" + COSLNG + "*" + double2String(coslng)
+	            + "+" + SINLNG + "*" + double2String(sinlng)
+	            + ")+" + double2String(sinlat) + "*" + SINLAT 
 	            + ")";
 	    //@formatter:on
 	}
@@ -240,6 +248,23 @@ public class ThreatLogger extends SQLiteOpenHelper {
 			db.execSQL("create index threat_ind1 on threats(type,freq);");
 			oldVersion = 4;
 		}
+		if ( oldVersion == 4 && newVersion == 5 ) {
+			db.execSQL("create table threats_loc2(id integer primary key autoincrement, threat_id integer, " 
+					+ "lat text, long text, ts integer," 
+					+ "speed real, bearing real," 
+					+ COSLAT + " text," 
+					+ COSLNG + " text,"  
+					+ SINLAT + " text,"  
+					+ SINLNG + " text,"  
+					+ "foreign key(threat_id) references threats(id) on delete cascade);");
+			String fields = "id,threat_id,lat,long,ts,speed,bearing," 
+					+ COSLAT + "," + COSLNG + "," + SINLAT + "," + SINLNG;
+			db.execSQL("insert into threats_loc2(" + fields + ") "
+					+ "select " + fields + " from threats_locations;");
+			db.execSQL("drop table threats_locations;");
+			db.execSQL("alter table threats_loc2 rename to threats_locations;");
+			oldVersion = 5;
+		}
 	}
 	
 	/**
@@ -256,6 +281,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		@Override
 		protected void onHandleIntent(Intent intent) {
 			// Keep X last records
+			Preferences.init(getApplicationContext());
 			if ( Preferences.isLogThreatLimitNumeric() ) {
 				purgeOldLogRecords(Preferences.getLogThreatLimitNumeric());
 			}

@@ -144,4 +144,14 @@
 	<string name="prefSumLookupWhenDriving">Activate only when driving activity detected</string>
 	<string name="prefValLookupWhenCarMode">Only in car mode</string>
 	<string name="prefValLookupWhenDriving">Only when driving</string>
+	<string name="prefKeyWarnOverSpeed">prefKeyWarnOverSpeed</string>
+	<string name="prefSumWarnOverSpeed">Audible warning when current speed exceeds speed limit. This feature is entirely dependent on speed limit data provided by OpenStreetMaps and Wikispeedia!</string>
+	<string name="prefValWarnOverSpeed">Speeding Warning</string>
+	<string name="prefKeyOverSpeedWarnLimit">prefKeyOverSpeedWarnLimit</string>
+	<string name="prefSumOverSpeedWarnLimit">Km/h over speed limit to start audible warning at. The warning will increase in intensity as speed increases</string>
+	<string name="prefValOverSpeedWarnLimit">Km/h over speed limit</string>
+	<string name="prefDlgTextWSTag">Enter WikiSpeedia user name</string>
+	<string name="prefKeyWSTag">prefKeyWSTag</string>
+	<string name="prefSumWSTag"></string>
+	<string name="prefValWSTag">WikiSpeedia user name</string>
 </resources>

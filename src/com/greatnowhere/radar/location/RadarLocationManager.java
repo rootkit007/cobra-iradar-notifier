@@ -61,6 +61,7 @@ public class RadarLocationManager {
 
 	public static void setCurrentLoc(Location currentLoc) {
 		RadarLocationManager.currentLoc = currentLoc;
+		eventBus.postSticky(new LocationChanged(currentLoc));
 		isReady = true;
 	}
 	
@@ -115,6 +116,30 @@ public class RadarLocationManager {
 		public void onProviderDisabled(String provider) {
 		}
 
+	}
+	
+	public static class LocationChanged {
+		public Location loc;
+		
+		public LocationChanged(Location l) {
+			loc = l;
+		}
+
+		public float getCurrentSpeedKph() {
+			if ( loc != null ) {
+				return loc.getSpeed()*3.6f;
+			}
+			return 0f;
+		}
+		
+		public float getCurrentSpeedMph() {
+			if ( loc != null ) {
+				return loc.getSpeed()*2.23694f;
+			}
+			return 0f;
+		}
+
+	
 	}
 	
 }

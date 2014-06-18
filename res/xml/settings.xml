@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?> 
 <PreferenceScreen android:key="preferences" 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:robobunny="http://robobunny.com">
@@ -88,9 +88,12 @@
     </PreferenceScreen>
     <PreferenceScreen android:summary="@string/prefCatLocationSum" android:title="@string/prefCatLocation">
         <CheckBoxPreference android:summary="@string/prefSumLookupMaxSpeed" android:title="@string/prefValLookupMaxSpeed" android:key="@string/prefKeyLookupMaxSpeed" android:defaultValue="true" android:disableDependentsState="false"/>
+	    <EditTextPreference android:dialogMessage="@string/prefDlgTextWSTag" android:key="@string/prefKeyWSTag" android:summary="@string/prefSumWSTag" android:title="@string/prefValWSTag" android:dependency="@string/prefKeyLookupMaxSpeed" android:defaultValue="ALL"/>
         <CheckBoxPreference android:summary="@string/prefSumLookupWhenDriving" android:title="@string/prefValLookupWhenDriving" android:key="@string/prefKeyLookupWhenDriving" android:defaultValue="true" android:dependency="@string/prefKeyLookupMaxSpeed"/>
         <CheckBoxPreference android:summary="@string/prefSumLookupWhenCarMode" android:title="@string/prefValLookupWhenCarMode" android:key="@string/prefKeyLookupWhenCarMode" android:defaultValue="false" android:dependency="@string/prefKeyLookupMaxSpeed"/>
-    </PreferenceScreen>
+        <CheckBoxPreference android:summary="@string/prefSumWarnOverSpeed" android:title="@string/prefValWarnOverSpeed" android:key="@string/prefKeyWarnOverSpeed" android:defaultValue="false" android:dependency="@string/prefKeyLookupMaxSpeed" android:disableDependentsState="false"/>
+	    <EditTextPreference android:key="@string/prefKeyOverSpeedWarnLimit" android:summary="@string/prefSumOverSpeedWarnLimit" android:title="@string/prefValOverSpeedWarnLimit" android:numeric="integer" android:dependency="@string/prefKeyWarnOverSpeed" android:defaultValue="0"/>
+        </PreferenceScreen>
     <ListPreference android:key="@string/prefKeyUnits" android:title="@string/prefValUnits" android:entries="@array/unitsTitles" android:entryValues="@array/unitsKeys" android:defaultValue="1"/>
     
 </PreferenceScreen>

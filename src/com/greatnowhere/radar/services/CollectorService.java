@@ -22,6 +22,7 @@ import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.LocationInfoLookupManager;
 import com.greatnowhere.radar.location.PhoneActivityDetector;
 import com.greatnowhere.radar.location.RadarLocationManager;
+import com.greatnowhere.radar.location.SpeedLimitChecker;
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
 import com.greatnowhere.radar.messaging.RadarMessageAllClear;
 import com.greatnowhere.radar.messaging.RadarMessageConnectivityNotification;
@@ -102,6 +103,9 @@ public class CollectorService extends Service {
 	    if ( Preferences.isLookupSpeedLimit() )
 	    	LocationInfoLookupManager.init(getApplicationContext());
 	    
+	    // Speed limit checker
+	    SpeedLimitChecker.init(getApplicationContext());
+	    
     	isRadarInitialized = RadarManager.initialize(getApplicationContext(), 
     			NotificationBuilder.getConnectedNotification(), NotificationBuilder.getScanNotification(), 
 				Preferences.isScanForDevice(), Preferences.getDeviceScanInterval(), CollectorService.class);
@@ -127,6 +131,7 @@ public class CollectorService extends Service {
         RadarLocationManager.stop();
         RadarScanner.stop();
         LocationInfoLookupManager.stop();
+        SpeedLimitChecker.stop();
         radarMessageHandler.unRegister();
         isRadarInitialized = false;
         eventBus = null;
