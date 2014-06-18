@@ -155,7 +155,8 @@ public class Preferences {
 	}
 	
 	public static int getLogThreatLimitNumeric() {
-		return prefs.getInt(res.getString(R.string.prefKeyLogThreatsLimitNumVal), 300);
+		String num = prefs.getString(res.getString(R.string.prefKeyLogThreatsLimitNumVal), "300");
+		return Integer.parseInt(num);
 	}
 	
 	public static boolean isFakeAlertDetection() {
