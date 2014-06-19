@@ -66,17 +66,17 @@ public class SpeedLimitChecker {
 		return Preferences.isWarnOverSpeed() && Preferences.isLookupSpeedLimit() && RadarLocationManager.isReady();
 	}
 	
-	public void onEventBackgroundThread(Preferences.PreferenceOverSpeedSettingsChangedEvent event) {
+	public void onEventAsync(Preferences.PreferenceOverSpeedSettingsChangedEvent event) {
 		Log.i(TAG, "Got preference changed event");
 		setAudibleWarning();
 	}
 	
-	public void onEventBackgroundThread(LocationInfoLookupManager.EventSpeedLimitChange event) {
+	public void onEventAsync(LocationInfoLookupManager.EventSpeedLimitChange event) {
 		Log.i(TAG, "Got speed limit change event");
 		setAudibleWarning();
 	}
 	
-	public void onEventBackgroundThread(RadarLocationManager.LocationChanged event) {
+	public void onEventAsync(RadarLocationManager.LocationChanged event) {
 		Log.i(TAG, "Got location change event");
 		setAudibleWarning();
 	}
@@ -88,9 +88,11 @@ public class SpeedLimitChecker {
 			LocationInfoLookupManager.EventSpeedLimitChange speedLimitEvent = eventBus.getStickyEvent(LocationInfoLookupManager.EventSpeedLimitChange.class);
 			if ( locationEvent == null ) {
 				Log.w(TAG,"Location not known, cannot warn overspeed");
+				return;
 			}
 			if ( speedLimitEvent == null ) {
 				Log.w(TAG,"Speed limit not known, cannot warn overspeed");
+				return;
 			}
 			float currentSpeed = locationEvent.getCurrentSpeedKph();
 			int speedLimit = speedLimitEvent.getKPH();

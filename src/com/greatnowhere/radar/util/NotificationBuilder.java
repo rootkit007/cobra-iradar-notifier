@@ -74,7 +74,7 @@ public class NotificationBuilder extends AbstractEventBusListener {
    	}
 
    	
-   	public void onEventBackgroundThread(PreferenceOngoingNotificationsChangedEvent event) {
+   	public void onEventAsync(PreferenceOngoingNotificationsChangedEvent event) {
    		RadarScanManager.setNotification(getScanNotification());
    		RadarManager.setOngoingNotification(getConnectedNotification());
    	}

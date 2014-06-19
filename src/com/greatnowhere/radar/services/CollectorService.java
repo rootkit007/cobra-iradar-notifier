@@ -204,7 +204,7 @@ public class CollectorService extends Service {
      * handler to let other components log to file
      * @param event
      */
-    public void onEventBackgroundThread(EventLogFileMessage event) {
+    public void onEventAsync(EventLogFileMessage event) {
     	addFileLogMessage(event.msg);
     }
     
@@ -212,22 +212,22 @@ public class CollectorService extends Service {
     // All event handlers are called in background thread, so care must be taken when updating UI
 	private CobraMessageHandler radarMessageHandler = new CobraMessageHandler() {
 		@Override
-		public void onEventBackgroundThread(final RadarMessageConnectivityNotification msg) {
+		public void onEventAsync(final RadarMessageConnectivityNotification msg) {
 			// nothing to do here. CobraMessageConnectivityNotification is a subclass of
 			// CobraMessageNotification so this message will get logged there
 			// and actual connectivity changes are handled elsewhere
 		}
 		
 		@Override
-		public void onEventBackgroundThread(final RadarMessageThreat msg) {
+		public void onEventAsync(final RadarMessageThreat msg) {
 	        	ThreatManager.newThreat(msg);
 		}
 		@Override
-		public void onEventBackgroundThread(final RadarMessageAllClear msg) {
+		public void onEventAsync(final RadarMessageAllClear msg) {
 				ThreatManager.removeThreats();
 		}
 		@Override
-		public void onEventBackgroundThread(final RadarMessageNotification msg) {
+		public void onEventAsync(final RadarMessageNotification msg) {
 				addLogMessage(msg.message);
 		}
 	};

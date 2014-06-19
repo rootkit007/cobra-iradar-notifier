@@ -8,9 +8,9 @@ import com.greatnowhere.radar.util.AbstractEventBusListener;
 
 public abstract class CobraMessageHandler extends AbstractEventBusListener {
 	
-	public abstract void onEventBackgroundThread(final RadarMessageConnectivityNotification msg);
-	public abstract void onEventBackgroundThread(final RadarMessageThreat msg);
-	public abstract void onEventBackgroundThread(final RadarMessageAllClear msg);
-	public abstract void onEventBackgroundThread(final RadarMessageNotification msg);
+	public abstract void onEventAsync(final RadarMessageConnectivityNotification msg);
+	public abstract void onEventAsync(final RadarMessageThreat msg);
+	public abstract void onEventAsync(final RadarMessageAllClear msg);
+	public abstract void onEventAsync(final RadarMessageNotification msg);
 	
 }

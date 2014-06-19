@@ -69,22 +69,22 @@ public class RadarScanner extends AbstractEventBusListener {
 	}
 	
 	// Preferences changed listener
-	public void onEventBackgroundThread(PreferenceDeviceScanSettingsChangedEvent event) {
+	public void onEventAsync(PreferenceDeviceScanSettingsChangedEvent event) {
 		scan();
 	}
 	
 	// Phone activity changed listener
-	public void onEventBackgroundThread(EventActivityChanged event) {
+	public void onEventAsync(EventActivityChanged event) {
 		scan();
 	}
 
 	// Car mode changed listener
-	public void onEventBackgroundThread(EventCarModeChange event) {
+	public void onEventAsync(EventCarModeChange event) {
 		scan();
 	}
 
 	// Notification settings change listener
-	public void onEventBackgroundThread(PreferenceOngoingNotificationsChangedEvent event) {
+	public void onEventAsync(PreferenceOngoingNotificationsChangedEvent event) {
 		// TODO: notif
 		scan();
 	}

@@ -62,7 +62,7 @@ public class LocationInfoLookupManager {
 	}
 	
 	private static void start() {
-		Log.i(TAG, "Starting");
+		Log.i(TAG, "Starting OSM and WS clients");
 		try {
 			osmListener = new OSMLocationListener(ctx);
 			osmListener.setOSMWayListener(new OSMListener());
@@ -79,6 +79,7 @@ public class LocationInfoLookupManager {
 	}
 	
 	public static void stop() {
+		Log.i(TAG,"Stopping OSM and WS clients");
 		if ( osmListener != null )
 			osmListener.stop();
 		osmListener = null;
@@ -104,13 +105,17 @@ public class LocationInfoLookupManager {
 	
 	protected static class OSMListener implements OSMWayChangedListener {
 		public void onOSMWayChangedListener(Way way) {
-			Log.i(TAG, "Got OSM way " + way);
+			Log.i(TAG, "Got OSM way " + ( way == null ? "null" : way.toString()));
 			currentWay = way;
 			if ( currentWay != null && currentWay.getMaxSpeed() != null ) {
 					setSpeedLimit(currentWay.getMaxSpeed(), SOURCE_OSM);
 			}
 			eventBus.post(new EventOSMWayChange(way));
-			eventBus.post(new RadarMessageNotification("OSM way " + way + "\nspeed limit " + ( way != null ? way.getMaxSpeed() : "")));
+			if ( way == null ) {
+				eventBus.post(new RadarMessageNotification("OSM missing data"));
+			} else {
+				eventBus.post(new RadarMessageNotification("OSM way " + way + "\nspeed limit " + ( way != null ? way.getMaxSpeed() : "")));
+			}
 		}
 	}
 	
