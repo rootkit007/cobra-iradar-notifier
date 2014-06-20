@@ -98,7 +98,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		if ( threat.locations != null ) {
 			for ( Location l : threat.locations ) {
 				String sql = "select distinct id from threats where type=? and abs(?-freq)<0.05 and exists (select * from threats_locations "
-						+ "where threat_id=threats.id and " + buildDistanceQuery(l.getLatitude(),l.getLongitude()) + " > ?)";
+						+ "where threat_id=threats.id and 1000000*" + buildDistanceQuery(l.getLatitude(),l.getLongitude()) + " > 1000000*?)";
 				Log.d(TAG, "Looking for threats close to lat " + double2String(l.getLatitude())
 						+ " long " + double2String(l.getLongitude()) + " sql " + sql);
 				Cursor c = db.rawQuery(sql, new String[] { Integer.toString(threat.alert.alertType.getCode()),
@@ -151,7 +151,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	}
 
 	public static double deg2rad(double deg) {
-	    return (deg * Math.PI / 180.0);
+	    return (deg * Math.PI / 180D);
 	}
 	
 	public static double convertPartialDistanceToKm(double result) {
@@ -169,10 +169,13 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	 */
 	@SuppressLint("DefaultLocale")
 	public static String double2String(double d) {
-		return String.format("%19.13f", d);
+		return String.format("%32.19f", d);
 	}
 	
 	/**
+	 * 
+	 * @see http://stackoverflow.com/questions/3126830/query-to-get-records-based-on-radius-in-sqlite/9536914#9536914
+	 * 
 	 * Build query based on distance using spherical law of cosinus
 	 * 
 	 * d = acos(sin(lat1).sin(lat2)+cos(lat1).cos(lat2).cos(long2−long1)).R

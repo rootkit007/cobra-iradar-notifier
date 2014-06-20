@@ -328,6 +328,8 @@ public class MainRadarActivity extends FragmentActivity {
     				( Preferences.getUnits() == Preferences.PREF_UNITS_METRIC ?
     						event.getKPH() + "kph" :
     						event.getMPH() + "mph" ));
+    	} else {
+    		speedLimit.setText("");
     	}
     }
     

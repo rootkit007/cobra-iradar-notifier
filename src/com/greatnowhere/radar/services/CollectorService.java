@@ -100,8 +100,7 @@ public class CollectorService extends Service {
 	    NotificationBuilder.init(getApplicationContext());
 	    
 	    // Webservices client init
-	    if ( Preferences.isLookupSpeedLimit() )
-	    	LocationInfoLookupManager.init(getApplicationContext());
+	    LocationInfoLookupManager.init(getApplicationContext());
 	    
 	    // Speed limit checker
 	    SpeedLimitChecker.init(getApplicationContext());

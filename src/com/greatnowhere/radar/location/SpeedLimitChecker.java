@@ -90,7 +90,7 @@ public class SpeedLimitChecker {
 				Log.w(TAG,"Location not known, cannot warn overspeed");
 				return;
 			}
-			if ( speedLimitEvent == null ) {
+			if ( speedLimitEvent == null || speedLimitEvent.limit == null ) {
 				Log.w(TAG,"Speed limit not known, cannot warn overspeed");
 				return;
 			}

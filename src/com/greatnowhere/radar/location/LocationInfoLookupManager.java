@@ -9,7 +9,7 @@ import com.greatnowhere.osmclient.OSMLocationListener.OSMWayChangedListener;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.PhoneActivityDetector.ActivityStatus;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
-import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener;
+//import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener;
 import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener.WikiSpeedChangedListener;
 import com.xapi.models.Way;
 
@@ -22,7 +22,7 @@ public class LocationInfoLookupManager {
 	private static final String TAG = LocationInfoLookupManager.class.getCanonicalName();
 	
 	private static OSMLocationListener osmListener;
-	private static WikiSpeedChangeListener wsListener;
+	//private static WikiSpeedChangeListener wsListener;
 	private static EventBus eventBus;
 	private static Way currentWay;
 	private static Context ctx;
@@ -70,8 +70,8 @@ public class LocationInfoLookupManager {
 			Log.w(TAG, ex);
 		}
 		try {
-			wsListener = new WikiSpeedChangeListener(ctx, Preferences.getWikiSpeediaUserName());
-			wsListener.setWikiSpeedChangedListener(new WSListener());
+			//wsListener = new WikiSpeedChangeListener(ctx, Preferences.getWikiSpeediaUserName());
+			//wsListener.setWikiSpeedChangedListener(new WSListener());
 		} catch (Exception ex) {
 			Log.w(TAG, ex);
 		}
@@ -83,9 +83,9 @@ public class LocationInfoLookupManager {
 		if ( osmListener != null )
 			osmListener.stop();
 		osmListener = null;
-		if ( wsListener != null )
-			wsListener.stop();
-		wsListener = null;
+		//if ( wsListener != null )
+			//wsListener.stop();
+		//wsListener = null;
 		isRunning.set(false);
 	}
 
@@ -107,8 +107,8 @@ public class LocationInfoLookupManager {
 		public void onOSMWayChangedListener(Way way) {
 			Log.i(TAG, "Got OSM way " + ( way == null ? "null" : way.toString()));
 			currentWay = way;
-			if ( currentWay != null && currentWay.getMaxSpeed() != null ) {
-					setSpeedLimit(currentWay.getMaxSpeed(), SOURCE_OSM);
+			if ( currentWay != null ) {
+				setSpeedLimit(currentWay.getMaxSpeed(), SOURCE_OSM);
 			}
 			eventBus.post(new EventOSMWayChange(way));
 			if ( way == null ) {
@@ -164,15 +164,15 @@ public class LocationInfoLookupManager {
 	 * Event handlers to start/stop lookup
 	 * @param event
 	 */
-	public void onEvent(PhoneActivityDetector.EventActivityChanged event) {
+	public void onEventAsync(PhoneActivityDetector.EventActivityChanged event) {
 		activate();
 	}
 
-	public void onEvent(PhoneActivityDetector.EventCarModeChange event) {
+	public void onEventAsync(PhoneActivityDetector.EventCarModeChange event) {
 		activate();
 	}
 	
-	public void onEvent(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
+	public void onEventAsync(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
 		activate();
 	}
 	

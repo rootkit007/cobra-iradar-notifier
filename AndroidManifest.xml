@@ -15,8 +15,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.greatnowhere.radar"
-      android:versionCode="16"
-      android:versionName="1.0beta16">
+      android:versionCode="18"
+      android:versionName="1.0beta18">
     <uses-sdk android:minSdkVersion="16" android:maxSdkVersion="19" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />

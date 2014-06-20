@@ -6,6 +6,7 @@ import com.greatnowhere.radar.config.Preferences;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.util.Log;
 
 /**
  * Manages alerts volume
@@ -13,6 +14,8 @@ import android.media.AudioManager;
  *
  */
 public class AlertAudioManager {
+	
+	private static final String TAG = AlertAudioManager.class.getCanonicalName();
 	
 	/**
 	 * If true, alert volume is already at "our" setting
@@ -37,6 +40,7 @@ public class AlertAudioManager {
 				int translatedVolume = getTranslatedVolume(getOurAlertLevel()); 
 				am.setStreamVolume(OUTPUT_STREAM, translatedVolume, 0);
 				isOurAlertVolumeSet.set(true);
+				Log.i(TAG,"Changed volume from " + originalVolume + " to " + translatedVolume);
 			}
 		}
 	}
@@ -49,6 +53,7 @@ public class AlertAudioManager {
 		if ( Preferences.getNotificationVolumeOffset() != 0 ) {
 			int ttsVolume = getOurAlertLevel() + Preferences.getNotificationVolumeOffset();
 			am.setStreamVolume(OUTPUT_STREAM, getTranslatedVolume(ttsVolume), 0);
+			Log.i(TAG,"Changed TTS volume to " + getTranslatedVolume(ttsVolume));
 		}
 		
 	}
@@ -59,6 +64,7 @@ public class AlertAudioManager {
 			int autoMuteVolume = getTranslatedVolume( getOurAlertLevel() + AUTOMUTE_VOLUME_OFFSET );
 			autoMuteVolume = Math.max(1, autoMuteVolume); // no lower than 1, cant mute altogether
 			am.setStreamVolume(OUTPUT_STREAM, autoMuteVolume, 0);
+			Log.i(TAG,"Automuted volume to " + autoMuteVolume);
 		}
 	}
 	
@@ -84,6 +90,7 @@ public class AlertAudioManager {
 			if ( am != null ) {
 				am.setStreamVolume(OUTPUT_STREAM, originalVolume, 0);
 				isOurAlertVolumeSet.set(false);
+				Log.i(TAG,"Restored volume to " + originalVolume);
 			}
 		}
 	}

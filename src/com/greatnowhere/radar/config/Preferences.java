@@ -19,12 +19,15 @@ public class Preferences {
 	private static SharedPreferences prefs;
 	private static Resources res;
 	private static EventBus eventBus = EventBus.getDefault();
+	// @see http://stackoverflow.com/questions/2542938/sharedpreferences-onsharedpreferencechangelistener-not-being-called-consistently
+	private static PreferenceChangeListener prefChangeListener;
 	
 	public static void init(Context ctx) {
 		if ( prefs == null ) {
 			prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 			res = ctx.getResources();
-			prefs.registerOnSharedPreferenceChangeListener(new PreferenceChangeListener());
+			prefChangeListener = new PreferenceChangeListener();
+			prefs.registerOnSharedPreferenceChangeListener(prefChangeListener);
 	        // set defaults for preferences
 	        PreferenceManager.setDefaultValues(ctx, R.xml.settings, false);
 		}
@@ -259,9 +262,9 @@ public class Preferences {
 			}
 			
 			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupMaxSpeed)) ||
-					
 					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenCarMode)) ||
 					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenDriving))) {
+				
 					eventBus.post(new PreferenceLocationLookupSettingsChangedEvent());
 
 			}
