@@ -44,7 +44,7 @@ public class LocationInfoLookupManager {
 	 * Returns TRUE if location info lookup should be active as per preferences
 	 * @return
 	 */
-	private static boolean isActivated() {
+	public static boolean isShouldActivate() {
 		return ( Preferences.isLookupSpeedLimit() &&
 				( Preferences.isLookupSpeedLimitOnlyInCarMode() ? PhoneActivityDetector.getIsCarMode() : true ) &&
 				( Preferences.isLookupSpeedLimitOnlyWhenDriving() ? PhoneActivityDetector.getActivityStatus() == ActivityStatus.DRIVING : true ) );
@@ -54,9 +54,9 @@ public class LocationInfoLookupManager {
 	 * Activates or stops location info lookup
 	 */
 	private synchronized static void activate() {
-		if ( isRunning.get() && !isActivated() ) {
+		if ( isRunning.get() && !isShouldActivate() ) {
 			stop();
-		} else if ( !isRunning.get() && isActivated() ) {
+		} else if ( !isRunning.get() && isShouldActivate() ) {
 			start();
 		}
 	}
@@ -65,6 +65,7 @@ public class LocationInfoLookupManager {
 		Log.i(TAG, "Starting OSM and WS clients");
 		try {
 			osmListener = new OSMLocationListener(ctx);
+			osmListener.setMaxRequests(1);
 			osmListener.setOSMWayListener(new OSMListener());
 		} catch (Exception ex) {
 			Log.w(TAG, ex);

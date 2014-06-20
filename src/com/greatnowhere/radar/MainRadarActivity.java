@@ -317,6 +317,7 @@ public class MainRadarActivity extends FragmentActivity {
     public void onEventMainThread(LocationInfoLookupManager.EventOSMWayChange event) {
     	if ( event.way == null ) {
     		roadInfo.setText("Unknown");
+    		speedLimit.setText("");
     	} else {
     		roadInfo.setText(event.way.getRoadName());
     	}

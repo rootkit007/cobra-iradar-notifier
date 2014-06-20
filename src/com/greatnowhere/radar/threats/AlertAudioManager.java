@@ -86,7 +86,7 @@ public class AlertAudioManager {
 	
 	public static void restoreOldAlertVolume() {
 
-		if ( Preferences.isSetAlertLevel() ) {
+		if ( Preferences.isSetAlertLevel() && isOurAlertVolumeSet.get() ) {
 			if ( am != null ) {
 				am.setStreamVolume(OUTPUT_STREAM, originalVolume, 0);
 				isOurAlertVolumeSet.set(false);

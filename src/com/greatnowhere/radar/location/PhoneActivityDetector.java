@@ -67,6 +67,10 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 			return activity;
 		}
 	}
+	
+	public static boolean isActivityDriving() {
+		return getActivityStatus() == ActivityStatus.DRIVING;
+	}
 
 	private static void setActivityStatus(ActivityStatus a) {
 		synchronized (activity) {

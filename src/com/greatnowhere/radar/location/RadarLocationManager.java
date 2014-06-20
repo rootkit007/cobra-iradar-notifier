@@ -1,11 +1,14 @@
 package com.greatnowhere.radar.location;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.cobra.iradar.RadarManager;
 import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
@@ -22,37 +25,49 @@ public class RadarLocationManager {
 	private static LocationListener locListener;
 	private static boolean isReady = false;
 	private static EventBus eventBus;
+	private static AtomicBoolean isActive = new AtomicBoolean(false);
+	private static ConnectivityEventsListener connectivityListener;
 	
 	public static void init(Context ctx) {
 		RadarLocationManager.ctx = ctx;
 		eventBus = EventBus.getDefault();
-		eventBus.register(new ConnectivityEventsListener());
+		connectivityListener = new ConnectivityEventsListener();
+		eventBus.register(connectivityListener);
 		lm = (LocationManager) RadarLocationManager.ctx.getSystemService(Context.LOCATION_SERVICE);
+		activate();
 	}
 	
-	public static void init() {
-		if ( ctx == null )
-			return;
-		
-		if ( Preferences.isLogThreatLocation() ) {
+	private static boolean isShouldActivate() {
+		return ( Preferences.isLogThreatLocation() && RadarManager.getConnectivityStatus() == ConnectivityStatus.CONNECTED ) ||
+				( LocationInfoLookupManager.isShouldActivate() );
+	}
+	
+	private synchronized static void activate() {
+		if ( isShouldActivate() && !isActive.get() ) {
 			start();
-		} else {
+		} else if ( !isShouldActivate() && isActive.get() ){
 			stop();
 		}
 	}
 	
-	public static void start() {
+	public synchronized static void start() {
 		locListener = new LocationListener();
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100L, 1L, locListener);
+		isActive.set(true);
 	}
 	
-	public static void stop() {
+	public synchronized static void stop() {
     	Log.d(TAG, "stop");
 		if ( locListener != null ) {
 			lm.removeUpdates(locListener);
 			locListener = null;
 		}
+		if ( connectivityListener != null && eventBus.isRegistered(connectivityListener) ) {
+			eventBus.unregister(connectivityListener);
+			connectivityListener = null;
+		}
 		isReady = false;
+		isActive.set(false);
 	}
 	
 	public static Location getCurrentLoc() {
@@ -87,16 +102,36 @@ public class RadarLocationManager {
 		RadarLocationManager.isReady = isReady;
 	}
 	
+	/**
+	 * Event handlers to start/stop lookup
+	 * @param event
+	 */
+	public void onEventAsync(PhoneActivityDetector.EventActivityChanged event) {
+		activate();
+	}
+
+	public void onEventAsync(PhoneActivityDetector.EventCarModeChange event) {
+		activate();
+	}
+	
+	public void onEventAsync(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
+		activate();
+	}
+	
+	public void onEventAsync(Preferences.PreferenceOverSpeedSettingsChangedEvent event) {
+		activate();
+	}
+	
 	private static class ConnectivityEventsListener {
 		@SuppressWarnings("unused")
 		public void onEventMainThread(CobraRadarMessageNotification msg) {
 			if ( msg.type == CobraRadarMessageNotification.TYPE_CONN ) {
 				switch (ConnectivityStatus.fromCode(msg.connectionStatus)) {
 				case CONNECTED:
-					init();
+					activate();
 					break;
 				case DISCONNECTED:
-					stop();
+					activate();
 					break;
 				default:
 				}
