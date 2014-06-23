@@ -218,6 +218,10 @@ public class Preferences {
 		return prefs.getString(res.getString(R.string.prefKeyWSTag), "ALL");
 	}
 	
+	public static boolean isLookupSpeedLimitOnlyWhenRadarConnected() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenDeviceConnected), true);
+	}
+	
 	public static boolean isLookupSpeedLimitOnlyInCarMode() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenCarMode), true);
 	}
@@ -237,6 +241,14 @@ public class Preferences {
 	public static int getWarnOverSpeedLimit() {
 		String v = prefs.getString(res.getString(R.string.prefKeyOverSpeedWarnLimit), Integer.toString(0));
 		return Integer.parseInt(v);
+	}
+	
+	/**
+	 * Suppress radar alerts if speed is under the limit
+	 * @return
+	 */
+	public static boolean isDontAlertUnderLimit() {
+		return prefs.getBoolean(res.getString(R.string.prefKeyNoAlertUnderLimit), true);
 	}
 	
 	private static class PreferenceChangeListener implements OnSharedPreferenceChangeListener {
@@ -263,7 +275,8 @@ public class Preferences {
 			
 			if ( key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupMaxSpeed)) ||
 					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenCarMode)) ||
-					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenDriving))) {
+					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenDriving)) ||
+					 key.equalsIgnoreCase(res.getString(R.string.prefKeyLookupWhenDeviceConnected))) {
 				
 					eventBus.post(new PreferenceLocationLookupSettingsChangedEvent());
 

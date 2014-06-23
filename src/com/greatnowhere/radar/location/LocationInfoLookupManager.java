@@ -4,18 +4,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.wikispeedia.models.Marker;
 
+import android.content.Context;
+import android.util.Log;
+
+import com.cobra.iradar.CobraRadarEvents;
+import com.cobra.iradar.RadarManager;
 import com.greatnowhere.osmclient.OSMLocationListener;
 import com.greatnowhere.osmclient.OSMLocationListener.OSMWayChangedListener;
 import com.greatnowhere.radar.config.Preferences;
-import com.greatnowhere.radar.location.PhoneActivityDetector.ActivityStatus;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
 //import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener;
 import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener.WikiSpeedChangedListener;
 import com.xapi.models.Way;
 
 import de.greenrobot.event.EventBus;
-import android.content.Context;
-import android.util.Log;
 
 public class LocationInfoLookupManager {
 
@@ -47,7 +49,9 @@ public class LocationInfoLookupManager {
 	public static boolean isShouldActivate() {
 		return ( Preferences.isLookupSpeedLimit() &&
 				( Preferences.isLookupSpeedLimitOnlyInCarMode() ? PhoneActivityDetector.getIsCarMode() : true ) &&
-				( Preferences.isLookupSpeedLimitOnlyWhenDriving() ? PhoneActivityDetector.getActivityStatus() == ActivityStatus.DRIVING : true ) );
+				( Preferences.isLookupSpeedLimitOnlyWhenDriving() ? PhoneActivityDetector.isActivityDriving() : true ) &&
+				( Preferences.isLookupSpeedLimitOnlyWhenRadarConnected() ? RadarManager.isRadarConnected() : true ) 
+				);
 	}
 	
 	/**
@@ -147,6 +151,11 @@ public class LocationInfoLookupManager {
 		
 		public String source;
 		
+		/**
+		 * 
+		 * @param l speed limit in m/s
+		 * @param s source
+		 */
 		public EventSpeedLimitChange(Double l,String s) {
 			limit = l;
 			source = s;
@@ -177,4 +186,11 @@ public class LocationInfoLookupManager {
 		activate();
 	}
 	
+	public void onEventAsync(CobraRadarEvents.EventDeviceConnected event) {
+		activate();
+	}
+
+	public void onEventAsync(CobraRadarEvents.EventDeviceDisconnected event) {
+		activate();
+	}
 }

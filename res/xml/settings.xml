@@ -87,13 +87,15 @@
 	  <CheckBoxPreference android:key="@string/prefKeyShowFakeHiddenThreats" android:summary="@string/prefSumShowFakeHiddenThreats" android:title="@string/prefValShowFakeHiddenThreats" android:defaultValue="true"/>
     </PreferenceScreen>
     <PreferenceScreen android:summary="@string/prefCatLocationSum" android:title="@string/prefCatLocation">
-        <CheckBoxPreference android:summary="@string/prefSumLookupMaxSpeed" android:title="@string/prefValLookupMaxSpeed" android:key="@string/prefKeyLookupMaxSpeed" android:defaultValue="true" android:disableDependentsState="false"/>
-	    <EditTextPreference android:dialogMessage="@string/prefDlgTextWSTag" android:key="@string/prefKeyWSTag" android:summary="@string/prefSumWSTag" android:title="@string/prefValWSTag" android:dependency="@string/prefKeyLookupMaxSpeed" android:defaultValue="ALL"/>
-        <CheckBoxPreference android:summary="@string/prefSumLookupWhenDriving" android:title="@string/prefValLookupWhenDriving" android:key="@string/prefKeyLookupWhenDriving" android:defaultValue="true" android:dependency="@string/prefKeyLookupMaxSpeed"/>
+        <CheckBoxPreference android:summary="@string/prefSumLookupMaxSpeed" android:title="@string/prefValLookupMaxSpeed" android:key="@string/prefKeyLookupMaxSpeed" android:defaultValue="false" android:disableDependentsState="false"/>
+	    <EditTextPreference android:dialogMessage="@string/prefDlgTextWSTag" android:key="@string/prefKeyWSTag" android:summary="@string/prefSumWSTag" android:title="@string/prefValWSTag" android:dependency="@string/prefKeyLookupMaxSpeed" android:defaultValue="ALL" android:enabled="false"/>
+        <CheckBoxPreference android:summary="@string/prefSumLookupWhenDeviceConnected" android:title="@string/prefValLookupWhenDeviceConnected" android:key="@string/prefKeyLookupWhenDeviceConnected" android:defaultValue="true" android:dependency="@string/prefKeyLookupMaxSpeed"/>
+	    <CheckBoxPreference android:summary="@string/prefSumLookupWhenDriving" android:title="@string/prefValLookupWhenDriving" android:key="@string/prefKeyLookupWhenDriving" android:defaultValue="true" android:dependency="@string/prefKeyLookupMaxSpeed"/>
         <CheckBoxPreference android:summary="@string/prefSumLookupWhenCarMode" android:title="@string/prefValLookupWhenCarMode" android:key="@string/prefKeyLookupWhenCarMode" android:defaultValue="false" android:dependency="@string/prefKeyLookupMaxSpeed"/>
-        <CheckBoxPreference android:summary="@string/prefSumWarnOverSpeed" android:title="@string/prefValWarnOverSpeed" android:key="@string/prefKeyWarnOverSpeed" android:defaultValue="false" android:dependency="@string/prefKeyLookupMaxSpeed" android:disableDependentsState="false"/>
-	    <EditTextPreference android:key="@string/prefKeyOverSpeedWarnLimit" android:summary="@string/prefSumOverSpeedWarnLimit" android:title="@string/prefValOverSpeedWarnLimit" android:numeric="integer" android:dependency="@string/prefKeyWarnOverSpeed" android:defaultValue="0"/>
-        </PreferenceScreen>
+        <CheckBoxPreference android:summary="@string/prefSumWarnOverSpeed" android:title="@string/prefValWarnOverSpeed" android:key="@string/prefKeyWarnOverSpeed" android:defaultValue="true" android:dependency="@string/prefKeyLookupMaxSpeed" android:disableDependentsState="false"/>
+	    <EditTextPreference android:key="@string/prefKeyOverSpeedWarnLimit" android:summary="@string/prefSumOverSpeedWarnLimit" android:title="@string/prefValOverSpeedWarnLimit" android:numeric="integer" android:dependency="@string/prefKeyWarnOverSpeed" android:defaultValue="15"/>
+        <CheckBoxPreference android:summary="@string/prefSumNoAlertUnderLimit" android:title="@string/prefValNoAlertUnderLimit" android:key="@string/prefKeyNoAlertUnderLimit" android:defaultValue="false" android:dependency="@string/prefKeyLookupMaxSpeed" android:disableDependentsState="false"/>
+    </PreferenceScreen>
     <ListPreference android:key="@string/prefKeyUnits" android:title="@string/prefValUnits" android:entries="@array/unitsTitles" android:entryValues="@array/unitsKeys" android:defaultValue="1"/>
     
 </PreferenceScreen>

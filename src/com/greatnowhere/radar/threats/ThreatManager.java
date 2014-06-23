@@ -23,6 +23,7 @@ import com.cobra.iradar.protocol.CobraRadarMessageAlert;
 import com.greatnowhere.radar.R;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.RadarLocationManager;
+import com.greatnowhere.radar.location.SpeedLimitChecker;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;
 
@@ -122,22 +123,25 @@ public class ThreatManager {
 		removeThreats();
 		RadarLocationManager.stop();
 	}
-	
-	public static ThreatCredibility newThreat(RadarMessageThreat alert) {
-		if ( alert.isVolumeChangeMessage() )
-			return ThreatCredibility.FAKE;
+
+	private static ThreatCredibility getThreatCredibility(RadarMessageThreat alert) {
 
 		ThreatCredibility cred = ThreatCredibility.LEGIT;
-		
 		// check if fake
 		if ( Preferences.isFakeAlertDetection() && Preferences.isLogThreatLocation() && RadarLocationManager.isReady() ) {
 			int countSimilar = ThreatLogger.countSimilarThreatOccurences(alert, RadarLocationManager.getCurrentLoc(), Preferences.getFakeAlertDetectionRadius());
 			if ( countSimilar > Preferences.getFakeAlertOccurenceThreshold() ) {
 				cred = ThreatCredibility.FAKE;
 			}
-			if ( countSimilar > 1 && countSimilar <= Preferences.getFakeAlertOccurenceThreshold() ) {
+			if ( countSimilar >= 1 && countSimilar <= Preferences.getFakeAlertOccurenceThreshold() ) {
 				cred = ThreatCredibility.SUSPECT_FAKE;
 			}
+		}
+		
+		// check if speed below limit
+		if ( Preferences.isLookupSpeedLimit() && Preferences.isDontAlertUnderLimit() 
+				&& RadarLocationManager.isReady() && SpeedLimitChecker.isSpeedBelowLimit()	) {
+			cred = ThreatCredibility.HIDDEN;
 		}
 		
 		// check if we are above min required speed
@@ -146,6 +150,15 @@ public class ThreatManager {
 				cred = ThreatCredibility.HIDDEN;
 			}
 		}
+		
+		return cred;
+	}
+	
+	public static ThreatCredibility newThreat(RadarMessageThreat alert) {
+		if ( alert.isVolumeChangeMessage() )
+			return ThreatCredibility.FAKE;
+
+		ThreatCredibility cred = getThreatCredibility(alert);
 		
 		if ( !isThreatActive.get() && Threat.isShowVisibleThreat(cred) ) {
 			showMainView();

@@ -88,6 +88,7 @@ public class RadarConnectionThread extends Thread {
 		connectionStatus.set(ConnectivityStatus.CONNECTED.getCode());
 		eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Connected to iRadar device",
 				ConnectivityStatus.CONNECTED.getCode()));
+		eventBus.post(new CobraRadarEvents.EventDeviceConnected());
 		isConnectionSuccess = true;
 
 		byte[] packet;
@@ -115,6 +116,7 @@ public class RadarConnectionThread extends Thread {
 		}
 		
 		connectionStatus.set(ConnectivityStatus.DISCONNECTED.getCode());
+		eventBus.post(new CobraRadarEvents.EventDeviceDisconnected());
 		// if we were successfully connected, notify clients of conn status change
 		if ( isConnectionSuccess ) {
 			eventBus.post(new CobraRadarMessageStopAlert(0));

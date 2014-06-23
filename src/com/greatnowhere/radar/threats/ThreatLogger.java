@@ -46,6 +46,8 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	private static PendingIntent logCleanupIntent;
 	private static EventBus eventBus;
 	
+	private static final double OneDegreeKm = 111.3D;
+	
 	public static synchronized void init(Context ctx) {
 		instance = new ThreatLogger(ctx, DB_NAME, null, DB_VERSION);
 		alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
@@ -92,18 +94,17 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	public static int countSimilarThreatOccurences(Threat threat, float radius) {
 		SQLiteDatabase db = instance.getReadableDatabase();
 		Set<Integer> threat_ids = new LinkedHashSet<Integer>();
-		String partialDistance = double2String(convertKmToPartialDistance(radius));
+		//String partialDistance = double2String(convertKmToPartialDistance(radius));
 		Log.d(TAG, "Looking for threats " + threat.alert.alertType.getName() + " freq " + threat.alert.frequency 
-				+ " radius " + radius + " part dist " + partialDistance);
+				+ " radius " + radius);
 		if ( threat.locations != null ) {
 			for ( Location l : threat.locations ) {
 				String sql = "select distinct id from threats where type=? and abs(?-freq)<0.05 and exists (select * from threats_locations "
-						+ "where threat_id=threats.id and 1000000*" + buildDistanceQuery(l.getLatitude(),l.getLongitude()) + " > 1000000*?)";
+						+ "where threat_id=threats.id and " + buildDistanceQuery2(l.getLatitude(), l.getLongitude(), radius) + ")";
 				Log.d(TAG, "Looking for threats close to lat " + double2String(l.getLatitude())
 						+ " long " + double2String(l.getLongitude()) + " sql " + sql);
 				Cursor c = db.rawQuery(sql, new String[] { Integer.toString(threat.alert.alertType.getCode()),
-						Float.toString(threat.alert.frequency), partialDistance
-						} );
+						Float.toString(threat.alert.frequency) } );
 				if ( c.getCount() > 0 ) {
 					while (c.moveToNext() ) {
 						threat_ids.add(c.getInt(0));
@@ -214,6 +215,24 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	            + ")+" + double2String(sinlat) + "*" + SINLAT 
 	            + ")";
 	    //@formatter:on
+	}
+	
+	/**
+	 * Simplistic approach at figuring whether two locations are within specified radius of each other
+	 * Based on assumption that one degree latitude is 111.3km, and one degree longitude is 111.3km * cos(lat)
+	 * @param latitude
+	 * @param longitude
+	 * @param radius km
+	 * @return
+	 */
+	public static String buildDistanceQuery2(double latitude, double longitude, double radius) {
+		/**
+		 * 1 deg lat = 111.3km
+		 * 1 deg long = 111.3km * cos(lat)
+		 */
+		double mx = Math.cos(latitude);
+		return "( abs(" + LATITUDE + " - " + double2String(latitude) + ")*" + OneDegreeKm + " < " + radius +
+				" and abs(" + LONGITUDE + " - "  + double2String(longitude) + ")*" + OneDegreeKm + "*" + mx + " < " + radius + ")";
 	}
 
 	@Override

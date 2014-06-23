@@ -68,6 +68,7 @@
 	<string name="prefSumLogThreats">Keep encountered threats in database</string>
 	<string name="prefKeyLogThreatsLimitNum">prefKeyLogThreatsLimitNum</string>
 	<string name="prefValLogThreatsLimitNum">Limit number of log entries</string>
+	<string name="prefSumLogThreatsLimitNum">Will periodically purge old threats from history. This can speed up the processing of alerts, but will also affect how false alert autodetection works - more history means better false alert detection</string>
 	<string name="prefKeyLogThreatsLimitNumVal">prefKeyLogThreatsLimitNumVal</string>
 	<string name="prefValLogThreatsLimitNumVal">Max Number of threats to keep</string>
 	<string name="prefKeyKeepScreenOnInForeground">prefKeyKeepScreenOnInForeground</string>
@@ -94,7 +95,7 @@
 	<string name="prefValFakeAlertDetectionOccurenceThreshold">Number of occurences threshold</string>
 	<string name="prefSumFakeAlertDetectionOccurenceThreshold">How many occurences of a threat with same frequency and location before its classified as false</string>
 	<string name="prefKeyThreatShowMinSpeed">prefKeyThreatShowMinSpeed</string>
-	<string name="prefValThreatShowMinSpeed">"Show Threats only when speed above "</string>
+	<string name="prefValThreatShowMinSpeed">Show Threats only when speed above </string>
 	<string name="prefSumThreatShowMinSpeed">Only alert when speed is above threshold</string>
 	<string name="prefDlgTextThreatShowMinSpeed">"Will not show any alerts unless speed is above entered value (km/h) "</string>
 	<string name="log">Log</string>
@@ -148,10 +149,16 @@
 	<string name="prefSumWarnOverSpeed">Audible warning when current speed exceeds speed limit. This feature is entirely dependent on speed limit data provided by OpenStreetMaps and Wikispeedia!</string>
 	<string name="prefValWarnOverSpeed">Speeding Warning</string>
 	<string name="prefKeyOverSpeedWarnLimit">prefKeyOverSpeedWarnLimit</string>
-	<string name="prefSumOverSpeedWarnLimit">Km/h over speed limit to start audible warning at. The warning will increase in intensity as speed increases</string>
+	<string name="prefSumOverSpeedWarnLimit">Km/h over speed limit to start audible warning at. The warning will increase pitch as speed increases</string>
 	<string name="prefValOverSpeedWarnLimit">Km/h over speed limit</string>
 	<string name="prefDlgTextWSTag">Enter WikiSpeedia user name</string>
 	<string name="prefKeyWSTag">prefKeyWSTag</string>
 	<string name="prefSumWSTag"></string>
 	<string name="prefValWSTag">WikiSpeedia user name</string>
+	<string name="prefKeyNoAlertUnderLimit">prefKeyNoAlertUnderLimit</string>
+	<string name="prefSumNoAlertUnderLimit">If your speed is less than limit disable radar alerts. Alerts will still display if "Show visible alerts" setting is checked</string>
+	<string name="prefValNoAlertUnderLimit">Dont alert radar threats if speed below limit</string>
+	<string name="prefKeyLookupWhenDeviceConnected">prefKeyLookupWhenDeviceConnected</string>
+	<string name="prefSumLookupWhenDeviceConnected">Activate only when radar device connected</string>
+	<string name="prefValLookupWhenDeviceConnected">Will only look up speed limit when radar device is connected</string>
 </resources>

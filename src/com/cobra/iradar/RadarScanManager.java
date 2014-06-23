@@ -62,6 +62,7 @@ public class RadarScanManager {
 			}
 			@Override
 			public void onConnected() {
+				Log.i(TAG, "Connect event received");
 				RadarScanManager.eventConnect();
 			}
 		};		

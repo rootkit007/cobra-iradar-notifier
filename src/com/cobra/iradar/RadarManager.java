@@ -120,6 +120,10 @@ public class RadarManager {
 		return RadarConnectionThread.getConnectivityStatus();
 	}
 	
+	public static boolean isRadarConnected() {
+		return getConnectivityStatus() == ConnectivityStatus.CONNECTED;
+	}
+	
 	/**
 	 * Notifies data collector service via intents
 	 * This ensures collector service is up and running for all events

@@ -1,5 +1,7 @@
 package com.greatnowhere.radar.location;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import android.content.Context;
 import android.media.SoundPool;
 import android.util.Log;
@@ -28,6 +30,14 @@ public class SpeedLimitChecker {
 	private SoundPool soundPool;
 	private int alertSoundId;
 	
+	private AtomicBoolean isOverSpeedAlertPlaying = new AtomicBoolean(false);
+	
+	/**
+	 * Current speed and speed limit, both in m/s
+	 */
+	private float currentSpeed;
+	private float speedLimit;
+	
 	public static void init(Context c) {
 		ctx = c;
 		eventBus = EventBus.getDefault();
@@ -53,6 +63,14 @@ public class SpeedLimitChecker {
 		return Preferences.isWarnOverSpeed() && Preferences.isLookupSpeedLimit() && RadarLocationManager.isReady();
 	}
 	
+	/**
+	 * Returns TRUE if speed limit is known, AND current speed is below said limit
+	 * @return
+	 */
+	public static boolean isSpeedBelowLimit() {
+		return ( instance.speedLimit != 0 && instance.speedLimit >= instance.currentSpeed );
+	}
+	
 	public void onEventAsync(Preferences.PreferenceOverSpeedSettingsChangedEvent event) {
 		Log.i(TAG, "Got preference changed event");
 		setAudibleWarning();
@@ -60,11 +78,13 @@ public class SpeedLimitChecker {
 	
 	public void onEventAsync(LocationInfoLookupManager.EventSpeedLimitChange event) {
 		Log.i(TAG, "Got speed limit change event");
+		speedLimit = ( event.limit != null ? event.limit.floatValue() : 0 );
 		setAudibleWarning();
 	}
 	
 	public void onEventAsync(RadarLocationManager.LocationChanged event) {
 		Log.i(TAG, "Got location change event");
+		currentSpeed = event.loc.getSpeed();
 		setAudibleWarning();
 	}
 	
@@ -89,6 +109,7 @@ public class SpeedLimitChecker {
 			if (  ( currentSpeed - speedLimit) > Preferences.getWarnOverSpeedLimit() && isPreferenceSet() ) {
 				AlertAudioManager.setOurAlertVolume();
 				soundPool.play(alertSoundId, 1f, 1f, 1, 0, getAlertPitch( currentSpeed - speedLimit - Preferences.getWarnOverSpeedLimit() ));
+				isOverSpeedAlertPlaying.set(true);
 			} else {
 				stopAudibleWarning();
 			}
@@ -99,8 +120,11 @@ public class SpeedLimitChecker {
 	}
 	
 	private synchronized void stopAudibleWarning() {
-		soundPool.stop(alertSoundId);
-		AlertAudioManager.restoreOldAlertVolume();
+		if ( isOverSpeedAlertPlaying.get() ) {
+			soundPool.stop(alertSoundId);
+			AlertAudioManager.restoreOldAlertVolume();
+		}
+		isOverSpeedAlertPlaying.set(false);
 	}
 	
 	/**

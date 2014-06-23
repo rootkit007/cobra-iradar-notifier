@@ -22,5 +22,5 @@ public abstract class RadarConnectivityListener extends AbstractEventBusListener
 	
 	public abstract void onConnected();
 	public abstract void onDisconnected();
-
+	
 }

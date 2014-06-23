@@ -30,7 +30,8 @@ public class AlertAudioManager {
 		am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
 	}
 	
-	public static void setOurAlertVolume() {
+	public synchronized static void setOurAlertVolume() {
+		Log.i(TAG,"setOurAlertVolume()");
 		// only set volume if we already havent done so, and preferences indicate we should do it
 		if ( Preferences.isSetAlertLevel() && !isOurAlertVolumeSet.get() ) {
 			if ( am != null ) {
@@ -48,7 +49,7 @@ public class AlertAudioManager {
 	/**
 	 * Adjusts current volume for TTS
 	 */
-	public static void setTTSVolume() {
+	public synchronized static void setTTSVolume() {
 		setOurAlertVolume();
 		if ( Preferences.getNotificationVolumeOffset() != 0 ) {
 			int ttsVolume = getOurAlertLevel() + Preferences.getNotificationVolumeOffset();
@@ -58,7 +59,7 @@ public class AlertAudioManager {
 		
 	}
 	
-	public static void setAutoMuteVolume() {
+	public synchronized static void setAutoMuteVolume() {
 		// only set volume if we are on our volume
 		if ( isOurAlertVolumeSet.get() ) {
 			int autoMuteVolume = getTranslatedVolume( getOurAlertLevel() + AUTOMUTE_VOLUME_OFFSET );
@@ -84,8 +85,8 @@ public class AlertAudioManager {
 		return Preferences.getAlertLevelSpeaker();
 	}
 	
-	public static void restoreOldAlertVolume() {
-
+	public synchronized static void restoreOldAlertVolume() {
+		Log.i(TAG,"restoreOldAlertVolume()");
 		if ( Preferences.isSetAlertLevel() && isOurAlertVolumeSet.get() ) {
 			if ( am != null ) {
 				am.setStreamVolume(OUTPUT_STREAM, originalVolume, 0);

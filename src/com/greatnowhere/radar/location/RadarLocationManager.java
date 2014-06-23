@@ -8,8 +8,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.cobra.iradar.CobraRadarEvents;
 import com.cobra.iradar.RadarManager;
-import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
@@ -26,13 +26,10 @@ public class RadarLocationManager {
 	private static boolean isReady = false;
 	private static EventBus eventBus;
 	private static AtomicBoolean isActive = new AtomicBoolean(false);
-	private static ConnectivityEventsListener connectivityListener;
 	
 	public static void init(Context ctx) {
 		RadarLocationManager.ctx = ctx;
 		eventBus = EventBus.getDefault();
-		connectivityListener = new ConnectivityEventsListener();
-		eventBus.register(connectivityListener);
 		lm = (LocationManager) RadarLocationManager.ctx.getSystemService(Context.LOCATION_SERVICE);
 		activate();
 	}
@@ -61,10 +58,6 @@ public class RadarLocationManager {
 		if ( locListener != null ) {
 			lm.removeUpdates(locListener);
 			locListener = null;
-		}
-		if ( connectivityListener != null && eventBus.isRegistered(connectivityListener) ) {
-			eventBus.unregister(connectivityListener);
-			connectivityListener = null;
 		}
 		isReady = false;
 		isActive.set(false);
@@ -121,25 +114,15 @@ public class RadarLocationManager {
 	public void onEventAsync(Preferences.PreferenceOverSpeedSettingsChangedEvent event) {
 		activate();
 	}
-	
-	private static class ConnectivityEventsListener {
-		@SuppressWarnings("unused")
-		public void onEventMainThread(CobraRadarMessageNotification msg) {
-			if ( msg.type == CobraRadarMessageNotification.TYPE_CONN ) {
-				switch (ConnectivityStatus.fromCode(msg.connectionStatus)) {
-				case CONNECTED:
-					activate();
-					break;
-				case DISCONNECTED:
-					activate();
-					break;
-				default:
-				}
-				
-			}
-		}
+
+	public void onEventAsync(CobraRadarEvents.EventDeviceConnected event) {
+		activate();
 	}
 
+	public void onEventAsync(CobraRadarEvents.EventDeviceDisconnected event) {
+		activate();
+	}
+	
 	private static class LocationListener implements android.location.LocationListener {
 		public void onLocationChanged(Location location) {
 			setCurrentLoc(location);
