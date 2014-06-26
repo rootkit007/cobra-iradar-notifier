@@ -3,6 +3,7 @@ package com.greatnowhere.radar.threats;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +31,7 @@ public class TTSManager {
 	private static HashMap<String, String> ttsParams = new HashMap<String, String>();
 	private static TelephonyManager tm;
 	private static EventListener listener = new EventListener();
+	private static TTSUtteranceProgressListener ttsUtteranceListener;
 	
 	public static void init(Context ctx) {
 		stop();
@@ -38,7 +40,8 @@ public class TTSManager {
 		tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
 		tts = new TextToSpeech(ctx, new TTSInitListener());
 		ttsParams.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AlertAudioManager.OUTPUT_STREAM));
-		tts.setOnUtteranceProgressListener(new TTSUtteranceProgressListener());
+		ttsUtteranceListener = new TTSUtteranceProgressListener();
+		tts.setOnUtteranceProgressListener(ttsUtteranceListener);
 		eventBus.register(listener);
 	}
 	
@@ -93,6 +96,7 @@ public class TTSManager {
 			return;
 		if ( isReady.get() && Preferences.isNotifyConnectivity() && text != null && !text.isEmpty() ) {
 			AlertAudioManager.setTTSVolume();
+	        ttsParams.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,UUID.randomUUID().toString());
 			int i = tts.speak(text, TextToSpeech.QUEUE_ADD, ttsParams);
 			Log.d(TAG, "speak " + text + " :result " + i);
 		}
@@ -115,15 +119,18 @@ public class TTSManager {
 	private static class TTSUtteranceProgressListener extends UtteranceProgressListener {
 		@Override
 		public void onStart(String utteranceId) {
+			Log.d(TAG, "TTS started for " + utteranceId);
 		}
 
 		@Override
 		public void onDone(String utteranceId) {
+			Log.d(TAG, "TTS done for " + utteranceId);
 			AlertAudioManager.restoreOldAlertVolume();
 		}
 
 		@Override
 		public void onError(String utteranceId) {
+			Log.d(TAG, "TTS error for " + utteranceId);
 		}
 		
 	}

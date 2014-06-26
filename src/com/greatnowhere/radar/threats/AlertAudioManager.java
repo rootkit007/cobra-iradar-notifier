@@ -1,6 +1,7 @@
 package com.greatnowhere.radar.threats;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.greatnowhere.radar.config.Preferences;
 
@@ -23,6 +24,7 @@ public class AlertAudioManager {
 	private static AtomicBoolean isOurAlertVolumeSet = new AtomicBoolean(false);
 	private static AudioManager am;
 	private static int originalVolume = 0;
+	private static AtomicInteger volumeSetCounter = new AtomicInteger(0);
 	public static final int OUTPUT_STREAM = AudioManager.STREAM_MUSIC;
 	public static final int AUTOMUTE_VOLUME_OFFSET = -2;
 	
@@ -33,9 +35,11 @@ public class AlertAudioManager {
 	public synchronized static void setOurAlertVolume() {
 		Log.i(TAG,"setOurAlertVolume()");
 		// only set volume if we already havent done so, and preferences indicate we should do it
-		if ( Preferences.isSetAlertLevel() && !isOurAlertVolumeSet.get() ) {
+		if ( Preferences.isSetAlertLevel() ) {
 			if ( am != null ) {
-				originalVolume = am.getStreamVolume(OUTPUT_STREAM);
+				if ( !isOurAlertVolumeSet.get() ) 
+					originalVolume = am.getStreamVolume(OUTPUT_STREAM);
+				volumeSetCounter.addAndGet(1);
 				// preferences alert level is always 0-7
 				// must translate that to selected stream's level
 				int translatedVolume = getTranslatedVolume(getOurAlertLevel()); 
@@ -51,7 +55,7 @@ public class AlertAudioManager {
 	 */
 	public synchronized static void setTTSVolume() {
 		setOurAlertVolume();
-		if ( Preferences.getNotificationVolumeOffset() != 0 ) {
+		if ( Preferences.isSetAlertLevel() && Preferences.getNotificationVolumeOffset() != 0 ) {
 			int ttsVolume = getOurAlertLevel() + Preferences.getNotificationVolumeOffset();
 			am.setStreamVolume(OUTPUT_STREAM, getTranslatedVolume(ttsVolume), 0);
 			Log.i(TAG,"Changed TTS volume to " + getTranslatedVolume(ttsVolume));
@@ -87,7 +91,7 @@ public class AlertAudioManager {
 	
 	public synchronized static void restoreOldAlertVolume() {
 		Log.i(TAG,"restoreOldAlertVolume()");
-		if ( Preferences.isSetAlertLevel() && isOurAlertVolumeSet.get() ) {
+		if ( Preferences.isSetAlertLevel() && isOurAlertVolumeSet.get() && volumeSetCounter.addAndGet(-1) == 0 ) {
 			if ( am != null ) {
 				am.setStreamVolume(OUTPUT_STREAM, originalVolume, 0);
 				isOurAlertVolumeSet.set(false);

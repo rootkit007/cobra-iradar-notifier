@@ -2,6 +2,7 @@ package com.cobra.iradar;
 
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
+import de.greenrobot.event.EventBus;
 import android.app.Notification;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
@@ -23,6 +24,7 @@ public class RadarConnectionService extends Service {
 	private BluetoothDevice iRadarDevice;
 	private RadarConnectionThread radarThread;
     private Notification connectedNotification;
+    private EventBus eventBus = EventBus.getDefault();
 	
 	@Override
 	public int onStartCommand (Intent intent, int flags, int startId) {
@@ -36,6 +38,10 @@ public class RadarConnectionService extends Service {
 		connectedNotification = RadarManager.getOngoingNotification();
     	if ( iRadarDevice != null )
     		runConnection();
+    	
+    	if ( !eventBus.isRegistered(this) ) 
+    		eventBus.register(this);
+    	
     	return START_STICKY;
     }
 	
@@ -43,9 +49,10 @@ public class RadarConnectionService extends Service {
 	public void onDestroy() {
     	Log.i(TAG, "Service Stop");
 		super.onDestroy();
-		connectivityListener.unRegister();
 		setNotification();
     	stopConnection();
+    	if ( eventBus.isRegistered(this) )
+    		eventBus.unregister(this);
 	}
 	
 	public synchronized void runConnection() {
@@ -83,17 +90,14 @@ public class RadarConnectionService extends Service {
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
+	
+	public void onEventAsync(CobraRadarEvents.EventDeviceConnected event) {
+		setNotification();
+	}
 
-	public RadarConnectivityListener connectivityListener = new RadarConnectivityListener() {
-		@Override
-		public void onDisconnected() {
-			setNotification();
-			stopSelf();
-		}
-		@Override
-		public void onConnected() {
-			setNotification();
-		}
-	};
+	public void onEventAsync(CobraRadarEvents.EventDeviceDisconnected event) {
+		setNotification();
+		stopSelf();
+	}
 	
 }

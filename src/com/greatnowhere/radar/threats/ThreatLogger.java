@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -18,17 +19,20 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.os.Parcelable;
 import android.util.Log;
+
 import com.greatnowhere.radar.MainRadarApplication;
 import com.greatnowhere.radar.config.Preferences;
+import com.greatnowhere.radar.location.LocationInfoLookupManager;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;
 import com.greatnowhere.radar.threats.ThreatManager.ThreatCredibility;
+
 import de.greenrobot.event.EventBus;
 
 public class ThreatLogger extends SQLiteOpenHelper {
 
 	private static final String DB_NAME = MainRadarApplication.class.getCanonicalName();
-	private static final int DB_VERSION = 5;
+	private static final int DB_VERSION = 6;
 	
 	private static final String TAG = ThreatLogger.class.getCanonicalName();
 	
@@ -74,6 +78,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		i.putExtra(ThreatLoggerService.KEY_BUNDLE_START_TIME, threat.startTimeMillis);
 		i.putExtra(ThreatLoggerService.KEY_BUNDLE_END_TIME, threat.endTimeMillis);
 		i.putExtra(ThreatLoggerService.KEY_BUNDLE_CREDIBILITY, threat.credibility);
+		i.putExtra(ThreatLoggerService.KEY_BUNDLE_LOCATION_NAME, LocationInfoLookupManager.getCurrentWayName());
 		ctx.startService(i);
 	}
 	
@@ -238,10 +243,10 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("create table threats(id integer primary key autoincrement, type integer, "
-				+ "freq real, timestamp integer,end_timestamp integer,fake integer);");
+				+ "freq real, timestamp integer,end_timestamp integer,fake integer,location_name text);");
 		db.execSQL("create table threats_locations(id integer primary key autoincrement, threat_id integer,"
 				+ " lat real, long real,ts integer,"
-				+ COSLAT + " real," + SINLAT + " real," + COSLNG + " real," + SINLNG + " real,speed real,bearing real," 
+				+ COSLAT + " text," + SINLAT + " text," + COSLNG + " text," + SINLNG + " text,speed real,bearing real," 
 				+ "foreign key(threat_id) references threats(id) on delete cascade);");
 		db.execSQL("create index threat_ind1 on threats(type,freq);");
 	}
@@ -287,6 +292,10 @@ public class ThreatLogger extends SQLiteOpenHelper {
 			db.execSQL("alter table threats_loc2 rename to threats_locations;");
 			oldVersion = 5;
 		}
+		if ( oldVersion == 5 && newVersion == 6 ) {
+			db.execSQL("alter table threats add column location_name text;");
+			oldVersion = 6;
+		}
 	}
 	
 	/**
@@ -327,6 +336,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		protected static final String KEY_BUNDLE_START_TIME = "threatStartTime";
 		protected static final String KEY_BUNDLE_END_TIME = "threatEndTime";
 		protected static final String KEY_BUNDLE_CREDIBILITY = "threatCredibility";
+		protected static final String KEY_BUNDLE_LOCATION_NAME = "threatLocationName";
 		
 		@Override
 		protected void onHandleIntent(Intent intent) {
@@ -338,6 +348,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 			Long startTime = intent.getLongExtra(KEY_BUNDLE_START_TIME, 0);
 			Long endTime = intent.getLongExtra(KEY_BUNDLE_END_TIME, 0);
 			ThreatManager.ThreatCredibility cred = (ThreatCredibility) intent.getSerializableExtra(KEY_BUNDLE_CREDIBILITY);
+			String locName = intent.getStringExtra(KEY_BUNDLE_LOCATION_NAME);
 			
 			SQLiteDatabase db = instance.getWritableDatabase(); 
 			db.beginTransaction();
@@ -347,6 +358,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 			v.put("timestamp", startTime);
 			v.put("end_timestamp", endTime);
 			v.put("fake", cred.getCode());
+			v.put("location_name", locName);
 			long threatId = db.insert("threats", null, v);
 			if ( locations != null ) {
 				for ( Location l : locations ) {

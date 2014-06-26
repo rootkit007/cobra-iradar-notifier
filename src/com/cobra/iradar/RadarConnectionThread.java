@@ -97,7 +97,7 @@ public class RadarConnectionThread extends Thread {
 				packet = CobraRadarPacketProcessor.getPacket(rxStream);
 				eventBus.post(CobraRadarMessage.fromPacket(packet));
 			} catch (Exception e) {
-				Log.e(TAG, "IO Exception", e);
+				Log.w(TAG, "IO Exception", e);
 				connectionStatus.set(ConnectivityStatus.PROTOCOL_ERROR.getCode());
 				eventBus.post(new CobraRadarMessageStopAlert(0));
 				eventBus.post(new CobraRadarMessageNotification(CobraRadarMessageNotification.TYPE_CONN, "Error in data connection",

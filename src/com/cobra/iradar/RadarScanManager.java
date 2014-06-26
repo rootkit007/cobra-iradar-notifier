@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.greatnowhere.radar.messaging.ConnectivityStatus;
 
+import de.greenrobot.event.EventBus;
+
 public class RadarScanManager {
 	
 	private static final String TAG = RadarScanManager.class.getCanonicalName();
@@ -30,6 +32,8 @@ public class RadarScanManager {
 	private static int scanInterval;
 	private static Notification notify;
 	
+	private static EventBus eventBus;
+	
 	static RadarScanManager instance;
 	
 	/**
@@ -43,29 +47,25 @@ public class RadarScanManager {
 	public static void init(Context ctx, Notification notify) {
 		RadarScanManager.ctx = ctx;
 		instance = new RadarScanManager();
+		eventBus = EventBus.getDefault();
+		eventBus.register(instance);
 		RadarScanManager.notify = notify;
 		alarmManager = (AlarmManager) RadarScanManager.ctx.getSystemService(Context.ALARM_SERVICE);
 		notifManager = (NotificationManager) RadarScanManager.ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-		initializeListener();
+	}
+	
+	public static void stop() {
+		Log.i(TAG,"complete stop");
+		runScan = false;
+		stopAlarm();
+		if ( instance != null && eventBus != null && eventBus.isRegistered(instance) ) {
+			eventBus.unregister(instance);
+			instance = null;
+		}
 	}
 	
 	public static boolean isInitialized() {
 		return ( ctx != null );
-	}
-	
-	private static void initializeListener() {
-		listener = new RadarConnectivityListener() {
-			@Override
-			public void onDisconnected() {
-				Log.i(TAG, "Disconnect event received");
-				RadarScanManager.eventDisconnect();
-			}
-			@Override
-			public void onConnected() {
-				Log.i(TAG, "Connect event received");
-				RadarScanManager.eventConnect();
-			}
-		};		
 	}
 	
 	public static void scan(boolean runScan, int scanInterval) {
@@ -114,13 +114,10 @@ public class RadarScanManager {
 	private static void startConnectionMonitor() {
 		Log.i(TAG,"start monitor");
 		
-		if ( listener == null )
-			initializeListener();
-		
 		if ( instance != null && instance.reconnectionIntent != null ) 
 			alarmManager.cancel(instance.reconnectionIntent);
 		
-		if ( instance != null && runScan && RadarManager.getConnectivityStatus() != ConnectivityStatus.CONNECTED ) {
+		if ( instance != null && runScan && !RadarManager.isRadarConnected() ) {
 			Log.d(TAG,"setting alarm for " + RadarMonitorService.class.getCanonicalName());
 			Intent reconnectIntent = new Intent(ctx, RadarMonitorService.class);
 			reconnectIntent.putExtra(RadarMonitorService.KEY_INTENT_RECONNECT, true);
@@ -130,14 +127,6 @@ public class RadarScanManager {
 		}
 	}
 	  
-	public static void stop() {
-		Log.i(TAG,"complete stop");
-		runScan = false;
-		if ( listener != null )
-			listener.unRegister();
-		stopAlarm();
-	}
-	
 	public static void stopAlarm() {
 		Log.i(TAG,"stop alarm");
 
@@ -167,14 +156,12 @@ public class RadarScanManager {
 			showNotification();
 	}
 	
-	public static void eventDisconnect() {
-		scan();
-	}
-
-	public static void eventConnect() {
+	public void onEventAsync(CobraRadarEvents.EventDeviceConnected event) {
 		stopAlarm();
 	}
 
-	private static RadarConnectivityListener listener;
-
+	public void onEventAsync(CobraRadarEvents.EventDeviceDisconnected event) {
+		scan();
+	}
+	
 }

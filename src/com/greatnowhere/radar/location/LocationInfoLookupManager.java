@@ -47,10 +47,10 @@ public class LocationInfoLookupManager {
 	 * @return
 	 */
 	public static boolean isShouldActivate() {
-		return ( Preferences.isLookupSpeedLimit() &&
-				( Preferences.isLookupSpeedLimitOnlyInCarMode() ? PhoneActivityDetector.getIsCarMode() : true ) &&
-				( Preferences.isLookupSpeedLimitOnlyWhenDriving() ? PhoneActivityDetector.isActivityDriving() : true ) &&
-				( Preferences.isLookupSpeedLimitOnlyWhenRadarConnected() ? RadarManager.isRadarConnected() : true ) 
+		return ( Preferences.isLookupSpeedLimit() && RadarManager.isRadarConnected()
+//				( Preferences.isLookupSpeedLimitOnlyInCarMode() ? PhoneActivityDetector.getIsCarMode() : true ) &&
+//				( Preferences.isLookupSpeedLimitOnlyWhenDriving() ? PhoneActivityDetector.isActivityDriving() : true ) &&
+//				( Preferences.isLookupSpeedLimitOnlyWhenRadarConnected() ? RadarManager.isRadarConnected() : true ) 
 				);
 	}
 	
@@ -92,6 +92,13 @@ public class LocationInfoLookupManager {
 			//wsListener.stop();
 		//wsListener = null;
 		isRunning.set(false);
+	}
+	
+	public static void destroy() {
+		Log.i(TAG,"destroy");
+		stop();
+		if ( eventBus != null && instance != null && eventBus.isRegistered(instance) )
+			eventBus.unregister(instance);
 	}
 
 	public static String getCurrentWayName() {
@@ -174,23 +181,23 @@ public class LocationInfoLookupManager {
 	 * Event handlers to start/stop lookup
 	 * @param event
 	 */
-	public void onEventAsync(PhoneActivityDetector.EventActivityChanged event) {
+	public void onEventMainThread(PhoneActivityDetector.EventActivityChanged event) {
 		activate();
 	}
 
-	public void onEventAsync(PhoneActivityDetector.EventCarModeChange event) {
+	public void onEventMainThread(PhoneActivityDetector.EventCarModeChange event) {
 		activate();
 	}
 	
-	public void onEventAsync(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
+	public void onEventMainThread(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
 		activate();
 	}
 	
-	public void onEventAsync(CobraRadarEvents.EventDeviceConnected event) {
+	public void onEventMainThread(CobraRadarEvents.EventDeviceConnected event) {
 		activate();
 	}
 
-	public void onEventAsync(CobraRadarEvents.EventDeviceDisconnected event) {
+	public void onEventMainThread(CobraRadarEvents.EventDeviceDisconnected event) {
 		activate();
 	}
 }

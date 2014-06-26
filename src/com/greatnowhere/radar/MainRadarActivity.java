@@ -39,7 +39,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.cobra.iradar.protocol.CobraRadarMessageAlert;
-import com.cobra.iradar.protocol.CobraRadarMessageNotification;
 import com.cobra.iradar.protocol.CobraRadarMessageAlert.Alert;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.config.SettingsActivity;
@@ -310,7 +309,7 @@ public class MainRadarActivity extends FragmentActivity {
      * Phone activity change detected
      */
     public void onEventMainThread(PhoneActivityDetector.EventActivityChanged event) {
-		eventBus.post(new CobraRadarMessageNotification("Activity change: " + event.activity.getName() ));
+		// eventBus.post(new CobraRadarMessageNotification("Activity change: " + event.activity.getName() ));
     	activity.setText(event.activity.getName());
     }
     

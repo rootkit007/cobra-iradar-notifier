@@ -77,18 +77,19 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 			if ( a != activity ) {
 				activity = a;
 				eventBus.postSticky(new EventActivityChanged(a));
+				Log.i(TAG,"posted event " + EventActivityChanged.class.getCanonicalName());
 			}
 		}
 	}
 	
 	public void onConnectionFailed(ConnectionResult result) {
-		Log.d(TAG,"connection failed");
+		Log.i(TAG,"connection failed");
 		setActivityStatus(ActivityStatus.UNKNOWN);
 	}
 
 
 	public void onConnected(Bundle connectionHint) {
-		Log.d(TAG,"connected");
+		Log.i(TAG,"connected");
 		Intent i = new Intent(ctx, ActivityDetectorIntentReceiver.class);
 		PendingIntent callbackIntent = PendingIntent.getService(ctx, 0, i,
 	             PendingIntent.FLAG_UPDATE_CURRENT);
@@ -97,7 +98,7 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 
 	public void onDisconnected() {
-		Log.d(TAG,"disconnected");
+		Log.i(TAG,"disconnected");
 		setActivityStatus(ActivityStatus.UNKNOWN);
 	}
 
@@ -156,12 +157,11 @@ public class PhoneActivityDetector implements GooglePlayServicesClient.Connectio
 
 		@Override
 		protected void onHandleIntent(Intent intent) {
-			Log.d(TAG,"onHandleIntent");
 			if (ActivityRecognitionResult.hasResult(intent)) {
 		         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 		         if ( result != null ) {
-			         Log.d(TAG,"Got activity update " + result.getMostProbableActivity());
 			         ActivityStatus newActivity = ActivityStatus.fromDetectedActivity(result.getMostProbableActivity());
+			         Log.i(TAG,"Got activity update " + result.getMostProbableActivity() + " " + newActivity.name);
 			         setActivityStatus(newActivity);
 		         }
 		    }

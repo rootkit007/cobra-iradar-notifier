@@ -127,9 +127,9 @@ public class CollectorService extends Service {
         TTSManager.stop();
         ThreatManager.stop();
 	    PhoneActivityDetector.stop();
-        RadarLocationManager.stop();
+        RadarLocationManager.destroy();
         RadarScanner.stop();
-        LocationInfoLookupManager.stop();
+        LocationInfoLookupManager.destroy();
         SpeedLimitChecker.stop();
         radarMessageHandler.unRegister();
         isRadarInitialized = false;

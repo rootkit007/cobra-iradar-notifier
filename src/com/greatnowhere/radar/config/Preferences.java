@@ -214,10 +214,13 @@ public class Preferences {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupMaxSpeed), true);
 	}
 	
+	/*
 	public static String getWikiSpeediaUserName() {
 		return prefs.getString(res.getString(R.string.prefKeyWSTag), "ALL");
 	}
+	*/
 	
+	/*
 	public static boolean isLookupSpeedLimitOnlyWhenRadarConnected() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenDeviceConnected), true);
 	}
@@ -229,6 +232,7 @@ public class Preferences {
 	public static boolean isLookupSpeedLimitOnlyWhenDriving() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyLookupWhenDriving), true);
 	}
+	*/
 	
 	public static boolean isWarnOverSpeed() {
 		return prefs.getBoolean(res.getString(R.string.prefKeyWarnOverSpeed), true);
