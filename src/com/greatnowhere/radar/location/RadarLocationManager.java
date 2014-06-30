@@ -6,7 +6,6 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 
 import com.cobra.iradar.CobraRadarEvents;
@@ -52,7 +51,6 @@ public class RadarLocationManager {
 	
 	public synchronized static void start() {
 		Log.i(TAG,"start");
-		checkLooper();
 		locListener = new LocationListener();
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100L, 1L, locListener);
 		isActive.set(true);
@@ -60,18 +58,12 @@ public class RadarLocationManager {
 	
 	public synchronized static void stop() {
     	Log.d(TAG, "stop");
-    	checkLooper();
 		if ( locListener != null ) {
 			lm.removeUpdates(locListener);
 			locListener = null;
 		}
 		isReady = false;
 		isActive.set(false);
-	}
-	
-	protected static void checkLooper() {
-		if ( Looper.myLooper() == null )
-			Looper.prepare();
 	}
 	
 	public static void destroy() {

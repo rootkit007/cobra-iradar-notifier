@@ -55,9 +55,14 @@ public class RadarScanManager {
 	}
 	
 	public static void stop() {
-		Log.i(TAG,"complete stop");
+		Log.i(TAG,"stop");
 		runScan = false;
 		stopAlarm();
+	}
+	
+	public static void destroy() {
+		Log.i(TAG,"destroy");
+		stop();
 		if ( instance != null && eventBus != null && eventBus.isRegistered(instance) ) {
 			eventBus.unregister(instance);
 			instance = null;
@@ -156,11 +161,11 @@ public class RadarScanManager {
 			showNotification();
 	}
 	
-	public void onEventAsync(CobraRadarEvents.EventDeviceConnected event) {
+	public void onEventMainThread(CobraRadarEvents.EventDeviceConnected event) {
 		stopAlarm();
 	}
 
-	public void onEventAsync(CobraRadarEvents.EventDeviceDisconnected event) {
+	public void onEventMainThread(CobraRadarEvents.EventDeviceDisconnected event) {
 		scan();
 	}
 	

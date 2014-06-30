@@ -2,10 +2,14 @@ package com.greatnowhere.radar.threats;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff.Mode;
 import android.location.Location;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,7 +27,10 @@ import com.greatnowhere.radar.threats.ThreatManager.ThreatCredibility;
  */
 public class Threat {
 	
+	private static final String TAG = Threat.class.getCanonicalName();
+	
 	public static final boolean AUDIBLE_FALSE_THREATS = false;
+	public static final float AUTOMUTE_VOLUME_PCT = 0.3f;
 	
 	/**
 	 * View displaying current threat
@@ -42,6 +49,12 @@ public class Threat {
 	protected Long startTimeMillis = System.currentTimeMillis();
 	protected Long endTimeMillis;
 	protected ThreatManager.ThreatCredibility credibility = ThreatCredibility.LEGIT;
+	protected AtomicBoolean isThreatAudibleNow = new AtomicBoolean(false);
+	protected Timer autoMuteTimer;
+	/**
+	 * Relative volume of this threat, used for automuting
+	 */
+	protected float volume = 1f;
 	
 	/**
 	 * True if this threat has been added to the view
@@ -69,13 +82,17 @@ public class Threat {
 	}
 	
 	void removeThreat() {
+		Log.i(TAG,"removeThreat");
 		endTimeMillis = System.currentTimeMillis();
 		if ( isShowing )
 			hideThreat();
 		isShowing = false;
 		if ( soundStreamId != 0 ) {
+			Log.i(TAG,"silence " + toString());
 			ThreatManager.alertSounds.stop(soundStreamId);
 			soundStreamId = 0;
+			AlertAudioManager.restoreOldAlertVolume();
+			isThreatAudibleNow.set(false);
 		}
 		if ( Preferences.isLogThreats() ) {
 			ThreatLogger.logThreat(this);
@@ -91,13 +108,24 @@ public class Threat {
 		});
 	}
 	
-	private void playAlert() {
-		AlertAudioManager.setOurAlertVolume();
-		if ( Preferences.isAutoMuteImmediatelyDuringCalls() && ThreatManager.isPhoneCallActive() ) {
-			AlertAudioManager.setAutoMuteVolume();
+	private synchronized void playAlert() {
+		Log.i(TAG,"playAlert " + toString());
+		if ( !isThreatAudibleNow.get() ) {
+			isThreatAudibleNow.set(true);
+			AlertAudioManager.setOurAlertVolume();
+			// start automute timer
+			if ( autoMuteTimer != null )
+				autoMuteTimer.cancel();
+			autoMuteTimer = new Timer(true);
+			autoMuteTimer.schedule(new AutoMuteTask(), Preferences.getAlertAutoMuteDelay() * 1000L);
 		}
+		if ( Preferences.isAutoMuteImmediatelyDuringCalls() && ThreatManager.isPhoneCallActive() ) {
+			volume = AUTOMUTE_VOLUME_PCT;
+		}
+		if ( soundStreamId != 0 ) 
+			ThreatManager.alertSounds.stop(soundStreamId);
 		// start looping play
-		soundStreamId = ThreatManager.alertSounds.play(ThreatManager.alertSoundsLoaded.get(alert.alertType.getSound()), 1, 1, 1, -1, 
+		soundStreamId = ThreatManager.alertSounds.play(ThreatManager.alertSoundsLoaded.get(alert.alertType.getSound()), volume, volume, 1, -1, 
 				ThreatManager.getThreatSoundPitch(alert.strength));
 	}
 	
@@ -117,11 +145,6 @@ public class Threat {
 			
 			this.alert.strength = newStrength;
 			this.credibility = cred;
-			// stop any alert sound currently playing
-			if ( soundStreamId != 0 ) {
-				ThreatManager.alertSounds.stop(soundStreamId);
-				soundStreamId = 0;
-			}
 			if ( isShowVisibleThreat() ) {
 				ThreatManager.post(new Runnable() {
 					public void run() {
@@ -186,5 +209,15 @@ public class Threat {
 	public String toString() {
 		return "Threat " + alert.alertType.getName() + " " + alert.frequency + " (" + credibility.getName() + ")"; 
 	}
+
+	private class AutoMuteTask extends TimerTask {
+		@Override
+		public void run() {
+			Log.i(TAG,"Automuted threat " + toString());
+			volume = AUTOMUTE_VOLUME_PCT;
+			playAlert();
+		}
+	}
+
 
 }

@@ -59,13 +59,13 @@ public class RadarScanner extends AbstractEventBusListener {
 		}
 	}
 	
-	public static void stop() {
-    	Log.d(TAG, "stop");
+	public static void destroy() {
+    	Log.d(TAG, "destroy");
 		if ( getInstance() != null ) {
 			getInstance().unRegister();
 			instance = null;
 		}
-		RadarScanManager.stop();
+		RadarScanManager.destroy();
 	}
 	
 	// Preferences changed listener

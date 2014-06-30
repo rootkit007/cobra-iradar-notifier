@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
@@ -54,7 +52,6 @@ public class ThreatManager {
 	protected static ThreatManager instance;
 	private static Threat currentThreat;
 	private static AtomicBoolean wasScreenOn = new AtomicBoolean(false);
-	private Timer autoMuteTimer;
 	private static TelephonyManager tm;
 	
 	private static Context ctx;
@@ -185,10 +182,6 @@ public class ThreatManager {
 				wm.addView(instance.mainThreatView, params);
 			}
 		}));
-		if ( Preferences.getAlertAutoMuteDelay() > 0 ) {
-			instance.autoMuteTimer = new Timer();
-			instance.autoMuteTimer.schedule(instance.new AutoMuteTask(), (long) Preferences.getAlertAutoMuteDelay() * 1000L );
-		}
 	}
 	
 	public synchronized static void removeThreats() {
@@ -274,13 +267,6 @@ public class ThreatManager {
 		return (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE);
 	}
 	
-	private class AutoMuteTask extends TimerTask {
-		@Override
-		public void run() {
-			AlertAudioManager.setAutoMuteVolume();
-		}
-	}
-
 	/**
 	 * Status returned by newThreat
 	 * can be FAKE, POSSIBLE_FAKE, etc

@@ -53,10 +53,13 @@ public class ThreatLogger extends SQLiteOpenHelper {
 	private static final double OneDegreeKm = 111.3D;
 	
 	public static synchronized void init(Context ctx) {
-		instance = new ThreatLogger(ctx, DB_NAME, null, DB_VERSION);
-		alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+		if ( instance == null ) 
+			instance = new ThreatLogger(ctx, DB_NAME, null, DB_VERSION);
+		if ( alarmManager == null )
+			alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
 		ThreatLogger.ctx = ctx;
-		eventBus = EventBus.getDefault();
+		if ( eventBus == null )
+			eventBus = EventBus.getDefault();
 		
 		if ( Preferences.isLogThreats() && Preferences.isLogThreatLimitNumeric() ) {
 			Intent i = new Intent(ctx, DBPruneService.class);
@@ -313,6 +316,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 		protected void onHandleIntent(Intent intent) {
 			// Keep X last records
 			Preferences.init(getApplicationContext());
+			ThreatLogger.init(getApplicationContext());
 			if ( Preferences.isLogThreatLimitNumeric() ) {
 				purgeOldLogRecords(Preferences.getLogThreatLimitNumeric());
 			}

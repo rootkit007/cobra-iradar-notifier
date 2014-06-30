@@ -42,10 +42,13 @@ public class AlertAudioManager {
 				volumeSetCounter.addAndGet(1);
 				// preferences alert level is always 0-7
 				// must translate that to selected stream's level
-				int translatedVolume = getTranslatedVolume(getOurAlertLevel()); 
-				am.setStreamVolume(OUTPUT_STREAM, translatedVolume, 0);
+				int translatedVolume = getTranslatedVolume(getOurAlertLevel());
+				// only set volume if it means increase, never decrease
+				if ( originalVolume < translatedVolume ) {
+					am.setStreamVolume(OUTPUT_STREAM, translatedVolume, 0);
+					Log.i(TAG,"Changed volume from " + originalVolume + " to " + translatedVolume);
+				}
 				isOurAlertVolumeSet.set(true);
-				Log.i(TAG,"Changed volume from " + originalVolume + " to " + translatedVolume);
 			}
 		}
 	}
@@ -61,16 +64,6 @@ public class AlertAudioManager {
 			Log.i(TAG,"Changed TTS volume to " + getTranslatedVolume(ttsVolume));
 		}
 		
-	}
-	
-	public synchronized static void setAutoMuteVolume() {
-		// only set volume if we are on our volume
-		if ( isOurAlertVolumeSet.get() ) {
-			int autoMuteVolume = getTranslatedVolume( getOurAlertLevel() + AUTOMUTE_VOLUME_OFFSET );
-			autoMuteVolume = Math.max(1, autoMuteVolume); // no lower than 1, cant mute altogether
-			am.setStreamVolume(OUTPUT_STREAM, autoMuteVolume, 0);
-			Log.i(TAG,"Automuted volume to " + autoMuteVolume);
-		}
 	}
 	
 	/**
