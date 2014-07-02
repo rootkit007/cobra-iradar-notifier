@@ -2,7 +2,7 @@ package com.greatnowhere.radar.location;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.wikispeedia.models.Marker;
+//import org.wikispeedia.models.Marker;
 
 import android.content.Context;
 import android.util.Log;
@@ -14,7 +14,7 @@ import com.greatnowhere.osmclient.OSMLocationListener.OSMWayChangedListener;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.messaging.RadarMessageNotification;
 //import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener;
-import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener.WikiSpeedChangedListener;
+//import com.greatnowhere.wikispeedia.client.WikiSpeedChangeListener.WikiSpeedChangedListener;
 import com.xapi.models.Way;
 
 import de.greenrobot.event.EventBus;
@@ -58,6 +58,7 @@ public class LocationInfoLookupManager {
 	 * Activates or stops location info lookup
 	 */
 	private synchronized static void activate() {
+		Log.d(TAG,"activate()");
 		if ( isRunning.get() && !isShouldActivate() ) {
 			stop();
 		} else if ( !isRunning.get() && isShouldActivate() ) {
@@ -131,6 +132,7 @@ public class LocationInfoLookupManager {
 		}
 	}
 	
+	/*
 	protected static class WSListener implements WikiSpeedChangedListener {
 		public void onWikiSpeedChangedListener(Marker m) {
 			Log.i(TAG, "Got WS marker " + m);
@@ -139,6 +141,7 @@ public class LocationInfoLookupManager {
 			}
 		}
 	}
+	*/
 	
 	public static class EventOSMWayChange {
 		public Way way;

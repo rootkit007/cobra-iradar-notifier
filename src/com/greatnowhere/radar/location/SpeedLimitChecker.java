@@ -107,7 +107,8 @@ public class SpeedLimitChecker {
 			int speedLimit = speedLimitEvent.getKPH();
 					
 			if (  ( currentSpeed - speedLimit) > Preferences.getWarnOverSpeedLimit() && isPreferenceSet() ) {
-				AlertAudioManager.setOurAlertVolume();
+				if ( !isOverSpeedAlertPlaying.get() )
+					AlertAudioManager.setOurAlertVolume();
 				soundPool.play(alertSoundId, 1f, 1f, 1, 0, getAlertPitch( currentSpeed - speedLimit - Preferences.getWarnOverSpeedLimit() ));
 				isOverSpeedAlertPlaying.set(true);
 			} else {

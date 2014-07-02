@@ -8,29 +8,9 @@
   </properties>
   <dependencies>
   <dependency>
-  	<groupId>com.octo.android.robospice</groupId>
-  	<artifactId>robospice</artifactId>
-  	<version>1.4.12</version>
-  </dependency>
-  <dependency>
-  	<groupId>org.simpleframework</groupId>
-  	<artifactId>simple-xml</artifactId>
-  	<version>2.7.1</version>
-  	<exclusions>
-  		<exclusion>
-  			<artifactId>stax</artifactId>
-  			<groupId>stax</groupId>
-  		</exclusion>
-  		<exclusion>
-  			<artifactId>stax-api</artifactId>
-  			<groupId>stax</groupId>
-  		</exclusion>
-  	</exclusions>
-  </dependency>
-  <dependency>
-  	<groupId>com.octo.android.robospice</groupId>
-  	<artifactId>robospice-spring-android</artifactId>
-  	<version>1.4.12</version>
+  	<groupId>com.greatnowhere.osmclient</groupId>
+  	<artifactId>com.greatnowhere.osmclient</artifactId>
+  	<version>0.0.1-SNAPSHOT</version>
   </dependency>
   </dependencies>
 </project>

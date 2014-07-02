@@ -42,6 +42,7 @@ public class RadarLocationManager {
 	}
 	
 	private synchronized void activate() {
+		Log.d(TAG,"activate()");
 		if ( isShouldActivate() && !isActive.get() ) {
 			start();
 		} else if ( !isShouldActivate() && isActive.get() ){
@@ -108,14 +109,6 @@ public class RadarLocationManager {
 	 * Event handlers to start/stop lookup
 	 * @param event
 	 */
-	public void onEventMainThread(PhoneActivityDetector.EventActivityChanged event) {
-		activate();
-	}
-
-	public void onEventMainThread(PhoneActivityDetector.EventCarModeChange event) {
-		activate();
-	}
-	
 	public void onEventMainThread(Preferences.PreferenceLocationLookupSettingsChangedEvent event) {
 		activate();
 	}

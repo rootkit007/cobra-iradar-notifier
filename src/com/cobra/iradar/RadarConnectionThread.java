@@ -45,6 +45,14 @@ public class RadarConnectionThread extends Thread {
 		return ConnectivityStatus.fromCode(connectionStatus.get());
 	}
 	
+	/**
+	 * Should only be used for debugging purposes
+	 * @param s
+	 */
+	protected static void setConnectivityStatus(ConnectivityStatus s) {
+		connectionStatus.set(s.getCode());
+	}
+	
 	@Override
 	public synchronized void run() {
 		
