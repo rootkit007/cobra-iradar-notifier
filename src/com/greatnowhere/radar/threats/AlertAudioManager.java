@@ -59,9 +59,11 @@ public class AlertAudioManager {
 	public synchronized static void setTTSVolume() {
 		setOurAlertVolume();
 		if ( Preferences.isSetAlertLevel() && Preferences.getNotificationVolumeOffset() != 0 ) {
-			int ttsVolume = getOurAlertLevel() + Preferences.getNotificationVolumeOffset();
-			am.setStreamVolume(OUTPUT_STREAM, getTranslatedVolume(ttsVolume), 0);
-			Log.i(TAG,"Changed TTS volume to " + getTranslatedVolume(ttsVolume));
+			int ttsVolume = getTranslatedVolume(getOurAlertLevel() + Preferences.getNotificationVolumeOffset());
+			if ( ttsVolume >  am.getStreamVolume(OUTPUT_STREAM) ) {
+				am.setStreamVolume(OUTPUT_STREAM, ttsVolume, 0);
+				Log.i(TAG,"Changed TTS volume to " + ttsVolume);
+			}
 		}
 		
 	}

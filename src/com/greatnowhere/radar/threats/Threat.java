@@ -30,7 +30,7 @@ public class Threat {
 	private static final String TAG = Threat.class.getCanonicalName();
 	
 	public static final boolean AUDIBLE_FALSE_THREATS = false;
-	public static final float AUTOMUTE_VOLUME_PCT = 0.3f;
+	public static final float AUTOMUTE_VOLUME_PCT = 0.2f;
 	
 	/**
 	 * View displaying current threat
@@ -82,11 +82,17 @@ public class Threat {
 	}
 	
 	void removeThreat() {
-		Log.i(TAG,"removeThreat");
+		Log.i(TAG,"removeThreat " + toString());
 		endTimeMillis = System.currentTimeMillis();
-		if ( isShowing )
-			hideThreat();
+		hideThreat();
 		isShowing = false;
+		silenceAlert();
+		if ( Preferences.isLogThreats() ) {
+			ThreatLogger.logThreat(this);
+		}
+	}
+	
+	private void silenceAlert() {
 		if ( soundStreamId != 0 ) {
 			Log.i(TAG,"silence " + toString());
 			ThreatManager.alertSounds.stop(soundStreamId);
@@ -94,39 +100,43 @@ public class Threat {
 			AlertAudioManager.restoreOldAlertVolume();
 			isThreatAudibleNow.set(false);
 		}
-		if ( Preferences.isLogThreats() ) {
-			ThreatLogger.logThreat(this);
-		}
 	}
 	
 	private void hideThreat() {
-		ThreatManager.post(new Runnable() {
-			public void run() {
-				ThreatManager.instance.mainThreatLayout.removeView(view);
-				isShowing = false;
-			}
-		});
+		if ( isShowing ) {
+			Log.d(TAG,"hideThreat" + toString());
+			ThreatManager.post(new Runnable() {
+				public void run() {
+					ThreatManager.instance.mainThreatLayout.removeView(view);
+					isShowing = false;
+				}
+			});
+		}
 	}
 	
 	private synchronized void playAlert() {
 		Log.i(TAG,"playAlert " + toString());
-		if ( !isThreatAudibleNow.get() ) {
-			isThreatAudibleNow.set(true);
-			AlertAudioManager.setOurAlertVolume();
-			// start automute timer
-			if ( autoMuteTimer != null )
-				autoMuteTimer.cancel();
-			autoMuteTimer = new Timer(true);
-			autoMuteTimer.schedule(new AutoMuteTask(), Preferences.getAlertAutoMuteDelay() * 1000L);
+		if ( isPlayAudibleThreat() ) {
+			if ( !isThreatAudibleNow.get() ) {
+				isThreatAudibleNow.set(true);
+				AlertAudioManager.setOurAlertVolume();
+				// start automute timer
+				if ( autoMuteTimer != null )
+					autoMuteTimer.cancel();
+				autoMuteTimer = new Timer(true);
+				autoMuteTimer.schedule(new AutoMuteTask(), Preferences.getAlertAutoMuteDelay() * 1000L);
+			}
+			if ( Preferences.isAutoMuteImmediatelyDuringCalls() && ThreatManager.isPhoneCallActive() ) {
+				volume = AUTOMUTE_VOLUME_PCT;
+			}
+			if ( soundStreamId != 0 ) 
+				ThreatManager.alertSounds.stop(soundStreamId);
+			// start looping play
+			soundStreamId = ThreatManager.alertSounds.play(ThreatManager.alertSoundsLoaded.get(alert.alertType.getSound()), volume, volume, 1, -1, 
+					ThreatManager.getThreatSoundPitch(alert.strength));
+		} else {
+			silenceAlert();
 		}
-		if ( Preferences.isAutoMuteImmediatelyDuringCalls() && ThreatManager.isPhoneCallActive() ) {
-			volume = AUTOMUTE_VOLUME_PCT;
-		}
-		if ( soundStreamId != 0 ) 
-			ThreatManager.alertSounds.stop(soundStreamId);
-		// start looping play
-		soundStreamId = ThreatManager.alertSounds.play(ThreatManager.alertSoundsLoaded.get(alert.alertType.getSound()), volume, volume, 1, -1, 
-				ThreatManager.getThreatSoundPitch(alert.strength));
 	}
 	
 	void updateThreat(RadarMessageThreat t, ThreatCredibility cred) {
@@ -142,7 +152,6 @@ public class Threat {
 		maxStrength = Math.max(maxStrength, newStrength);
 		// only update if strength or credibility changes
 		if ( newStrength != alert.strength || credibility != cred || !isShowing ) {
-			
 			this.alert.strength = newStrength;
 			this.credibility = cred;
 			if ( isShowVisibleThreat() ) {
@@ -163,12 +172,9 @@ public class Threat {
 					}
 				});
 			} else {
-				if ( isShowing ) {
-					hideThreat();
-				}
+				hideThreat();
 			}
-			if ( isPlayAudibleThreat() )
-				playAlert();
+			playAlert();
 		}
 	}
 	
@@ -213,9 +219,12 @@ public class Threat {
 	private class AutoMuteTask extends TimerTask {
 		@Override
 		public void run() {
-			Log.i(TAG,"Automuted threat " + toString());
 			volume = AUTOMUTE_VOLUME_PCT;
-			playAlert();
+			// only automute if still audible
+			if ( isThreatAudibleNow.get() ) {
+				Log.i(TAG,"Automuted threat " + toString());
+				playAlert();
+			}
 		}
 	}
 

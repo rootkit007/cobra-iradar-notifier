@@ -24,7 +24,7 @@ public class RadarLocationManager {
 	private static LocationListener locListener;
 	private static boolean isReady = false;
 	private static EventBus eventBus;
-	private static AtomicBoolean isActive = new AtomicBoolean(false);
+	private static AtomicBoolean isActive;
 	private static RadarLocationManager instance;
 	
 	public static void init(Context ctx) {
@@ -32,6 +32,8 @@ public class RadarLocationManager {
 		eventBus = EventBus.getDefault();
 		instance = new RadarLocationManager();
 		eventBus.register(instance);
+		isActive = new AtomicBoolean(false);
+		isReady = false;
 		lm = (LocationManager) RadarLocationManager.ctx.getSystemService(Context.LOCATION_SERVICE);
 		instance.activate();
 	}
@@ -68,6 +70,7 @@ public class RadarLocationManager {
 	}
 	
 	public static void destroy() {
+    	Log.d(TAG, "destroy");
 		stop();
 		if ( eventBus != null && instance != null && eventBus.isRegistered(instance) )
 			eventBus.unregister(instance);

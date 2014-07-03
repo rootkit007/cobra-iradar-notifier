@@ -88,7 +88,7 @@
 	<string name="prefValFakeAlertDetectionRadius">Proximity threshold for fake alerts</string>
 	<string name="prefSumFakeAlertDetectionRadius">Proximity (km) to previous alerts</string>
 	<string name="menuItemTestAlertTitle">Test Alert</string>
-	<string name="prefSumAlertLevelSetFlag">Set alerts volume. Will restore original volume after alert(s) clear</string>
+	<string name="prefSumAlertLevelSetFlag">Set minimum alerts volume. Will restore original volume after alert(s) clear</string>
 	<string name="prefKeyUnits">prefKeyUnits</string>
 	<string name="prefValUnits">Units to display</string>
 	<string name="prefKeyFakeAlertDetectionOccurenceThreshold">prefKeyFakeAlertDetectionOccurenceThreshold</string>
@@ -106,8 +106,8 @@
 	<string name="prefSumKeepScreenOnInForeground">Will keep screen on while app is running in foreground</string>
 	<string name="prefSumTurnScreenOnForAlerts">Will turn screen on and disable keyguard when alerts occur</string>
 	<string name="prefKeyTTSVolumeOffset">prefKeyTTSVolumeOffset</string>
-	<string name="prefValTTSVolumeOffset">Change volume for TTS notifications</string>
-	<string name="prefSumTTSVolumeOffset">Increase or decrease TTS volume relative to alerts volume</string>
+	<string name="prefValTTSVolumeOffset">Change minimum volume for TTS notifications</string>
+	<string name="prefSumTTSVolumeOffset">Increase or decrease TTS min volume relative to alerts volume</string>
 	<string name="prefKeyAutoMuteDelay">prefKeyAutoMuteDelay</string>
 	<string name="prefValAutoMuteDelay">Auto Mute</string>
 	<string name="prefSumAutoMuteDelay">After how many seconds to reduce alert volume</string>
@@ -121,7 +121,7 @@
 	<string name="reconnect">Reconnect</string>
 	<string name="voltage">Voltage</string>
 	<string name="status">Status</string>
-	<string name="prefSumCatAudio">Set fixed alert levels for audible alerts</string>
+	<string name="prefSumCatAudio">Set minimum alert levels for audible alerts</string>
 	<string name="prefSumCatVisibleNotifications">Ongoing notifications in your status bar. Also contains settings whether to turn screen on for alerts</string>
 	<string name="prefCatScanning">Scanning for iRadar device</string>
 	<string name="prefSumCatScanning">Cobra iRadar device does not connect to the phone. Instead phone must initiate connection. Contains settings to govern when phone will attempt to connect.</string>
@@ -133,7 +133,7 @@
 	<string name="prefSumShowFakeHiddenThreats">Will display visible (not audible) alerts for any threats that are hidden (speed below threshold) or determined as fake. Hidden alerts will be blue, false alerts green</string>
 	<string name="prefSumScanOnlyInCarMode">Will only attempt to connect when phone is connected to car dock</string>
 	<string name="prefCatLocation">Location awareness</string>
-	<string name="prefCatLocationSum">Query online services about current location (speed limit, street name, etc)</string>
+	<string name="prefCatLocationSum">Query online services about current location (speed limit, street name)</string>
 	<string name="prefKeyLookupMaxSpeed">prefKeyLookupMaxSpeed</string>
 	<string name="prefValLookupMaxSpeed">Lookup speed limit</string>
 	<string name="prefSumLookupMaxSpeed">Will try to determine current speed limit. This depends on online services data availability, and is not guaranteed. This will enable GPS when radar device is coonected and result in reduced battery life!</string>
