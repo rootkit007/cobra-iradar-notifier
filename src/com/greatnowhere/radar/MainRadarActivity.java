@@ -65,6 +65,7 @@ public class MainRadarActivity extends FragmentActivity {
     private View rootView;
     
     private TextView alert;
+    private TextView alertCredibility;
     private TextView connState;
     private TextView log;
     private TextView voltage;
@@ -101,6 +102,7 @@ public class MainRadarActivity extends FragmentActivity {
         log = (TextView) findViewById(R.id.logScroll);
         log.setMovementMethod(new ScrollingMovementMethod());
         alert = (TextView) findViewById(R.id.radarState);
+        alertCredibility = (TextView) findViewById(R.id.radarThreatCredibility);
         connState = (TextView) findViewById(R.id.connStatus);
         voltage = (TextView) findViewById(R.id.voltageText);
         btnReconnect = (Button) findViewById(R.id.btnReconnect);
@@ -283,6 +285,7 @@ public class MainRadarActivity extends FragmentActivity {
     public void onEventMainThread(UIRefreshEvent event) {
     	voltage.setText(CollectorService.getBatteryVoltage());
     	alert.setText(CollectorService.getCurrentAlert());
+    	alertCredibility.setText(CollectorService.getCurrentAlertCredibility());
     	connState.setText(CollectorService.getConnStatus());
     	uiMode.setText(getCurrentUIModeString(uiModeManager.getCurrentModeType()));
 		if ( RadarLocationManager.isReady() ) {

@@ -213,9 +213,13 @@ public class Threat {
 	 */
 	@Override
 	public String toString() {
-		return "Threat " + alert.alertType.getName() + " " + alert.frequency + " (" + credibility.getName() + ")"; 
+		return "Threat " + alert.alertType.getName() + " " + alert.frequency; 
 	}
 
+	public String getCredibility() {
+		return credibility.getName(); 
+	}
+	
 	private class AutoMuteTask extends TimerTask {
 		@Override
 		public void run() {

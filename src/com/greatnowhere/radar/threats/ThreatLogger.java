@@ -23,7 +23,6 @@ import android.util.Log;
 import com.greatnowhere.radar.MainRadarApplication;
 import com.greatnowhere.radar.config.Preferences;
 import com.greatnowhere.radar.location.LocationInfoLookupManager;
-import com.greatnowhere.radar.messaging.RadarMessageNotification;
 import com.greatnowhere.radar.messaging.RadarMessageThreat;
 import com.greatnowhere.radar.threats.ThreatManager.ThreatCredibility;
 
@@ -122,7 +121,7 @@ public class ThreatLogger extends SQLiteOpenHelper {
 			}
 		}
 		Log.d(TAG,"found " + threat_ids.size() + " unique threats");
-		eventBus.post(new RadarMessageNotification("False threat scanner found " + threat_ids.size() + " similar threats"));
+		//eventBus.post(new RadarMessageNotification("False threat scanner found " + threat_ids.size() + " similar threats"));
 		return threat_ids.size();
 	}
 	

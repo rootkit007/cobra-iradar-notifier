@@ -115,6 +115,10 @@ public class ThreatManager {
 		return ( currentThreat == null ? "" : currentThreat.toString() );
 	}
 	
+	public static String getCurrentThreatCredibility() {
+		return ( currentThreat == null ? "" : currentThreat.getCredibility() );
+	}
+	
 	public static void stop() {
     	Log.d(TAG, "stop");
 		removeThreats();

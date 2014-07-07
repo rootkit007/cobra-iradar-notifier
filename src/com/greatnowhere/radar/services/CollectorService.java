@@ -154,6 +154,12 @@ public class CollectorService extends Service {
 		return ThreatManager.getCurrentThreat();
 	}
 
+	public synchronized static String getCurrentAlertCredibility() {
+    	if ( instance == null )
+    		return null;
+		return ThreatManager.getCurrentThreatCredibility();
+	}
+	
 	public synchronized static String getLog() {
 		if ( instance != null )
 			return instance.screenLogString;
