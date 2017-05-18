@@ -21,7 +21,7 @@
         android:shadowColor="#8080FF"
 	    android:shadowDx="0.0"
 	    android:shadowDy="0.0"
-	    android:shadowRadius="30.0"
+	    android:shadowRadius="25.0"
 	/>
     
     <ProgressBar android:max="5" android:id="@+id/threatViewStrength"
@@ -30,7 +30,7 @@
         android:shadowColor="#8080FF"
 	    android:shadowDx="0.0"
 	    android:shadowDy="0.0"
-	    android:shadowRadius="30.0" 
+	    android:shadowRadius="25.0"
 		android:maxHeight="20dip"
 		android:minHeight="20dip"
 		style="?android:attr/progressBarStyleHorizontal"
@@ -62,7 +62,7 @@
         android:shadowColor="#8080FF"
 	    android:shadowDx="0.0"
 	    android:shadowDy="0.0"
-	    android:shadowRadius="30.0" 
+	    android:shadowRadius="25.0"
 	/>
     <!-- 
             app:strokeWidth="2"
